@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>arm_driver_pkg</name>
+  <name>hudson_driver</name>
   <version>0.0.0</version>
-  <description>Arm driving package for ot2_workcell</description>
-  <maintainer email="dozgulbas@anl.gov">Doga Ozgulbas and Alan Wang</maintainer>
+  <description>Hudson package for ROS</description>
+  <maintainer email="ravescovi@anl.gov">Rafael Vescovi</maintainer>
   <license>MIT License</license>
 
   <test_depend>ament_copyright</test_depend>

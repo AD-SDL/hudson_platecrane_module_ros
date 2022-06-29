@@ -11,11 +11,10 @@ with open('requirements.txt') as reqs:
         install_requires.append(req)
 
 
-##this is weird. 
-package_name = 'PF400_driver'
+package_name = 'hudson_driver'
 
 setup(
-    name='PF400_driver',
+    name='hudson_driver',
     version='0.0.1',
     packages=find_packages(),
     data_files=[
@@ -26,16 +25,13 @@ setup(
     install_requires=install_requires,
     zip_safe=True,
     python_requires=">=3.8",
-    maintainer='Doga Ozgulbas and Alan Wang',
-    maintainer_email='dozgulbas@anl.gov',
-    description='Driver for the PF400 robot arm',
-    url='https://github.com/AD-SDL/PF400_driver.git', 
+    maintainer='Rafael Vescovi',
+    maintainer_email='ravescovi@anl.gov',
+    description='Driver for Hudson',
+    url='https://github.com/AD-SDL/hudson_driver.git', 
     license='MIT License',
     entry_points={ 
         'console_scripts': [
-             'arm_driver = arm_driver_pkg.arm_driver:main_null',
-      
-
         ]
     },
     classifiers=[
