@@ -5,11 +5,11 @@ import logging
 import json
 
 #Log Configuration
-file_path = os.path.join(os.path.split(os.path.dirname(__file__))[0]  + '/pf400_logs/robot_client_logs.log')
+file_path = os.path.join(os.path.split(os.path.dirname(__file__))[0]  + '/SCICLOPS_logs/robot_client_logs.log')
 
 logging.basicConfig(filename = file_path, level=logging.DEBUG, format = '[%(levelname)s] [%(asctime)s] [%(name)s] %(message)s', datefmt = '%Y-%m-%d %H:%M:%S')
 
-class SCIOPS():
+class SCICLOPS():
     def __init__(self, data_file_path):
         
         self.logger = logging.getLogger("Hudson Stacker")
@@ -26,21 +26,21 @@ class SCIOPS():
     def connect_robot(self):    
         #create an INET, Streaming socket (IPv4, TCP/IP)
         try:
-            PF400 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+            SCICLOPS = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
 
         except socket.error:
             self.logger.error('Failed to create socket')
 
         else:
-            PF400.connect((self.host,self.port))
+            SCICLOPS.connect((self.host,self.port))
             # self.logger.info('Socket Created')
-            return PF400     
+            return SCICLOPS     
 
         #self.logger.info('Socket Connected to ' + self.host + " Port:", self.port )
         #TODO:Read the status of the robot 
 
-    def disconnect_robot(self, PF400):
-        PF400.close()
+    def disconnect_robot(self, SCICLOPS):
+        SCICLOPS.close()
         # self.logger.info("TCP/IP client is closed")
 
     def send_command(self, cmd: str=None, ini_msg:str = None, err_msg:str = None, wait:int = 0.1):
@@ -66,11 +66,11 @@ class SCIOPS():
         ##TODO check cmd against cmd list 
         ##return invalid CMD before trying to connect
 
-        PF400_sock = self.connect_robot()
+        SCICLOPS_sock = self.connect_robot()
         
         try:
-            PF400_sock.send(bytes(cmd.encode('ascii')))
-            robot_output = PF400_sock.recv(4096).decode("utf-8")
+            SCICLOPS_sock.send(bytes(cmd.encode('ascii')))
+            robot_output = SCICLOPS_sock.recv(4096).decode("utf-8")
             if ini_msg:
                 self.logger.info(ini_msg)
             self.logger.info(robot_output)
@@ -81,7 +81,7 @@ class SCIOPS():
 
             return('failed')## what is a failed state or it is the last state
         else:
-            self.disconnect_robot(PF400_sock)
+            self.disconnect_robot(SCICLOPS_sock)
             # Returning the output message as a list             
             return(robot_output)
 
@@ -93,3 +93,25 @@ class SCIOPS():
 
         out_msg = self.send_command(cmd, input_msg, err_msg)
         return out_msg
+
+        TEACH_RISE = 15.0
+TEACH_PLATE = 15.0
+STD_FINGER_LENGTH = 17.2
+COMPRESSION_DISTANCE = 3.35
+CURRENT_POS = 0, 0 ,0, 0
+NEST_ADJUSTMENT = 20.0
+
+"GETPOS"
+"STATUS"
+"VERSION"
+"GETCONFIG"
+"GETGRIPSTRENGTH"
+"READINP 15"
+"READINP"
+"GETGRIPPERLENGTH"
+"GETCOLLAPSEDISTANCE"
+"GETSTEPSPERUNIT"
+"GETPOINT "
+"SETSPEED"
+"HOME"
+

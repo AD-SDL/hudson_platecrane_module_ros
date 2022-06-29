@@ -1,0 +1,483 @@
+
+TEACH_RISE = 15.0
+TEACH_PLATE = 15.0;
+STD_FINGER_LENGTH = 17.2;
+COMPRESSION_DISTANCE = 3.35;
+CURRENT_POS = 0, 0 ,0, 0
+NEST_ADJUSTMENT = 20.0;
+
+"GETPOS"
+"STATUS"
+"VERSION"
+"GETCONFIG"
+"GETGRIPSTRENGTH"
+"READINP 15"
+"READINP"
+"GETGRIPPERLENGTH"
+"GETCOLLAPSEDISTANCE"
+"GETSTEPSPERUNIT"
+"GETPOINT "
+"SETSPEED"
+"HOME"
+
+
+###############
+
+    internal double DefaultGrip => 15.0 - (this.Settings.GripperLength - 15.0);
+
+    public SciclopsSettings Settings => (SciclopsSettings) this.DeviceSettings;
+
+    public double NestAdjustment
+    {
+      get => this._nestAdjustment;
+      set => this._nestAdjustment = value;
+    }
+
+    public bool UseAck
+    {
+      get => this.Commander.UseCommandAck;
+      set => this.Commander.UseCommandAck = value;
+    }
+
+    public Sciclops()
+      : this((IDevice) null)
+    {
+    }
+
+    public Sciclops(IDevice device)
+      : base(device)
+    {
+      this._currentPosition = new RealWorldValue();
+      this.DeviceSettings = (DeviceSettings) new SciclopsSettings();
+      this.ConnectSequence = (CommandResult) new ReadSettingsResult();
+    }
+
+    protected long CalculateMoveTime(HudsonDeviceCommand command) => 750;
+
+    protected override void SimulateResponse(HudsonDeviceCommand command)
+    {
+      string upper = command.DeviceCommand.Command.ToUpper(CultureInfo.InvariantCulture);
+      command.SetSuccess();
+      DateTime now = DateTime.Now;
+"MOVE") || upper.StartsWith("JOG"))
+      {
+        long moveTime = this.CalculateMoveTime(command);
+        while (HudsonDevice.Elapsed(now) < (double) moveTime)
+          Thread.Sleep(50);
+      }
+"GETPOS", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 R:" + this._currentPosition.ToString());
+      else if (upper.StartsWith("STATUS", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 1");
+      else if (upper.StartsWith("VERSION", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 Sciclops Simulated");
+      else if (upper.StartsWith("GETCONFIG", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 123");
+      else if (upper.StartsWith("GETGRIPSTRENGTH", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 100%");
+      else if (upper.StartsWith("READINP 15", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 1");
+      else if (upper.StartsWith("READINP", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 0");
+      else if (upper.StartsWith("GETGRIPPERLENGTH", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 " + 17.2.ToString("F3"));
+      else if (upper.StartsWith("GETCOLLAPSEDISTANCE", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 " + 3.35.ToString("F3"));
+      else if (upper.StartsWith("GETSTEPSPERUNIT", StringComparison.OrdinalIgnoreCase))
+        command.Result.Responses.Add("0000 R:556.667, Z:157.48, P:35.2, Y:161.26");
+      else if (upper.StartsWith("GETPOINT ", StringComparison.OrdinalIgnoreCase))
+      {
+        string str = upper.Substring(9, upper.Length - 9);
+        foreach (Point point in this.Settings.Points)
+        {
+          if (point.Name == str)
+          {
+            command.Result.Responses.Add("0000 " + point.ToString());
+            return;
+          }
+        }
+        command.Result.Responses.Add("0000 R:0, Z:0, P:0, Y:0");
+      }
+      else if (upper.StartsWith("GETLIMITS", StringComparison.OrdinalIgnoreCase))
+      {
+        command.Result.Responses.Add(string.Format((IFormatProvider) CultureInfo.InvariantCulture, "0000 ZL:{0:F3}, ZU:{1:F3}, PL:{2:F3}, PU:{3:F3}, YL:{4:F3}, YU:{5:F3}", (object) this.Settings.Z.Profile.LowerLimit, (object) this.Settings.Z.Profile.UpperLimit, (object) this.Settings.P.Profile.LowerLimit, (object) this.Settings.P.Profile.UpperLimit, (object) this.Settings.Y.Profile.LowerLimit, (object) this.Settings.Y.Profile.UpperLimit));
+      }
+      else
+      {
+  "SETSPEED", StringComparison.OrdinalIgnoreCase))
+          return;
+  "HOME", StringComparison.OrdinalIgnoreCase))
+        {
+          this._currentPosition.Name = "";
+          this._currentPosition.R = 0.0;
+          this._currentPosition.Z = 0.0;
+          this._currentPosition.P = 0.0;
+          this._currentPosition.Y = 0.0;
+          command.Result.Responses.Add("0000 Success");
+        }
+        else
+        {
+    "SET", StringComparison.OrdinalIgnoreCase) && upper.EndsWith("TEMP", StringComparison.OrdinalIgnoreCase) || upper.StartsWith("SHIFT TEMP", StringComparison.OrdinalIgnoreCase))
+            return;
+    "LISTMOTIONS", StringComparison.OrdinalIgnoreCase))
+          {
+            MotionOverride motionOverride = new MotionOverride();
+            command.Result.Responses.Add("Id: rangeMin, rangeMax, foo, foo, foo");
+            for (int index = 0; index < 10; ++index)
+              command.Result.Responses.Add((index + 1).ToString() + ": " + motionOverride.ToString());
+            command.Result.Responses.Add("DONE");
+          }
+          else if (upper.StartsWith("LISTPOINTS", StringComparison.OrdinalIgnoreCase))
+          {
+            command.Result.Responses.Add("0000 Points List (5 points):");
+            for (int index = 1; index <= 3; ++index)
+              command.Result.Responses.Add(index.ToString() + ": Stack" + index.ToString() + ", R:0, Z:0, P:0, Y:0");
+            command.Result.Responses.Add("4: TEMP, R:0, Z:0, P:0, Y:0");
+            command.Result.Responses.Add("5: Nest, R:0, Z:0, P:0, Y:0");
+            command.Result.Responses.Add("End Of List");
+          }
+          else
+            command.Result.Responses.Add("0000 Success");
+        }
+      }
+    }
+
+    public CommandResult MoveToPosition(RealWorldValue position)
+    {
+      if (position == (RealWorldValue) null)
+        throw new ArgumentNullException(nameof (position));
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand()
+      {
+        DeviceCommand = new DeviceCommand(string.Format((IFormatProvider) CultureInfo.InvariantCulture, "LOADPOINT TEMP,{0},{1},{2},{3}", (object) position.R, (object) position.Z, (object) position.P, (object) position.Y)),
+        Message = "Moving to " + position.ToString()
+      });
+      sequence.Commands.Add(new HudsonDeviceCommand("MOVE TEMP", "Moving to " + position.ToString()));
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult MoveToShiftedPoint(string point, RealWorldValue offsets) => this.MoveToPoint(point, (PointBase) offsets);
+
+    public CommandResult SavePoint(string name, RealWorldValue position)
+    {
+      if (name == null)
+        throw new ArgumentNullException(nameof (name));
+      if (position == (RealWorldValue) null)
+        throw new ArgumentNullException(nameof (position));
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand(string.Format((IFormatProvider) CultureInfo.InvariantCulture, "LOADPOINT {0},R:{1},Z:{2},P:{3},Y:{4}", (object) name, (object) position.R, (object) position.Z, (object) position.P, (object) position.Y), "Saving " + name));
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult AutoTeach(string point)
+    {
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand("AUTOTEACH " + point, "Teaching point \"" + point + "\"."));
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult SetSpeed(int speed)
+    {
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand()
+      {
+        DeviceCommand = new DeviceCommand("SETSPEED " + Convert.ToString(speed, (IFormatProvider) CultureInfo.InvariantCulture)),
+        Message = "Setting speed to \"" + Convert.ToString(speed, (IFormatProvider) CultureInfo.InvariantCulture) + "\"."
+      });
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult OpenGripper()
+    {
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand("OPEN", "Opening Gripper."));
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult CloseGripper()
+    {
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand("CLOSE", "Closing Gripper."));
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public ReadValueResult CheckGripperClosed()
+    {
+      ReadValueResult sequence = new ReadValueResult();
+      HudsonDeviceCommand hudsonDeviceCommand = new HudsonDeviceCommand("GETGRIPPERISCLOSED", "Checking Gripper.");
+      sequence.Commands.Add(hudsonDeviceCommand);
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    public ReadValueResult CheckGripperOpen()
+    {
+      ReadValueResult sequence = new ReadValueResult();
+      HudsonDeviceCommand hudsonDeviceCommand = new HudsonDeviceCommand("GETGRIPPERISOPEN", "Checking Gripper.");
+      sequence.Commands.Add(hudsonDeviceCommand);
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    public ReadValueResult CheckPlatePresent()
+    {
+      ReadValueResult sequence = new ReadValueResult();
+      HudsonDeviceCommand hudsonDeviceCommand = new HudsonDeviceCommand("GETPLATEPRESENT", "Checking Plate Present.");
+      sequence.Commands.Add(hudsonDeviceCommand);
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    public ReadPositionResult ReadPosition()
+    {
+      ReadPositionResult sequence = new ReadPositionResult();
+      HudsonDeviceCommand hudsonDeviceCommand = new HudsonDeviceCommand("GETPOS", "Retrieving Current Position.");
+      sequence.Commands.Add(hudsonDeviceCommand);
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    public CommandResult UploadSettings(SciclopsSettings settings)
+    {
+      if (settings == null)
+        throw new ArgumentNullException(nameof (settings));
+      UploadSettingsResult sequence = new UploadSettingsResult();
+      sequence.Settings = settings;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult MovePath(params string[] points)
+    {
+      string commandText = "MOVE ";
+      bool flag = true;
+      foreach (string point in points)
+      {
+        if (!flag)
+          commandText += ",";
+        commandText += point;
+        flag = false;
+      }
+      CommandSequence sequence = new CommandSequence();
+      sequence.Commands.Add(new HudsonDeviceCommand(commandText, "Moving on path."));
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public RealWorldValue ShiftPosition(
+      RealWorldValue startingPosition,
+      double rDistance,
+      double zDistance,
+      double pDistance,
+      double yDistance)
+    {
+      RealWorldValue realWorldValue = new RealWorldValue(rDistance, zDistance, pDistance, yDistance);
+      return startingPosition + realWorldValue;
+    }
+
+    public ReadSettingsResult ReadSettings()
+    {
+      ReadSettingsResult sequence = new ReadSettingsResult();
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    public CommandResult GetLabwareFromNest(
+      string target,
+      LabwareDefinition plate,
+      bool returnToTravel)
+    {
+      GetLabwareFromNestResult sequence = new GetLabwareFromNestResult();
+      sequence.Target = target;
+      sequence.Plate = plate;
+      sequence.MoveToTravel = returnToTravel;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult RemoveLidFromNest(
+      string target,
+      LiddedPlateDefinition plate,
+      bool returnToTravel)
+    {
+      RemoveLidFromNestResult sequence = new RemoveLidFromNestResult();
+      sequence.Target = target;
+      sequence.Plate = (LabwareDefinition) plate;
+      sequence.MoveToTravel = returnToTravel;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult PutLabwareInNest(
+      string target,
+      LabwareDefinition plate,
+      bool returnToTravel)
+    {
+      PutLabwareInNestResult sequence = new PutLabwareInNestResult();
+      sequence.Target = target;
+      sequence.Plate = plate;
+      sequence.MoveToTravel = returnToTravel;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult ReplaceLidInNest(
+      string target,
+      LiddedPlateDefinition plate,
+      bool returnToTravel)
+    {
+      ReplaceLidInNestResult sequence = new ReplaceLidInNestResult();
+      sequence.Target = target;
+      sequence.Plate = (LabwareDefinition) plate;
+      sequence.MoveToTravel = returnToTravel;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public GetFromStackResult GetLabwareFromStack(
+      string target,
+      int index,
+      LabwareDefinition stack,
+      LabwareDefinition plate)
+    {
+      GetLabwareFromStackResult sequence = new GetLabwareFromStackResult();
+      sequence.Target = target;
+      sequence.Index = index;
+      sequence.StackPlate = stack;
+      sequence.Plate = plate;
+      this.QueueSequence((CommandResult) sequence);
+      return (GetFromStackResult) sequence;
+    }
+
+    public GetFromStackResult RemoveLidFromStack(
+      string target,
+      int index,
+      LabwareDefinition stack,
+      LiddedPlateDefinition plate)
+    {
+      RemoveLidFromStackResult sequence = new RemoveLidFromStackResult();
+      sequence.Target = target;
+      sequence.Index = index;
+      sequence.StackPlate = stack;
+      sequence.Plate = (LabwareDefinition) plate;
+      this.QueueSequence((CommandResult) sequence);
+      return (GetFromStackResult) sequence;
+    }
+
+    public CommandResult PutLabwareInStack(
+      string target,
+      int index,
+      LabwareDefinition stack,
+      LabwareDefinition plate)
+    {
+      PutLabwareInStackResult sequence = new PutLabwareInStackResult();
+      sequence.Target = target;
+      sequence.StackPlate = stack;
+      sequence.Plate = plate;
+      sequence.Index = index;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public CommandResult ReplaceLidInStack(
+      string target,
+      int index,
+      LabwareDefinition stack,
+      LiddedPlateDefinition plate)
+    {
+      ReplaceLidInStackResult sequence = new ReplaceLidInStackResult();
+      sequence.Target = target;
+      sequence.StackPlate = stack;
+      sequence.Plate = (LabwareDefinition) plate;
+      sequence.Index = index;
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public GetFromStackResult DiscoverStack(
+      string target,
+      LabwareDefinition stack,
+      bool returnToTravel)
+    {
+      DiscoverStackResult sequence = new DiscoverStackResult();
+      sequence.Target = target;
+      sequence.MoveToTravel = returnToTravel;
+      sequence.StackPlate = stack;
+      this.QueueSequence((CommandResult) sequence);
+      return (GetFromStackResult) sequence;
+    }
+
+    public CommandResult DeterminePositionHeight()
+    {
+      DetermineHeightResult sequence = new DetermineHeightResult();
+      this.QueueSequence((CommandResult) sequence);
+      return (CommandResult) sequence;
+    }
+
+    public TakePictureResult TakePicture() => this.TakePicture(1.0);
+
+    public TakePictureResult TakePicture(double scale) => this.TakePicture(scale, "temp.jpg");
+
+    public TakePictureResult TakePicture(double scale, string fileName)
+    {
+      TakePictureResult sequence = new TakePictureResult();
+      sequence.FileName = fileName;
+      sequence.Scale = scale;
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    public ReadValueResult GetImageData(long offset, long length) => this.GetImageData(offset, length, "temp.jpg");
+
+    public ReadValueResult GetImageData(long offset, long length, string filename)
+    {
+      GetImageDataResult sequence = new GetImageDataResult();
+      sequence.Offset = offset;
+      sequence.Length = length;
+      sequence.Filename = filename;
+      this.QueueSequence((CommandResult) sequence);
+      return (ReadValueResult) sequence;
+    }
+
+    public AnalyzeResult AnalyzePicture()
+    {
+      AnalyzeResult sequence = new AnalyzeResult();
+      this.QueueSequence((CommandResult) sequence);
+      return sequence;
+    }
+
+    CommandResult ISciclops.MoveAbovePoint(string point) => this.MoveAxesToPoint(point, "R", "P", "Y");
+
+    ReadValueResult ISciclops.GetHomeStatus() => this.GetHomeStatus();
+
+    ReadValueResult ISciclops.SendText(string command) => this.SendText(command);
+
+    CommandResult ISciclops.Home() => this.Home();
+
+    CommandResult ISciclops.JogAxis(string axis, double distance) => this.JogAxis(axis, distance);
+
+    CommandResult ISciclops.MoveAxis(string axis, double position) => this.MoveAxis(axis, position);
+
+    CommandResult ISciclops.MoveToPoint(string point) => this.MoveToPoint(point);
+
+    CommandResult ISciclops.MoveToTravelHeight() => this.MoveToTravelHeight();
+
+    CommandResult ISciclops.DeletePoint(string point) => this.DeletePoint(point);
+
+    CommandResult ISciclops.PointHere(string point) => this.PointHere(point);
+
+    CommandResult ISciclops.Limp(bool powerOff) => this.Limp(powerOff);
+
+    ReadValueResult ISciclops.ReadFirmwareVersion() => this.ReadFirmwareVersion();
+
+    ReadValueResult ISciclops.ReadDigitalInput(int number) => this.ReadDigitalInput(number);
+
+    CommandResult ISciclops.SetDigitalOutput(int number, int value) => this.SetDigitalOutput(number, value);
+  }
+}
