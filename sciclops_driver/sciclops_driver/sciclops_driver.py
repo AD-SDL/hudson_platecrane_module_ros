@@ -6,6 +6,7 @@ import usb.util
 import sys
 import re
 
+
 class SCICLOPS():
     '''
     Description: 
@@ -33,6 +34,7 @@ class SCICLOPS():
         # self.CLOSEMSG = ""
         self.labware = self.load_labware()
         self.success_count = 0
+            
     
 
     def connect_sciclops(self):
