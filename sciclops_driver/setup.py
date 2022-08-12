@@ -11,10 +11,11 @@ with open('requirements.txt') as reqs:
         install_requires.append(req)
 
 
-package_name = 'hudson_driver'
+##this is weird. 
+package_name = 'sciclops_driver'
 
 setup(
-    name='hudson_driver',
+    name='sciclops_driver',
     version='0.0.1',
     packages=find_packages(),
     data_files=[
@@ -25,15 +26,12 @@ setup(
     install_requires=install_requires,
     zip_safe=True,
     python_requires=">=3.8",
-    maintainer='Rafael Vescovi',
-    maintainer_email='ravescovi@anl.gov',
-    description='Driver for Hudson',
-    url='https://github.com/AD-SDL/hudson_driver.git', 
+    maintainer='Rafael Vescovi and Doga Ozgulbas',
+    maintainer_email='dozgulbas@anl.gov',
+    description='Driver for the Azenta Sealer and Peeler',
+    url='https://github.com/AD-SDL/azenta_driver.git', 
     license='MIT License',
-    entry_points={ 
-        'console_scripts': [
-        ]
-    },
+    entry_points={},
     classifiers=[
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
