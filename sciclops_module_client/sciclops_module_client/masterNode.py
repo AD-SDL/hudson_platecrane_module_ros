@@ -34,6 +34,15 @@ class masterNode(Node):
         
         self.stateSub # prevent unused variable warning
 
+        # Creating client instance
+        self.cli = self.create_client(sciclopsActions, 'sciclops_actions')
+        # include service not available option?
+        self.sciclops_action_request = sciclopsActions.Request()
+
+        self.sciclops_action_request = "Get Plate 1"
+        self.future = self.cli.call_async(self.sciclops_action_request)
+        rclpy.spin_until_future_complete(self, self.future)
+
 
     def descriptionCallback(self, request, response):
 

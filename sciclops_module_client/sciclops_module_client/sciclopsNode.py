@@ -46,6 +46,7 @@ class sciclopsNode(Node):
             ["Get Plate 4",["get_plate"], [["tower4"]]],
             ["Get Plate 5",["get_plate"], [["tower5"]]],
             ["Home",["home"], [[""]]],
+            ["Status",["get_status"], [[""]]],
             ]
 
 
@@ -137,10 +138,6 @@ class sciclopsNode(Node):
                 response.action_response= False
         
         self.state = "COMPLETED"
-
-        # if "Error:" in self.peeler.peeler_output:
-        #     self.state = self.peeler.error_msg
-        
 
         return response
 
