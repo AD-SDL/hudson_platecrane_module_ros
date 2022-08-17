@@ -607,6 +607,28 @@ class SCICLOPS():
             limp_string = "TRUE"
         command = "LIMP %s" % limp_string # Command interpreted by Sciclops
         self.send_command(command)
+    
+
+    # TODO: add lid nests to labware dictionary
+    # TODO: update labware function
+    '''
+    functions to add
+    '''
+    #* Remove lid, (self, lidnest), removes lid from exchange
+
+    #* Stack, to exchange, remove lid (self, tower, lidnest)
+
+    #* Stack to exchange, do not remove lid (self, tower)
+
+    #* Plate from exchange to stack (self, tower, plateinfo)
+
+    #* Plate on exchange, replace lid, move to stack (self, tower, platinfo, lidnest)
+
+    #* Plate on exchange, replace lid (self, plateinfo, lidnest)
+
+    #* Plate on exchange, just remove lid (self, plateinfo, lidnest)
+
+    #* 
 
 
 
