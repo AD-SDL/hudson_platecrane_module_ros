@@ -574,50 +574,59 @@ class SCICLOPS():
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
-    #TODO: add remove_lid bool
-    def get_plate(self, location):
+    def get_plate(self, location, remove_lid):
         '''
         Grabs plate and places on exchange. Paramater is the stack that the Sciclops is requested to remove the plate from.
         Format: "Stack<num>"
         '''
 
-        tower_info = self.labware[location]
+        # check to see if plate already on the exchange
+        if self.labware['exchange']['howmany'] != 0:
+            print("PLATE ALREADY ON THE EXCHANGE")
+        else:
+            tower_info = self.labware[location]
 
-        # Move arm up and to neutral position to avoid hitting any objects
-        self.open() 
-        self.set_speed(3) # 
-        self.jog('Y', -1000)
-        self.jog('Z', 1000) 
-        self.set_speed(12) 
-        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            # Move arm up and to neutral position to avoid hitting any objects
+            self.open() 
+            self.set_speed(3) # 
+            self.jog('Y', -1000)
+            self.jog('Z', 1000) 
+            self.set_speed(12) 
+            self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
-        # Move above desired tower
-        self.set_speed(12)
-        self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
-        
-        # Remove plate from tower
-        self.set_speed(7)
-        self.jog('Z', -1000)
-        grab_height = tower_info.get('grab_height', 12.5)
-        self.jog('Z', grab_height)
-        self.close()
-        self.set_speed(12)
-        self.jog('Z', 1000)
-        
-        # Place in exchange
-        self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
-        self.jog('Z', -395)
-        self.set_speed(1)
-        self.jog('Z', -20)
-        self.open()
-        sleep(0.1)
-        self.set_speed(12)
-        self.jog('Z', 1000)
+            # Move above desired tower
+            self.set_speed(12)
+            self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
+            
+            # Remove plate from tower
+            self.set_speed(7)
+            self.jog('Z', -1000)
+            grab_height = tower_info.get('grab_height', 12.5)
+            self.jog('Z', grab_height)
+            self.close()
+            self.set_speed(12)
+            self.jog('Z', 1000)
+            
+            # Place in exchange
+            self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+            self.jog('Z', -395)
+            self.set_speed(1)
+            self.jog('Z', -20)
+            self.open()
+            sleep(0.1)
+            self.set_speed(12)
+            self.jog('Z', 1000)
 
-        # Move back to neutral
-        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            # check if lid needs to be removed
+            if remove_lid == True:
+                self.remove_lid()
+            
+            # Move back to neutral
+            self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
-        #TODO: update labware
+            # update labware
+            self.labware[location]['howmany']-=1
+            self.labware['exchange']['howmany']+=1
         
 
     def limp(self, limp_bool):
@@ -668,7 +677,7 @@ class SCICLOPS():
 
     #* Remove lid, (self, lidnest, plate_type), removes lid from plate in exchange
     # TODO: add option to immediatley throw lid into trash
-    def remove_lid(self, lidnest, plate_type):
+    def remove_lid(self):# TODO: add specific plate type?
         #  move above plate exchange
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
@@ -721,7 +730,7 @@ class SCICLOPS():
     def get_plate_remove_lid(self, tower, lidnest):
         #self.get_plate(tower)
         #tower_info = self.labware[tower]
-        #plate_info = tower_info.get['grab_height'] # TODO, figure out grab_height meaning and what info needed for remove lid
+        #plate_info = tower_info.get['grab_height']
         #self.remove_lid(lidnest, plate_info)
         pass
 
@@ -730,6 +739,8 @@ class SCICLOPS():
         if add_lid == True:
             lidnest = self.check_for_lid()
             self.replace_lid(plate_type, lidnest)
+        
+        #TODO: check to see if given stack is full, use function to account for different labware
         
         # move over exchange
         self.open()
