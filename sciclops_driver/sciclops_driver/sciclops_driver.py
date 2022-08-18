@@ -574,6 +574,7 @@ class SCICLOPS():
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
+    #TODO: add remove_lid bool
     def get_plate(self, location):
         '''
         Grabs plate and places on exchange. Paramater is the stack that the Sciclops is requested to remove the plate from.
@@ -615,6 +616,8 @@ class SCICLOPS():
 
         # Move back to neutral
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+
+        #TODO: update labware
         
 
     def limp(self, limp_bool):
@@ -633,6 +636,7 @@ class SCICLOPS():
     # TODO: check if short plate lids interchangeable
     # TODO: possible to error check putting lid on non-plate by jogging down and checking height of item on exchange?, maybe separate function that just inputs current z height of crane
     #TODO: see if way to update exchange labware info after p400 puts plate there (probably needs to be in seperate file)
+    #TODO: add check to see if exchange or towers are full at any point
 
     '''
     functions to add
@@ -690,6 +694,9 @@ class SCICLOPS():
         # return to home
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
+        # update labware dict
+        self.labware[lid_nest]['occupied'] = True
+
 
     #* Plate on exchange, replace lid (self, plateinfo, lidnest)
     def replace_lid(self, plate_info, lidnest):
@@ -706,6 +713,8 @@ class SCICLOPS():
 
         # return to home
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+
+        # update labware dict
 
     #TODO: maybe just add remove plate bool into get_plate
     #* Stack, to exchange, remove lid (self, tower, lidnest)
@@ -746,11 +755,11 @@ class SCICLOPS():
 
         # move to home
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+
+        # update labware dict
+        self.labware['exchange']['howmany']-=1
+        self.labware[tower]['howmany']+=1
         
-
-
-    #TODO: add lid bool?
-    #* Plate on exchange, replace lid, move to stack (self, tower, platinfo, lidnest)
 
 
     
