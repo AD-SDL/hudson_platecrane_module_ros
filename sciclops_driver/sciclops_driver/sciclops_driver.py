@@ -133,7 +133,7 @@ class SCICLOPS():
                 'pos':{
                     #TODO
                 },
-            'type': 'TODO',# TODO, necessary?
+            'type': '96plates',
             'howmany': 1, # can only hold one
             'size':[10,11,12],
             'grab_height': 'TODO' #TODO
@@ -142,7 +142,7 @@ class SCICLOPS():
                 'pos':{
                     #TODO
                 },
-            'type': 'TODO',# TODO, necessary?
+            'type': '96plates',
             'howmany': 1, # can only hold one
             'size':[10,11,12],
             'grab_height': 'TODO' #TODO
@@ -155,7 +155,7 @@ class SCICLOPS():
                 'P': 98.2955
                 },
             'type': '96plates',
-            'howmany': 3,
+            'howmany': 1,
             'size': [10,11,2],
             'grab_height': "TODO", # TODO
             'cap_height': "TODO", # TODO
@@ -657,8 +657,6 @@ class SCICLOPS():
         self.send_command(command)
     
 
-    # TODO: check if short plate lids interchangeable
-    #TODO: will stacks always contain uniform equipment? or can alternate
     # TODO: possible to error check putting lid on non-plate by jogging down and checking height of item on exchange?, maybe separate function that just inputs current z height of crane
     #TODO: see if way to update exchange labware info after p400 puts plate there (probably needs to be in seperate file)
     #TODO: add check to see if exchange or towers are full at any point
@@ -670,14 +668,14 @@ class SCICLOPS():
     def update_labware(plate_type, source, destination):
         pass
 
-    #* checks all lid nests to see if there's a lid present, returns occupied lid nest
+    #* checks all lid nests to see if there's a lid of same type present, returns occupied lid nest
     def check_for_lid(self):
-        if self.labware['lidnest1']['howmany'] >= 1:
+        if self.labware['lidnest1']['howmany'] >= 1 and self.labware['lidnest1']['type'] == self.labware['exchange']['type']:
             return 'lidnest1'
-        elif self.labware['lidnest2']['howmany'] >= 1:
+        elif self.labware['lidnest2']['howmany'] >= 1 and self.labware['lidnest2']['type'] == self.labware['exchange']['type']:
             return 'lidnest2'
         else:
-            print("NO AVAILABLE LID IN LID NESTS")
+            print("NO MATCHING LID IN LID NESTS")
         pass
 
     #* check all lid nests to see if there's an empty "available" lid nst, returns open lid nest
@@ -698,53 +696,63 @@ class SCICLOPS():
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
 
+        # find empty plate nest
         lid_nest = self.check_for_empty_nest() # TODO: maybe add conditional to throw away lids in nests if none available?
 
-        # remove lid
-        self.set_speed(7)
-        self.jog('Z', -1000)
-        lid_height = self.labware['exchange']["cap_height"]
-        self.jog('Z', lid_height)
-        self.close()
-        self.set_speed(12)
-        self.jog('Z', 1000)
+        # check to make sure plate has lid
+        if self.labware['exchange']['has_lid'] == False:
+            print("NO LID ON PLATE IN EXCHANGE")
+        else:
+            # remove lid
+            self.set_speed(7)
+            self.jog('Z', -1000)
+            lid_height = self.labware['exchange']["cap_height"]
+            self.jog('Z', lid_height)
+            self.close()
+            self.set_speed(12)
+            self.jog('Z', 1000)
 
 
-        # move above desired lid nest
-        self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
+            # move above desired lid nest
+            self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
 
-        # place in lid nest
-        # TODO determine Z height of lidnests
+            # place in lid nest
+            # TODO determine Z height of lidnests
 
-        # return to home
-        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            # return to home
+            self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
-        # update labware dict
-        self.labware[lid_nest]['howmany']+=1
-        self.labware['exchange']['has_lid'] = False
+            # update labware dict
+            self.labware[lid_nest]['howmany']+=1
+            self.labware[lid_nest]['type'] = self.labware['exchange']['type']
+            self.labware['exchange']['has_lid'] = False
 
 
     #* Plate on exchange, replace lid (self, plateinfo, lidnest)
-    def replace_lid(self, plate_info):
+    def replace_lid(self):
  
         # find a lid
         self.open()
         lid_nest = self.check_for_lid() # TODO: conditional for no available lid to prevent delays?
-        # move above desired lidnest #TODO: maybe some kind of check to make sure lid correct for plate, add lid type to dict
 
-        # grab lid
+        # make sure current plate doesn't already have lid
+        if self.labware['exchange']['has_lid'] == True:
+            print("PLATE IN EXCHANGE ALREADY HAS LID")
+        else:
+            # move above desired lidnest 
+            # grab lid
 
-        # move above exchange
-        self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+            # move above exchange
+            self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
 
-        # place lid onto plate
+            # place lid onto plate
 
-        # return to home
-        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            # return to home
+            self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
-        # update labware dict
-        self.labware[lid_nest]['howmany']-=1
-        self.labware['exchange']['has_lid'] = True
+            # update labware dict
+            self.labware[lid_nest]['howmany']-=1
+            self.labware['exchange']['has_lid'] = True
 
     #* Plate from exchange to stack (self, tower, plateinfo)
     def plate_to_stack(self, tower, plate_type, add_lid):
@@ -782,12 +790,14 @@ class SCICLOPS():
         # update labware dict
         self.labware['exchange']['howmany']-=1
         self.labware[tower]['howmany']+=1
+        #self.labware['exchange']['type'] = 'None' # TODO: necessary to update exchange parameters? or just leave until next plate added?
         
 
 
     
     #* Remove lid from lidnest, throw away
     def lidnest_to_trash(self, lidnest):
+        # check to make sure lid present
         # move above lidnest
         # grab lid
         # move above trash #TODO determine trash coordinates
@@ -796,6 +806,7 @@ class SCICLOPS():
 
     #* Remove plate from exchange, throw away
     def plate_to_trash(self, plate_info, add_lid):
+        # check if plate is present
         # check if add_lid is true, if yes, run check function to find lid, and add lid
         # move over exchange
         # grab plate
