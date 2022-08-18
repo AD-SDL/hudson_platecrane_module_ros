@@ -148,7 +148,7 @@ class SCICLOPS():
             'type': '96plates',
             'howmany': 3,
             'size': [10,11,2],
-            'grap_height': "TODO", # TODO
+            'grab_height': "TODO", # TODO
             'cap_height': "TODO" # TODO
             },
             'neutral':{
@@ -629,7 +629,6 @@ class SCICLOPS():
         self.send_command(command)
     
 
-    # TODO: add lid nests to labware dictionary
     # TODO: add bool to labware dictionary to tell if plates have lids or not (need or just check if cap height exists?)
     # TODO: check if short plate lids interchangeable
     # TODO: possible to error check putting lid on non-plate by jogging down and checking height of item on exchange?, maybe separate function that just inputs current z height of crane
@@ -652,6 +651,7 @@ class SCICLOPS():
             print("NO AVAILABLE LID IN LID NESTS")
         pass
 
+    #* check all lid nests to see if there's an empty "available" lid nst, returns open lid nest
     def check_for_empty_nest(self):
         if self.labware['lidnest1']['occupied'] == False:
             return 'lidnest1'
@@ -690,21 +690,22 @@ class SCICLOPS():
         # return to home
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
-        pass
 
     #* Plate on exchange, replace lid (self, plateinfo, lidnest)
     def replace_lid(self, plate_info, lidnest):
-        pass
+ 
         
         # move above desired lidnest #TODO: maybe some kind of check to make sure lid correct for plate, add lid type to dict
 
         # grab lid
 
         # move above exchange
+        self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
 
         # place lid onto plate
 
         # return to home
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
     #TODO: maybe just add remove plate bool into get_plate
     #* Stack, to exchange, remove lid (self, tower, lidnest)
@@ -718,17 +719,33 @@ class SCICLOPS():
     #* Plate from exchange to stack (self, tower, plateinfo)
     def plate_to_stack(self, tower, plate_type, add_lid):
         if add_lid == True:
-            lidnest = 1 # TODO: function to check lid nests
+            lidnest = self.check_for_lid()
             self.replace_lid(plate_type, lidnest)
         
         # move over exchange
+        self.open()
+        self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
 
         # grab plate
+        self.set_speed(7)
+        self.jog('Z', -1000)
+        grab_height = self.labware['exchange'].get('grab_height', 12.5)
+        self.jog('Z', grab_height)
+        self.close()
+        self.set_speed(12)
+        self.jog('Z', 1000)
 
         # move above tower, place plate in tower
+        self.move(R=self.labware[tower]['pos']['R'], Z=23.5188, P=self.labware[tower]['pos']['P'], Y=self.labware[tower]['pos']['Y'])
+        self.set_speed(7)
+        self.jog('Z', -1000) # TODO: test to make more gentle?
+        self.open()
+        self.set_speed(12)
+        self.jog('Z', 1000)
+
 
         # move to home
-        pass
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         
 
 
