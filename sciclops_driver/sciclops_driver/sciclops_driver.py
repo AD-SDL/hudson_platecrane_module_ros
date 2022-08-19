@@ -168,6 +168,11 @@ class SCICLOPS():
                     'Y': 32.7484,
                     'P': 98.2955
                     }
+            },
+            'trash':{
+                'pos': {
+                    "TODO"
+                    }
             }
         }
 
@@ -642,7 +647,7 @@ class SCICLOPS():
             self.labware['exchange']['type'] = self.labware[location]['type']
             self.labware['exchange']['grab_height'] = self.labware[location]['grab_height']
             self.labware['exchange']['cap_height'] = self.labware[location]['cap_height']
-            # TODO: size?
+            self.labware['exchange']['size'] = self.labware[location]['size']
         
 
     def limp(self, limp_bool):
@@ -688,10 +693,24 @@ class SCICLOPS():
             print("NO AVAILABLE LID NESTS")
         pass
 
+    def check_stack(self, tower):
+        pass
+        # save z height of stack
+        # move over stack
+        # close gripper
+        # jog down
+        # pull current z height
+        # figure out remaining space in stack
+        # --- OR ---
+        # save z height of stack
+        # pull size of current plates in stack
+        # multiply height of plate by howmany
+        # figure out remaining space in stack
+
 
     #* Remove lid, (self, lidnest, plate_type), removes lid from plate in exchange
     # TODO: add option to immediatley throw lid into trash
-    def remove_lid(self):# TODO: add specific plate type?
+    def remove_lid(self):
         #  move above plate exchange
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
