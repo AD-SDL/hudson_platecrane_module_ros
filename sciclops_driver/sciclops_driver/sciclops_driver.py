@@ -131,21 +131,27 @@ class SCICLOPS():
             },
             'lidnest1':{
                 'pos':{
-                    #TODO
+                    'Z': 23.5188,
+                    'R': 169.2706,
+                    'Y': 25.7535,
+                    'P': 12.2159
                 },
             'type': '96plates',
             'howmany': 1, # can only hold one
             'size':[10,11,12],
-            'grab_height': 'TODO' #TODO
+            'grab_height': 15
             },
             'lidnest2':{
                 'pos':{
-                    #TODO
+                    'Z': 23.5188,
+                    'R': 201.2665,
+                    'Y': 25.7535,
+                    'P': 9.0909
                 },
             'type': '96plates',
             'howmany': 1, # can only hold one
             'size':[10,11,12],
-            'grab_height': 'TODO' #TODO
+            'grab_height': 15
             },
             'exchange':{
             'pos': {
@@ -158,7 +164,7 @@ class SCICLOPS():
             'howmany': 1,
             'size': [10,11,2],
             'grab_height': "TODO", # TODO
-            'cap_height': "TODO", # TODO
+            'cap_height': 15,
             'has_lid': True
             },
             'neutral':{
@@ -171,7 +177,11 @@ class SCICLOPS():
             },
             'trash':{
                 'pos': {
-                    "TODO"
+                    #TODO
+                    'Z': 23.5188,
+                    'R': 259.2688,
+                    'Y': 62.7497,
+                    'P': 98.2670
                     }
             }
         }
@@ -674,7 +684,7 @@ class SCICLOPS():
         pass
 
     #* checks all lid nests to see if there's a lid of same type present, returns occupied lid nest
-    def check_for_lid(self):
+    def check_for_lid(self): # TODO: conditional for no available lid to prevent delays?
         if self.labware['lidnest1']['howmany'] >= 1 and self.labware['lidnest1']['type'] == self.labware['exchange']['type']:
             return 'lidnest1'
         elif self.labware['lidnest2']['howmany'] >= 1 and self.labware['lidnest2']['type'] == self.labware['exchange']['type']:
@@ -684,7 +694,7 @@ class SCICLOPS():
         pass
 
     #* check all lid nests to see if there's an empty "available" lid nst, returns open lid nest
-    def check_for_empty_nest(self):
+    def check_for_empty_nest(self): # TODO: maybe add conditional to throw away lids in nests if none available?
         if self.labware['lidnest1']['howmany'] == 0:
             return 'lidnest1'
         elif self.labware['lidnest2']['howmany'] == 0:
@@ -716,7 +726,7 @@ class SCICLOPS():
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
 
         # find empty plate nest
-        lid_nest = self.check_for_empty_nest() # TODO: maybe add conditional to throw away lids in nests if none available?
+        lid_nest = self.check_for_empty_nest() 
 
         # check to make sure plate has lid
         if self.labware['exchange']['has_lid'] == False:
@@ -736,7 +746,11 @@ class SCICLOPS():
             self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
 
             # place in lid nest
-            # TODO determine Z height of lidnests
+            self.set_speed(12)
+            self.jog('Z', -405)
+            self.open()
+            self.set_speed(12)
+            self.jog('Z', 1000)
 
             # return to home
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
@@ -752,19 +766,34 @@ class SCICLOPS():
  
         # find a lid
         self.open()
-        lid_nest = self.check_for_lid() # TODO: conditional for no available lid to prevent delays?
+        lid_nest = self.check_for_lid()
 
         # make sure current plate doesn't already have lid
         if self.labware['exchange']['has_lid'] == True:
             print("PLATE IN EXCHANGE ALREADY HAS LID")
         else:
             # move above desired lidnest 
+            self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
+
             # grab lid
+            self.set_speed(7)
+            self.jog('Z', -1000)
+            lid_height = self.labware[lid_nest]['grab_height']
+            self.jog('Z', lid_height)
+            self.close()
+            self.set_speed(12)
+            self.jog('Z', 1000)
 
             # move above exchange
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
 
             # place lid onto plate
+            self.set_speed(6)
+            self.jog('Z', -400)
+            self.open()
+            self.set_speed(12)
+            self.jog('Z', 1000)
+
 
             # return to home
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
@@ -817,10 +846,17 @@ class SCICLOPS():
     #* Remove lid from lidnest, throw away
     def lidnest_to_trash(self, lidnest):
         # check to make sure lid present
-        # move above lidnest
-        # grab lid
-        # move above trash #TODO determine trash coordinates
-        # drop lid 
+        # if self.labware[lidnest]['howmany'] >= 1: # lid in nest
+        #     # move above lidnest
+        #     self.move(R=self.labware[lidnest]['pos']['R'], Z=23.5188, P=self.labware[lidnest]['pos']['P'], Y=self.labware)
+            # grab lid
+            # move above trash #TODO determine trash coordinates
+            # drop lid 
+        
+        # else:
+        #     print('NO LID IN NEST')
+
+        
         pass
 
     #* Remove plate from exchange, throw away
