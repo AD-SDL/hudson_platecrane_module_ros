@@ -818,6 +818,14 @@ class SCICLOPS():
 
     #* Plate from exchange to stack (self, tower, plateinfo)
     def plate_to_stack(self, tower, plate_type, add_lid):
+        # Move arm up and to neutral position to avoid hitting any objects
+        self.open() 
+        self.set_speed(3)
+        self.jog('Y', -1000)
+        self.jog('Z', 1000) 
+        self.set_speed(12) 
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+
         if add_lid == True:
             lidnest = self.check_for_lid()
             self.replace_lid(plate_type, lidnest)
@@ -858,6 +866,13 @@ class SCICLOPS():
     
     #* Remove lid from lidnest, throw away
     def lidnest_to_trash(self, lidnest):
+        # Move arm up and to neutral position to avoid hitting any objects
+        self.open() 
+        self.set_speed(3) 
+        self.jog('Y', -1000)
+        self.jog('Z', 1000) 
+        self.set_speed(12) 
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         # check to make sure lid present
         if self.labware[lidnest]['howmany'] >= 1: # lid in nest
             # move above lidnest
@@ -894,6 +909,13 @@ class SCICLOPS():
 
     #* Remove plate from exchange, throw away
     def plate_to_trash(self, plate_info, add_lid):
+        # Move arm up and to neutral position to avoid hitting any objects
+        self.open() 
+        self.set_speed(3)
+        self.jog('Y', -1000)
+        self.jog('Z', 1000) 
+        self.set_speed(12) 
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         # check if plate is present
         if self.labware['exchange']['howmany'] >= 1:
             # check if add_lid is true, if yes, add lid
