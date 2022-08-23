@@ -704,10 +704,9 @@ class SCICLOPS():
 
     def check_stack(self, tower):
         pass
-        # save z height of stack
+        # save z height of stack Z = -36
         # move over stack
-        # close gripper
-        # jog down
+        # Move arm up and to neutral position to avoid hitting any objects
         # pull current z height
         # figure out remaining space in stack
         # --- OR ---
@@ -848,7 +847,7 @@ class SCICLOPS():
         # move above tower, place plate in tower
         self.move(R=self.labware[tower]['pos']['R'], Z=23.5188, P=self.labware[tower]['pos']['P'], Y=self.labware[tower]['pos']['Y'])
         self.set_speed(7)
-        self.jog('Z', -1000) # TODO: test to make more gentle?
+        self.jog('Z', -1000)
         self.open()
         self.set_speed(12)
         self.jog('Z', 1000)
@@ -929,7 +928,6 @@ class SCICLOPS():
             # grab plate
             self.set_speed(7)
             self.jog('Z', -1000)
-            #TODO: check grab height here
             self.close()
             self.set_speed(12)
             self.jog('Z', 1000)
