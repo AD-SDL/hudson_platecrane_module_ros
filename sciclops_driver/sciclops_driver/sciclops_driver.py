@@ -13,10 +13,10 @@ class SCICLOPS():
     Python interface that allows remote commands to be executed to the Sciclops. 
     '''
     
-    def __init__(self, host_path):
-        self.host_path = host_path
+    def __init__(self):
         self.VENDOR_ID = 0x7513
         self.PRODUCT_ID = 0x0002
+        self.host_path = self.connect_sciclops()
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
@@ -42,13 +42,14 @@ class SCICLOPS():
         Connect to serial port / If wrong port entered inform user 
         '''
         
-        dev = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
+        host_path = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
 
-        if dev is None:
+        if host_path  is None:
             sys.exit("Could not find Id System Barcode Reader.")
         else:
-            print('Device detected')
+            print('Device Connected')
 
+        return host_path
 
     def load_labware(self, labware_file=None):
         '''
@@ -67,9 +68,9 @@ class SCICLOPS():
                 'P': 8.6648
                 },
             'type': '96plates',
-            'howmany': 3,
+            'howmany': 1,
             'grab_height': 8,
-            'cap_heigh': 20,
+            'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
             },
@@ -81,9 +82,9 @@ class SCICLOPS():
                 'P': 8.4943
                 },
             'type': '96plates',
-            'howmany': 3,
+            'howmany': 0,
             'grab_height': 12,
-            'cap_heigh': 20,
+            'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
             },
@@ -95,9 +96,9 @@ class SCICLOPS():
                 'P': 12.4716
                 },
             'type': '96plates',
-            'howmany': 3,
+            'howmany': 0,
             'grab_height': 12,
-            'cap_heigh': 20,
+            'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
             },
@@ -109,9 +110,9 @@ class SCICLOPS():
                 'P': 5.9091
                 },
             'type': '96plates',
-            'howmany': 3,
+            'howmany': 0,
             'grab_height': 12,
-            'cap_heigh': 20,
+            'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
             },
@@ -123,9 +124,9 @@ class SCICLOPS():
                 'P': 10.8807
                 },
             'type': '96plates',
-            'howmany': 3,
+            'howmany': 0,
             'grab_height': 12,
-            'cap_heigh': 20,
+            'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
             },
@@ -134,10 +135,10 @@ class SCICLOPS():
                     'Z': 23.5188,
                     'R': 169.2706,
                     'Y': 25.7535,
-                    'P': 12.2159
+                    'P': 11.2159
                 },
             'type': '96plates',
-            'howmany': 1, # can only hold one
+            'howmany': 0, # can only hold one
             'size':[10,11,12],
             'grab_height': 15
             },
@@ -149,7 +150,7 @@ class SCICLOPS():
                     'P': 9.0909
                 },
             'type': '96plates',
-            'howmany': 1, # can only hold one
+            'howmany': 0, # can only hold one
             'size':[10,11,12],
             'grab_height': 15
             },
@@ -161,7 +162,7 @@ class SCICLOPS():
                 'P': 98.2955
                 },
             'type': '96plates',
-            'howmany': 1,
+            'howmany': 0,
             'size': [10,11,2],
             'grab_height': 0,
             'cap_height': 15,
@@ -622,6 +623,7 @@ class SCICLOPS():
             # Move above desired tower
             self.set_speed(12)
             self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
+            sleep(3)
             
             # Remove plate from tower
             self.set_speed(7)
@@ -629,16 +631,19 @@ class SCICLOPS():
             grab_height = tower_info.get('grab_height', 12.5)
             self.jog('Z', grab_height)
             self.close()
+            sleep(1)
             self.set_speed(12)
             self.jog('Z', 1000)
+            sleep(1)
             
             # Place in exchange
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+            sleep(1)
             self.jog('Z', -395)
             self.set_speed(1)
             self.jog('Z', -20)
             self.open()
-            sleep(0.1)
+            sleep(1)
             self.set_speed(12)
             self.jog('Z', 1000)
 
@@ -721,6 +726,7 @@ class SCICLOPS():
         #  move above plate exchange
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+        sleep(1)
 
 
         # check to make sure plate has lid
@@ -733,6 +739,7 @@ class SCICLOPS():
             lid_height = self.labware['exchange']["cap_height"]
             self.jog('Z', lid_height)
             self.close()
+            sleep(1)
             self.set_speed(12)
             self.jog('Z', 1000)
 
@@ -757,13 +764,16 @@ class SCICLOPS():
 
                 # move above desired lid nest
                 self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
+                sleep(1)
 
                 # place in lid nest
                 self.set_speed(12)
                 self.jog('Z', -405)
                 self.open()
+                sleep(1)
                 self.set_speed(12)
                 self.jog('Z', 1000)
+                sleep(1)
 
                 # return to home
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
@@ -787,6 +797,7 @@ class SCICLOPS():
         else:
             # move above desired lidnest 
             self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
+            sleep(1)
 
             # grab lid
             self.set_speed(7)
@@ -794,22 +805,26 @@ class SCICLOPS():
             lid_height = self.labware[lid_nest]['grab_height']
             self.jog('Z', lid_height)
             self.close()
+            sleep(1)
             self.set_speed(12)
             self.jog('Z', 1000)
 
             # move above exchange
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+            sleep(1)
 
             # place lid onto plate
             self.set_speed(6)
             self.jog('Z', -400)
             self.open()
+            sleep(1)
             self.set_speed(12)
             self.jog('Z', 1000)
 
 
             # return to home
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            sleep(1)
 
             # update labware dict
             self.labware[lid_nest]['howmany']-=1
@@ -957,38 +972,38 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    dummy_sciclops = SCICLOPS(usb.core.find(idVendor= 0x7513, idProduct=0x0002))
+    dummy_sciclops = SCICLOPS()
     dummy_sciclops.check_plate()
 
 #Finished commands
-"GETPOS"
-"STATUS"
-"VERSION"
-"GETCONFIG"
-"GETGRIPPERLENGTH"
-"GETCOLLAPSEDISTANCE"
-"GETSTEPSPERUNIT"
-"HOME"
-"OPEN"
-"CLOSE"
-"GETGRIPPERISCLOSED"
-"GETGRIPPERISOPEN"
-"GETPLATEPRESENT"
-"SETSPEED "
-"MOVE "
-"JOG"
-"DELETEPOINT (ADD POINT)"
-"LISTPOINTS"
-"LOADPOINT R:0,Z:0,P:0,Y:0"
-"LIMP TRUE/FALSE"
+# "GETPOS"
+# "STATUS"
+# "VERSION"
+# "GETCONFIG"
+# "GETGRIPPERLENGTH"
+# "GETCOLLAPSEDISTANCE"
+# "GETSTEPSPERUNIT"
+# "HOME"
+# "OPEN"
+# "CLOSE"
+# "GETGRIPPERISCLOSED"
+# "GETGRIPPERISOPEN"
+# "GETPLATEPRESENT"
+# "SETSPEED "
+# "MOVE "
+# "JOG"
+# "DELETEPOINT (ADD POINT)"
+# "LISTPOINTS"
+# "LOADPOINT R:0,Z:0,P:0,Y:0"
+# "LIMP TRUE/FALSE"
 
-#Unfinished Commands
-"GETLIMITS"
+# #Unfinished Commands
+# "GETLIMITS"
 
-#Unknown Commands
-"LISTMOTIONS"
-"AUTOTEACH"
-"GETPOINT"
-"READINP 15"
-"GETGRIPSTRENGTH"
-"READINP"
+# #Unknown Commands
+# "LISTMOTIONS"
+# "AUTOTEACH"
+# "GETPOINT"
+# "READINP 15"
+# "GETGRIPSTRENGTH"
+# "READINP"
