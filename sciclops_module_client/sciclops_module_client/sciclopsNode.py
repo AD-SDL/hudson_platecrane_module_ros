@@ -6,8 +6,8 @@ from std_msgs.msg import String
 import usb.core
 import usb.util
 
-from sciclops_module_services.srv import SciclopsDescription 
-from sciclops_module_services.srv import SciclopsActions   
+from wei_services.srv import WeiDescription 
+from wei_services.srv import WeiActions   
 
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
@@ -59,9 +59,9 @@ class sciclopsNode(Node):
         self.stateTimer = self.create_timer(timer_period, self.stateCallback)
 
 
-        self.actionSrv = self.create_service(SciclopsActions, "sciclops_actions", self.actionCallback)
+        self.actionSrv = self.create_service(WeiActions, "sciclops_actions", self.actionCallback)
 
-        self.descriptionSrv = self.create_service(SciclopsDescription, "sciclops_description", self.descriptionCallback)
+        self.descriptionSrv = self.create_service(WeiDescription, "sciclops_description", self.descriptionCallback)
 
 
     def descriptionCallback(self, request, response):
