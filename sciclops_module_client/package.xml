@@ -10,7 +10,7 @@
 
   <depend>rclpy</depend>
   <depend>std_msgs</depend>
-  <depend>sciclops_module_services</depend>
+  <depend>wei_services</depend>
   
 
   <test_depend>ament_copyright</test_depend>
