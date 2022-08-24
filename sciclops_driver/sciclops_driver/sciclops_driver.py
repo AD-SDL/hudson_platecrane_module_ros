@@ -42,9 +42,9 @@ class SCICLOPS():
         Connect to serial port / If wrong port entered inform user 
         '''
         
-        dev = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
+        host_path = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
 
-        if dev is None:
+        if host_path  is None:
             sys.exit("Could not find Id System Barcode Reader.")
         else:
             print('Device Connected')
@@ -83,7 +83,7 @@ class SCICLOPS():
                 },
             'type': '96plates',
             'howmany': 0,
-            'grab_height': 12,
+            'grab_height': 8,
             'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
@@ -97,7 +97,7 @@ class SCICLOPS():
                 },
             'type': '96plates',
             'howmany': 0,
-            'grab_height': 12,
+            'grab_height': 8,
             'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
@@ -111,7 +111,7 @@ class SCICLOPS():
                 },
             'type': '96plates',
             'howmany': 0,
-            'grab_height': 12,
+            'grab_height': 8,
             'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
@@ -119,13 +119,13 @@ class SCICLOPS():
             'tower5':{
             'pos': {
                 'Z': 23.5188,
-                'R': 206.0,
+                'R': 205.4,
                 'Y': 171.2082,
                 'P': 10.8807
                 },
             'type': '96plates',
             'howmany': 0,
-            'grab_height': 12,
+            'grab_height': 8,
             'cap_height': 20,
             'size': [10,11,12],
             'has_lid': True
@@ -135,7 +135,7 @@ class SCICLOPS():
                     'Z': 23.5188,
                     'R': 169.2706,
                     'Y': 25.7535,
-                    'P': 11.2159
+                    'P': 10.2159
                 },
             'type': '96plates',
             'howmany': 0, # can only hold one
@@ -147,7 +147,7 @@ class SCICLOPS():
                     'Z': 23.5188,
                     'R': 201.2665,
                     'Y': 25.7535,
-                    'P': 9.0909
+                    'P': 8.0909
                 },
             'type': '96plates',
             'howmany': 0, # can only hold one
@@ -159,14 +159,14 @@ class SCICLOPS():
                 'Z': 23.5188,
                 'R': 109.2741,
                 'Y': 32.7484,
-                'P': 98.2955
+                'P': 99.2955
                 },
             'type': '96plates',
             'howmany': 0,
             'size': [10,11,2],
             'grab_height': 0,
             'cap_height': 15,
-            'has_lid': True
+            'has_lid': False
             },
             'neutral':{
                 'pos': {
@@ -628,7 +628,8 @@ class SCICLOPS():
             # Remove plate from tower
             self.set_speed(7)
             self.jog('Z', -1000)
-            grab_height = tower_info.get('grab_height', 12.5)
+            sleep(1)
+            grab_height = tower_info['grab_height']
             self.jog('Z', grab_height)
             self.close()
             sleep(1)
@@ -646,6 +647,10 @@ class SCICLOPS():
             sleep(1)
             self.set_speed(12)
             self.jog('Z', 1000)
+            self.labware['exchange']['howmany']+=1
+            self.labware['exchange']['type'] = self.labware[location]['type']
+            self.labware['exchange']['size'] = self.labware[location]['size']
+            self.labware['exchange']['has_lid'] = self.labware[location]['has_lid']
 
             # check if lid needs to be removed
             if remove_lid == True:
@@ -658,11 +663,7 @@ class SCICLOPS():
 
             # update labware
             self.labware[location]['howmany']-=1
-            self.labware['exchange']['howmany']+=1
-            self.labware['exchange']['type'] = self.labware[location]['type']
-            self.labware['exchange']['grab_height'] = self.labware[location]['grab_height']
-            self.labware['exchange']['cap_height'] = self.labware[location]['cap_height']
-            self.labware['exchange']['size'] = self.labware[location]['size']
+            
         
 
     def limp(self, limp_bool):
@@ -737,6 +738,7 @@ class SCICLOPS():
             self.set_speed(7)
             self.jog('Z', -1000)
             lid_height = self.labware['exchange']["cap_height"]
+            sleep(1)
             self.jog('Z', lid_height)
             self.close()
             sleep(1)
@@ -745,7 +747,9 @@ class SCICLOPS():
 
             if trash == True:
                 # move above trash
+                sleep(1)
                 self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
+                sleep(1)
 
                 # drop in trash
                 self.jog('Z', -1000)
@@ -753,8 +757,9 @@ class SCICLOPS():
                 self.jog('Z', 1000)
 
                 # return to home
+                sleep(1)
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-
+                
                 # update labware
                 self.labware['exchange']['has_lid'] = False
             else:
@@ -763,12 +768,14 @@ class SCICLOPS():
 
 
                 # move above desired lid nest
+                sleep(1)
                 self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
                 sleep(1)
 
                 # place in lid nest
                 self.set_speed(12)
                 self.jog('Z', -405)
+                sleep(1)
                 self.open()
                 sleep(1)
                 self.set_speed(12)
@@ -831,7 +838,7 @@ class SCICLOPS():
             self.labware['exchange']['has_lid'] = True
 
     #* Plate from exchange to stack (self, tower, plateinfo)
-    def plate_to_stack(self, tower, plate_type, add_lid):
+    def plate_to_stack(self, tower, add_lid):
         # Move arm up and to neutral position to avoid hitting any objects
         self.open() 
         self.set_speed(3)
@@ -839,33 +846,40 @@ class SCICLOPS():
         self.jog('Z', 1000) 
         self.set_speed(12) 
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-
+        sleep(1)
+        plate_type = self.labware['exchange']['type']
         if add_lid == True:
             lidnest = self.check_for_lid()
-            self.replace_lid(plate_type, lidnest)
+            sleep(1)
+            self.replace_lid()
         
         #TODO: check to see if given stack is full, use function to account for different labware, maybe checks all stacks to find one with same labware?
         
         # move over exchange
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
-
+        sleep(1)
         # grab plate
         self.set_speed(7)
         self.jog('Z', -1000)
         grab_height = self.labware['exchange'].get('grab_height', 12.5)
         self.jog('Z', grab_height)
         self.close()
+        sleep(1)
         self.set_speed(12)
         self.jog('Z', 1000)
 
         # move above tower, place plate in tower
+        sleep(1)
         self.move(R=self.labware[tower]['pos']['R'], Z=23.5188, P=self.labware[tower]['pos']['P'], Y=self.labware[tower]['pos']['Y'])
         self.set_speed(7)
         self.jog('Z', -1000)
+        sleep(1)
         self.open()
+        sleep(1)
         self.set_speed(12)
         self.jog('Z', 1000)
+        sleep(1)
 
 
         # move to home
