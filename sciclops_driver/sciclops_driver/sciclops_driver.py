@@ -727,17 +727,29 @@ class SCICLOPS():
         pass
 
     def check_stack(self, tower):
-        pass
         # save z height of stack Z = -36
-        # move over stack
-        # Move arm up and to neutral position to avoid hitting any objects
-        # pull current z height
-        # figure out remaining space in stack
-        # --- OR ---
-        # save z height of stack
-        # pull size of current plates in stack
-        # multiply height of plate by howmany
-        # figure out remaining space in stack
+        tower_z_height = -50
+        tower_z_bottom = -421.8625
+
+        # get type of plate in desired tower
+        plate_type = self.labware[tower]['type']
+        
+        # get height of plate type
+        plate_height = self.plate_info[plate_type]['height']
+
+        # number of plates in stack
+        num_stack = self.labware[tower]['howmany']
+
+        total_height = plate_height * num_stack
+
+        remaining = total_height + tower_z_bottom
+
+        if remaining < tower_z_height: # room for another plate
+            return True
+
+        else: # stack full
+            return False
+
 
 
     #* Remove lid, (self, lidnest, plate_type), removes lid from plate in exchange, trash bool will throw lid into trash
