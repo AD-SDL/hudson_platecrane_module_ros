@@ -33,6 +33,7 @@ class SCICLOPS():
         # self.OPENMSG = ""
         # self.CLOSEMSG = ""
         self.labware = self.load_labware()
+        self.plate_info = self.load_plate_info()
         self.success_count = 0
             
     
@@ -51,6 +52,23 @@ class SCICLOPS():
 
         return host_path
 
+    def load_plate_info(self):
+        '''
+        hard-codes size information for any possible plates
+        '''
+        plates = {
+            '96_well':{
+                'height': 16.6625,
+                'grab_exchange': 0,
+                'grab_lid_exchange': 15,
+                'grab_tower': 8,
+                'grab_lid_tower': 20,
+                'grab_lid_nest': 15
+            }
+        }
+
+        return plates
+
     def load_labware(self, labware_file=None):
         '''
         Loads plate information which affects get_plate function.
@@ -67,7 +85,7 @@ class SCICLOPS():
                 'Y': 171.9895,
                 'P': 8.6648
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 1,
             'grab_height': 8,
             'cap_height': 20,
@@ -81,7 +99,7 @@ class SCICLOPS():
                 'Y': 171.4872,
                 'P': 8.4943
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0,
             'grab_height': 8,
             'cap_height': 20,
@@ -95,7 +113,7 @@ class SCICLOPS():
                 'Y': 171.4810,
                 'P': 12.4716
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0,
             'grab_height': 8,
             'cap_height': 20,
@@ -109,7 +127,7 @@ class SCICLOPS():
                 'Y': 169.4470,
                 'P': 5.9091
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0,
             'grab_height': 8,
             'cap_height': 20,
@@ -123,7 +141,7 @@ class SCICLOPS():
                 'Y': 171.2082,
                 'P': 10.8807
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0,
             'grab_height': 8,
             'cap_height': 20,
@@ -137,7 +155,7 @@ class SCICLOPS():
                     'Y': 25.7535,
                     'P': 10.2159
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0, # can only hold one
             'size':[10,11,12],
             'grab_height': 15
@@ -149,7 +167,7 @@ class SCICLOPS():
                     'Y': 25.7535,
                     'P': 8.0909
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0, # can only hold one
             'size':[10,11,12],
             'grab_height': 15
@@ -161,7 +179,7 @@ class SCICLOPS():
                 'Y': 32.7484,
                 'P': 99.2955
                 },
-            'type': '96plates',
+            'type': '96_well',
             'howmany': 0,
             'size': [10,11,2],
             'grab_height': 0,
