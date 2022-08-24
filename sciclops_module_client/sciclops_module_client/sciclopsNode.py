@@ -12,8 +12,6 @@ from wei_services.srv import WeiActions
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
-
-
 class sciclopsNode(Node):
     '''
     The sciclopsNode inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 

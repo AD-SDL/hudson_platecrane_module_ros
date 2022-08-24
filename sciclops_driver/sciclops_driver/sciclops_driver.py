@@ -42,9 +42,9 @@ class SCICLOPS():
         Connect to serial port / If wrong port entered inform user 
         '''
         
-        host_path = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
+        dev = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
 
-        if host_path  is None:
+        if dev is None:
             sys.exit("Could not find Id System Barcode Reader.")
         else:
             print('Device Connected')
@@ -972,7 +972,7 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    dummy_sciclops = SCICLOPS()
+    dummy_sciclops = SCICLOPS(usb.core.find(idVendor= 0x7513, idProduct=0x0002))
     dummy_sciclops.check_plate()
 
 #Finished commands
