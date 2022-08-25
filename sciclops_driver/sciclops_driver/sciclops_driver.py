@@ -730,23 +730,16 @@ class SCICLOPS():
         # save z height of stack Z = -36
         tower_z_height = -50
         tower_z_bottom = -421.8625
-
         # get type of plate in desired tower
         plate_type = self.labware[tower]['type']
-        
         # get height of plate type
         plate_height = self.plate_info[plate_type]['height']
-
         # number of plates in stack
         num_stack = self.labware[tower]['howmany']
-
         total_height = plate_height * num_stack
-
         remaining = total_height + tower_z_bottom
-
         if remaining < tower_z_height: # room for another plate
             return True
-
         else: # stack full
             return False
 

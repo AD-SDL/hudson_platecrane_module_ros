@@ -93,23 +93,73 @@ class sciclopsNode(Node):
 
                 response.action_response = True
             
+            case "Get Plate 1 Remove Lid":
+                self.sciclops.get_plate('tower1', True, False)
+
+                response.action_response = True
+
+            case "Get Plate 1 Remove Lid Trash":
+                self.sciclops.get_plate('tower1', True, True)
+
+                response.action_response = True
+            
             case "Get Plate 2":
-                    self.sciclops.get_plate('tower2')
+                    self.sciclops.get_plate('tower2', False, False)
+
+                    response.action_response = True
+
+            case "Get Plate 2 Remove Lid":
+                    self.sciclops.get_plate('tower2', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 2 Remove Lid Trash":
+                    self.sciclops.get_plate('tower2', True, True)
 
                     response.action_response = True
                         
             case "Get Plate 3":
-                    self.sciclops.get_plate('tower3')
+                    self.sciclops.get_plate('tower3', False, False)
+
+                    response.action_response = True
+                
+            case "Get Plate 3 Remove Lid":
+                    self.sciclops.get_plate('tower3', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 3 Remove Lid Trash":
+                    self.sciclops.get_plate('tower3', True, True)
 
                     response.action_response = True
                         
             case "Get Plate 4":
-                    self.sciclops.get_plate('tower4')
+                    self.sciclops.get_plate('tower4', False, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 4 Remove Lid":
+                    self.sciclops.get_plate('tower4', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 4 Remove Lid Trash":
+                    self.sciclops.get_plate('tower4', True, True)
 
                     response.action_response = True
                         
             case "Get Plate 5":
-                    self.sciclops.get_plate('tower5')
+                    self.sciclops.get_plate('tower5', False, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 5 Remove Lid":
+                    self.sciclops.get_plate('tower5', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 5 Remove Lid Trash":
+                    self.sciclops.get_plate('tower5', True, True)
 
                     response.action_response = True
 
