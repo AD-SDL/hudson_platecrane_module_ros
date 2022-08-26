@@ -1,6 +1,6 @@
 from setuptools import setup
 import os
-import glob
+from glob import glob
 
 package_name = 'sciclops_module_client'
 
