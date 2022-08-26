@@ -162,6 +162,71 @@ class sciclopsNode(Node):
                     self.sciclops.get_plate('tower5', True, True)
 
                     response.action_response = True
+            
+            case "Remove Lid":
+                    self.sciclops.remove_lid(False)
+
+                    response.action_response = True
+            
+            case "Remove Lid Trash":
+                    self.sciclops.remove_lid(True)
+
+                    response.action_response = True
+
+            case "Replace Lid":
+                    self.sciclops.replace_lid()
+
+                    response.action_response = True
+            
+            case "Plate to Stack 1":
+                    self.sciclops.plate_to_stack('tower1', False)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 1 Add Lid":
+                    self.sciclops.plate_to_stack('tower1', True)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 2":
+                    self.sciclops.plate_to_stack('tower2', False)
+
+                    response.action_response = True
+
+            case "Plate to Stack 2 Add Lid":
+                    self.sciclops.plate_to_stack('tower2', True)
+
+                    response.action_response = True
+
+            case "Plate to Stack 3":
+                    self.sciclops.plate_to_stack('tower3', False)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 3 Add Lid":
+                    self.sciclops.plate_to_stack('tower3', True)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 4":
+                    self.sciclops.plate_to_stack('tower4', False)
+
+                    response.action_response = True
+
+            case "Plate to Stack 4 Add Lid":
+                    self.sciclops.plate_to_stack('tower4', True)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 5":
+                    self.sciclops.plate_to_stack('tower5', False)
+
+                    response.action_response = True
+
+            case "Plate to Stack 5 Add Lid":
+                    self.sciclops.plate_to_stack('tower5', True)
+
+                    response.action_response = True
 
             case "Home":
                     self.sciclops.home()
