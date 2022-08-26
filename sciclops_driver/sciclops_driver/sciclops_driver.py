@@ -278,6 +278,29 @@ class SCICLOPS():
             print(self.CURRENT_POS)
         except:
             pass
+    
+    def pull_position(self):
+        '''
+        Requests sciclops position and returns coordinates.
+        Coordinates:
+        Z: Vertical axis
+        R: Base turning axis
+        Y: Extension axis
+        P: Gripper turning axis
+        '''
+
+        command = 'GETPOS\r\n' # Command interpreted by Sciclops
+        out_msg = self.send_command(command)
+        
+        try:
+            # Checks if specified format is found in feedback
+            exp = r"Z:([-.\d]+), R:([-.\d]+), Y:([-.\d]+), P:([-.\d]+)" # Format of coordinates provided in feedback
+            find_current_pos = re.search(exp,out_msg)
+            self.CURRENT_POS = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
+            
+            return float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])
+        except:
+            pass
 
     def get_status(self):
         '''
@@ -617,6 +640,16 @@ class SCICLOPS():
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
+    def confirm_coords(self, Z, R, Y, P):
+        '''
+        compares inputted coordinates to actual current coordinates, returns True if match
+        '''
+        curr_Z, curr_R, curr_Y, curr_P = self.pull_position()
+        if Z == curr_Z and R == curr_R and Y == curr_Y and P == curr_P:
+            return True
+        else:
+            return False
+
     def get_plate(self, location, remove_lid, trash):
         '''
         Grabs plate and places on exchange. Paramater is the stack that the Sciclops is requested to remove the plate from.
@@ -625,63 +658,74 @@ class SCICLOPS():
         '''
 
         # check to see if plate already on the exchange
-        if self.labware['exchange']['howmany'] != 0:
-            print("PLATE ALREADY ON THE EXCHANGE")
+        # removed for now until labware can be  edited in a file
+        # if self.labware['exchange']['howmany'] != 0:
+        #     print("PLATE ALREADY ON THE EXCHANGE")
+        # else:
+        tower_info = self.labware[location]
+        plate_type = tower_info['type']
+
+        # Move arm up and to neutral position to avoid hitting any objects
+        self.open() 
+        self.set_speed(3) # 
+        self.jog('Y', -1000)
+        self.jog('Z', 1000) 
+        self.set_speed(12) 
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+
+        # check coordinates
+
+        # Move above desired tower
+        self.set_speed(12)
+        self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
+        sleep(3)
+        # check coordinates
+        
+        # Remove plate from tower
+        self.set_speed(7)
+        self.jog('Z', -1000)
+        sleep(1)
+        grab_height = self.plate_info[plate_type]['grab_tower']
+        self.jog('Z', grab_height)
+        self.close()
+        # check plate
+        sleep(1)
+        self.set_speed(12)
+        self.jog('Z', 1000)
+        sleep(1)
+        # check coordinates
+        
+        # Place in exchange
+        self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+        sleep(1)
+        # check coordinates
+        self.jog('Z', -395)
+        self.set_speed(1)
+        self.jog('Z', -20)
+        self.open()
+        sleep(1)
+        # check plate
+        self.set_speed(12)
+        self.jog('Z', 1000)
+        # check coordinates
+        self.labware['exchange']['howmany']+=1
+        self.labware['exchange']['type'] = self.labware[location]['type']
+        self.labware['exchange']['size'] = self.labware[location]['size']
+        self.labware['exchange']['has_lid'] = self.labware[location]['has_lid']
+
+        # check if lid needs to be removed
+        if remove_lid == True:
+            self.remove_lid(trash=trash)
         else:
-            tower_info = self.labware[location]
-            plate_type = tower_info['type']
+            self.labware['exchange']['has_lid'] = True
+        
+        # Move back to neutral
+        self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+        sleep(1)
+        # check coordinates
 
-            # Move arm up and to neutral position to avoid hitting any objects
-            self.open() 
-            self.set_speed(3) # 
-            self.jog('Y', -1000)
-            self.jog('Z', 1000) 
-            self.set_speed(12) 
-            self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-
-            # Move above desired tower
-            self.set_speed(12)
-            self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
-            sleep(3)
-            
-            # Remove plate from tower
-            self.set_speed(7)
-            self.jog('Z', -1000)
-            sleep(1)
-            grab_height = self.plate_info[plate_type]['grab_tower']
-            self.jog('Z', grab_height)
-            self.close()
-            sleep(1)
-            self.set_speed(12)
-            self.jog('Z', 1000)
-            sleep(1)
-            
-            # Place in exchange
-            self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
-            sleep(1)
-            self.jog('Z', -395)
-            self.set_speed(1)
-            self.jog('Z', -20)
-            self.open()
-            sleep(1)
-            self.set_speed(12)
-            self.jog('Z', 1000)
-            self.labware['exchange']['howmany']+=1
-            self.labware['exchange']['type'] = self.labware[location]['type']
-            self.labware['exchange']['size'] = self.labware[location]['size']
-            self.labware['exchange']['has_lid'] = self.labware[location]['has_lid']
-
-            # check if lid needs to be removed
-            if remove_lid == True:
-                self.remove_lid(trash=trash)
-            else:
-                self.labware['exchange']['has_lid'] = True
-            
-            # Move back to neutral
-            self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-
-            # update labware
-            self.labware[location]['howmany']-=1
+        # update labware
+        self.labware[location]['howmany']-=1
             
         
 
@@ -925,10 +969,11 @@ class SCICLOPS():
         self.set_speed(3) 
         self.jog('Y', -1000)
         self.jog('Z', 1000) 
-        self.set_speed(12) 
+        self.set_speed(12)
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         # check to make sure lid present
         if self.labware[lidnest]['howmany'] >= 1: # lid in nest
+            lid_self.labware[lidnest]['type']
             # move above lidnest
             self.open()
             self.move(R=self.labware[lidnest]['pos']['R'], Z=23.5188, P=self.labware[lidnest]['pos']['P'], Y=self.labware)
