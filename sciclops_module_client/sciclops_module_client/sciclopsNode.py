@@ -9,6 +9,7 @@ import usb.util
 from wei_services.srv import WeiDescription 
 from wei_services.srv import WeiActions   
 
+from time import sleep
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
@@ -38,7 +39,7 @@ class sciclopsNode(Node):
             }
         }
 
-        timer_period = 0.5  # seconds
+        timer_period = 1  # seconds
         self.statePub = self.create_publisher(String, 'sciclops_state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback)
 
@@ -83,7 +84,8 @@ class sciclopsNode(Node):
             pos = vars.get('pos')
             
             self.sciclops.get_plate(pos, False, False)
-
+            ##Get plate is delivering answer way too fast
+            sleep(20)
             response.action_response = True
 
         self.state = "COMPLETED"
