@@ -3,8 +3,6 @@
 import rclpy                 # import Rospy
 from rclpy.node import Node  # import Rospy Node
 from std_msgs.msg import String
-import usb.core
-import usb.util
 
 from wei_services.srv import WeiDescription 
 from wei_services.srv import WeiActions   
@@ -33,9 +31,9 @@ class sciclopsNode(Node):
         
         self.description = {
             'name': NODE_NAME,
-            'type': ',',
+            'type': 'sciclops_plate_stacker',
             'actions':
-            {
+            {'get_plate':'$tower $lid $trash'
             }
         }
 
@@ -75,6 +73,14 @@ class sciclopsNode(Node):
         '''
         
 
+        if request.action_handle=='status':
+            self.sciclops.get_status()
+            response.action_response = True
+        if request.action_handle=='home':            
+            self.state = "BUSY"
+            self.stateCallback()
+            self.sciclops.home()    
+            response.action_response = True
         if request.action_handle=='get_plate':
             self.state = "BUSY"
             self.stateCallback()
@@ -82,9 +88,12 @@ class sciclopsNode(Node):
             print(vars)
 
             pos = vars.get('pos')
+            lid = vars.get('lid',False)
+            trash = vars.get('trash',False)
+
+            self.sciclops.get_plate(pos, lid, trash)
             
-            self.sciclops.get_plate(pos, False, False)
-            ##Get plate is delivering answer way too fast
+            ##TODO: Get plate is delivering answer way too fast
             sleep(20)
             response.action_response = True
 
@@ -92,47 +101,9 @@ class sciclopsNode(Node):
 
         return response
 
-        # match self.manager_command:
-            
-        #     case "Get Plate 1":
-                
-            
-        #     case "Get Plate 2":
-        #             self.sciclops.get_plate('tower2')
-
-        #             response.action_response = True
-                        
-        #     case "Get Plate 3":
-        #             self.sciclops.get_plate('tower3')
-
-        #             response.action_response = True
-                        
-        #     case "Get Plate 4":
-        #             self.sciclops.get_plate('tower4')
-
-        #             response.action_response = True
-                        
-        #     case "Get Plate 5":
-        #             self.sciclops.get_plate('tower5')
-
-        #             response.action_response = True
 
         #     case "Home":
-        #             self.sciclops.home()
 
-        #             response.action_response = True
-            
-        #     case "Status":
-        #         self.sciclops.get_status()
-                
-        #         response.action_response = True
-
-        #     case other:
-        #         response.action_response= False
-        
-        # self.state = "COMPLETED"
-
-        # return response
 
 
     def stateCallback(self):
