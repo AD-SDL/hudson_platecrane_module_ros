@@ -629,6 +629,7 @@ class SCICLOPS():
             print("PLATE ALREADY ON THE EXCHANGE")
         else:
             tower_info = self.labware[location]
+            plate_type = tower_info['type']
 
             # Move arm up and to neutral position to avoid hitting any objects
             self.open() 
@@ -647,7 +648,7 @@ class SCICLOPS():
             self.set_speed(7)
             self.jog('Z', -1000)
             sleep(1)
-            grab_height = tower_info['grab_height']
+            grab_height = self.plate_info[plate_type]['grab_tower']
             self.jog('Z', grab_height)
             self.close()
             sleep(1)
@@ -751,6 +752,7 @@ class SCICLOPS():
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         sleep(1)
+        plate_type = self.labware['exchange']['type']
 
 
         # check to make sure plate has lid
@@ -760,7 +762,7 @@ class SCICLOPS():
             # remove lid
             self.set_speed(7)
             self.jog('Z', -1000)
-            lid_height = self.labware['exchange']["cap_height"]
+            lid_height = self.plate_info[plate_type]['grab_lid_exchange']
             sleep(1)
             self.jog('Z', lid_height)
             self.close()
@@ -820,6 +822,7 @@ class SCICLOPS():
         # find a lid
         self.open()
         lid_nest = self.check_for_lid()
+        plate_type = self.labware['exchange']['type']
 
         # make sure current plate doesn't already have lid
         if self.labware['exchange']['has_lid'] == True:
@@ -832,7 +835,7 @@ class SCICLOPS():
             # grab lid
             self.set_speed(7)
             self.jog('Z', -1000)
-            lid_height = self.labware[lid_nest]['grab_height']
+            lid_height = self.plate_info[plate_type]['grab_lid_nest']
             self.jog('Z', lid_height)
             self.close()
             sleep(1)
@@ -885,7 +888,7 @@ class SCICLOPS():
         # grab plate
         self.set_speed(7)
         self.jog('Z', -1000)
-        grab_height = self.labware['exchange'].get('grab_height', 12.5)
+        grab_height = self.plate_info[plate_type]['grab_exchange']
         self.jog('Z', grab_height)
         self.close()
         sleep(1)
