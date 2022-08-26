@@ -17,7 +17,7 @@ class sciclopsNode(Node):
     The sciclopsNode inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
     based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
     '''
-    def __init__(self, PORT = usb.core.find(idVendor= 0x7513, idProduct=0x0002), NODE_NAME = "sciclopsNode"):
+    def __init__(self, NODE_NAME = "sciclopsNode"):
         '''
         The init function is neccesary for the sciclopsNode class to initialize all variables, parameters, and other functions.
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
@@ -35,13 +35,6 @@ class sciclopsNode(Node):
             'type': ',',
             'actions':
             {
-            'Get Plate 1'
-            'Get Plate 2',
-            'Get Plate 3',
-            'Get Plate 4',
-            'Get Plate 5',
-            'Home',
-            'Status'
             }
         }
 
@@ -49,9 +42,9 @@ class sciclopsNode(Node):
         self.statePub = self.create_publisher(String, 'sciclops_state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback)
 
-        self.actionSrv = self.create_service(WeiActions, NODE_NAME + "/actions", self.actionCallback)
+        self.actionSrv = self.create_service(WeiActions, NODE_NAME + "/action_handler", self.actionCallback)
 
-        self.descriptionSrv = self.create_service(WeiDescription, NODE_NAME + "/description", self.descriptionCallback)
+        self.descriptionSrv = self.create_service(WeiDescription, NODE_NAME + "/description_handler", self.descriptionCallback)
 
     def descriptionCallback(self, request, response):
         """The descriptionCallback function is a service that can be called to showcase the available actions a robot
@@ -80,55 +73,64 @@ class sciclopsNode(Node):
         can preform.
         '''
         
-        self.manager_command = request.action_request # Run commands if manager sends corresponding command
-    
-        self.state = "BUSY"
 
-        self.stateCallback()
+        if request.action_handle=='get_plate':
+            self.state = "BUSY"
+            self.stateCallback()
+            vars = eval(request.vars)
+            print(vars)
 
-        match self.manager_command:
+            pos = vars.get('pos')
             
-            case "Get Plate 1":
-                self.sciclops.get_plate('tower1', False, False)
+            self.sciclops.get_plate(pos, False, False)
 
-                response.action_response = True
-            
-            case "Get Plate 2":
-                    self.sciclops.get_plate('tower2')
+            response.action_response = True
 
-                    response.action_response = True
-                        
-            case "Get Plate 3":
-                    self.sciclops.get_plate('tower3')
-
-                    response.action_response = True
-                        
-            case "Get Plate 4":
-                    self.sciclops.get_plate('tower4')
-
-                    response.action_response = True
-                        
-            case "Get Plate 5":
-                    self.sciclops.get_plate('tower5')
-
-                    response.action_response = True
-
-            case "Home":
-                    self.sciclops.home()
-
-                    response.action_response = True
-            
-            case "Status":
-                self.sciclops.get_status()
-                
-                response.action_response = True
-
-            case other:
-                response.action_response= False
-        
         self.state = "COMPLETED"
 
         return response
+
+        # match self.manager_command:
+            
+        #     case "Get Plate 1":
+                
+            
+        #     case "Get Plate 2":
+        #             self.sciclops.get_plate('tower2')
+
+        #             response.action_response = True
+                        
+        #     case "Get Plate 3":
+        #             self.sciclops.get_plate('tower3')
+
+        #             response.action_response = True
+                        
+        #     case "Get Plate 4":
+        #             self.sciclops.get_plate('tower4')
+
+        #             response.action_response = True
+                        
+        #     case "Get Plate 5":
+        #             self.sciclops.get_plate('tower5')
+
+        #             response.action_response = True
+
+        #     case "Home":
+        #             self.sciclops.home()
+
+        #             response.action_response = True
+            
+        #     case "Status":
+        #         self.sciclops.get_status()
+                
+        #         response.action_response = True
+
+        #     case other:
+        #         response.action_response= False
+        
+        # self.state = "COMPLETED"
+
+        # return response
 
 
     def stateCallback(self):
@@ -151,12 +153,11 @@ class sciclopsNode(Node):
 
 def main(args = None):
 
-    PORT = usb.core.find(idVendor= 0x7513, idProduct=0x0002)           # port name for peeler
     NAME = "sciclopsNode"
 
     rclpy.init(args=args)  # initialize Ros2 communication
 
-    node = sciclopsNode(PORT=PORT, NODE_NAME=NAME)
+    node = sciclopsNode(NODE_NAME=NAME)
 
     rclpy.spin(node)     # keep Ros2 communication open for action node
 
