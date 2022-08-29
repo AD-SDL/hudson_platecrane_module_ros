@@ -1,13 +1,12 @@
 from setuptools import setup
 import os
-import glob
+from glob import glob
 
 package_name = 'sciclops_module_client'
 
 setup(
     name=package_name,
     version='0.0.1',
-
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -26,5 +25,5 @@ setup(
         'console_scripts': [
             'sciclopsNode = sciclops_module_client.sciclopsNode:main',
         ],
-    },
+   },
 )
