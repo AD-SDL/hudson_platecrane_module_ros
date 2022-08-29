@@ -59,7 +59,7 @@ class SCICLOPS():
         plates = {
             '96_well':{
                 'height': 16.6625,
-                'grab_exchange': -30, # from Z= -356.5375
+                'grab_exchange': -30, # from Z = -356.5375
                 'grab_lid_exchange': -21,
                 'grab_tower': -18,
                 'grab_lid_tower': -13,
@@ -336,6 +336,25 @@ class SCICLOPS():
             self.VERSION = find_version[1]
 
             print(self.VERSION)
+        
+        except:
+            pass
+    
+    def reset(self):
+        '''
+        Resets Sciclops
+        '''
+
+        command = 'RESET\r\n' # Command interpreted by Sciclops
+        out_msg =  self.send_command(command)
+        
+        try:
+            # Checks if specified format is found in feedback
+            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
+            find_reset = re.search(exp,out_msg)
+            self.RESET = find_reset[1] # TODO: test
+
+            print(self.RESET)
         
         except:
             pass
