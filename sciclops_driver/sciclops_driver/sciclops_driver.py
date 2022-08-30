@@ -320,6 +320,36 @@ class SCICLOPS():
         
         except:
             pass
+    
+    def check_complete(self):
+        '''
+        Checks to see if current sciclops action has completed
+        '''
+
+        command = 'STATUS\r\n' # Command interpreted by Sciclops
+        out_msg =  self.send_command(command)
+        
+        try:
+            # Checks if specified format is found in feedback
+            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
+            find_status= re.search(exp,out_msg)
+            self.STATUS = find_status[1]
+        
+            return True
+        
+        except:
+            return False
+    
+    def check_complete_loop(self):
+        '''
+        continuously runs check_complete until it returns True
+        '''
+        a = False
+        while a == False:
+            a = self.check_complete()
+
+        print('ACTION COMPLETE')
+
 
     def get_version(self):
         '''
@@ -693,12 +723,14 @@ class SCICLOPS():
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
         # check coordinates
+        self.check_complete_loop()
 
         # Move above desired tower
         self.set_speed(100)
         self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
         sleep(1)
         # check coordinates
+        self.check_complete_loop()
         
         # Remove plate from tower
         self.close()
@@ -719,12 +751,14 @@ class SCICLOPS():
         self.jog('Z', 1000)
         sleep(1)
         # check coordinates
+        self.check_complete_loop()
         
         # Place in exchange
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         sleep(1)
         # check coordinates
-        self.jog('Z', -380) # TODO
+        self.check_complete_loop()
+        self.jog('Z', -380)
         self.set_speed(1)
         self.jog('Z', -30)
         self.open()
@@ -733,6 +767,7 @@ class SCICLOPS():
         self.set_speed(100)
         self.jog('Z', 1000)
         # check coordinates
+        self.check_complete_loop()
         self.labware['exchange']['howmany']+=1
         self.labware['exchange']['type'] = self.labware[location]['type']
         self.labware['exchange']['size'] = self.labware[location]['size']
@@ -748,6 +783,7 @@ class SCICLOPS():
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         sleep(1)
         # check coordinates
+        self.check_complete_loop()
 
         # update labware
         self.labware[location]['howmany']-=1
@@ -767,7 +803,6 @@ class SCICLOPS():
     
 
     #TODO: see if way to update exchange labware info after p400 puts plate there (probably needs to be in seperate file)
-    #TODO: speed!
     '''
     functions to add
     '''
@@ -822,6 +857,7 @@ class SCICLOPS():
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         sleep(1)
         # check coordinates
+        self.check_complete_loop()
         plate_type = self.labware['exchange']['type']
 
 
@@ -842,12 +878,13 @@ class SCICLOPS():
             self.set_speed(100)
             self.jog('Z', 1000)
             # check coordinates
+            self.check_complete_loop()
 
             if trash == True:
                 # move above trash
                 sleep(1)
                 self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
-                sleep(1)
+                self.check_complete_loop()
 
                 # drop in trash
                 self.jog('Z', -400)
@@ -858,6 +895,7 @@ class SCICLOPS():
                 sleep(1)
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
                 # check coordinates
+                self.check_complete_loop()
                 
                 # update labware
                 self.labware['exchange']['has_lid'] = False
@@ -869,8 +907,8 @@ class SCICLOPS():
                 # move above desired lid nest
                 sleep(1)
                 self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
-                sleep(1)
                 # check coordinates
+                self.check_complete_loop()
 
                 # place in lid nest
                 self.jog('Z', -400)
@@ -879,12 +917,13 @@ class SCICLOPS():
                 # check plate
                 sleep(1)
                 self.jog('Z', 1000)
-                sleep(1)
                 # check coordinates
+                self.check_complete_loop()
 
                 # return to home
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
                 # check coordinates
+                self.check_complete_loop()
 
                 # update labware dict
                 self.labware[lid_nest]['howmany']+=1
@@ -908,7 +947,7 @@ class SCICLOPS():
             # move above desired lidnest 
             self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
             # check coordinates
-            sleep(1)
+            self.check_complete_loop()
 
             # grab lid
             self.close()
@@ -925,11 +964,12 @@ class SCICLOPS():
             sleep(1)
             self.set_speed(100)
             self.jog('Z', 1000)
+            self.check_complete_loop()
 
             # move above exchange
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
             # check coordinates
-            sleep(1)
+            self.check_complete_loop()
 
             # place lid onto plate
             self.jog('Z', -400)
@@ -937,14 +977,13 @@ class SCICLOPS():
             # check plate
             sleep(1)
             self.jog('Z', 1000)
-            sleep(1)
-            # check coordinates
+            self.check_complete_loop()
 
 
             # return to home
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
             # check coordinates
-            sleep(1)
+            self.check_complete_loop()
 
             # update labware dict
             self.labware[lid_nest]['howmany']-=1
@@ -959,7 +998,7 @@ class SCICLOPS():
         self.jog('Z', 1000) 
         self.set_speed(12) 
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-        # check coordinates
+        self.check_complete_loop()
         sleep(1)
         plate_type = self.labware['exchange']['type']
         if add_lid == True:
@@ -973,7 +1012,7 @@ class SCICLOPS():
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         # check coordinates
-        sleep(1)
+        self.check_complete_loop()
         # grab plate
         self.set_speed(7)
         self.jog('Z', -380)
@@ -985,11 +1024,13 @@ class SCICLOPS():
         sleep(1)
         self.set_speed(12)
         self.jog('Z', 1000)
+        self.check_complete_loop()
 
         # move above tower, place plate in tower
         sleep(1)
         self.move(R=self.labware[tower]['pos']['R'], Z=23.5188, P=self.labware[tower]['pos']['P'], Y=self.labware[tower]['pos']['Y'])
         # check coordinates
+        self.check_complete_loop()
         self.set_speed(7)
         self.jog('Z', -1000)
         sleep(1)
@@ -999,12 +1040,13 @@ class SCICLOPS():
         self.set_speed(12)
         self.jog('Z', 1000)
         # check coordinates
-        sleep(1)
+        self.check_complete_loop()
 
 
         # move to home
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         # check coordinates
+        self.check_complete_loop()
 
         # update labware dict
         self.labware['exchange']['howmany']-=1
