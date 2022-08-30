@@ -158,7 +158,7 @@ class SCICLOPS():
             'type': '96_well',
             'howmany': 0, # can only hold one
             'size':[10,11,12],
-            'grab_height': 15 #TODO: move to Z of -372.4625 ( 10 above lid)
+            'grab_height': 15 #Z of -372.4625 ( 10 above lid)
             },
             'lidnest2':{
                 'pos':{
