@@ -325,7 +325,7 @@ class SCICLOPS():
         '''
         Checks to see if current sciclops action has completed
         '''
-
+        print('Checking if complete')
         command = 'STATUS\r\n' # Command interpreted by Sciclops
         out_msg =  self.send_command(command)
         
@@ -347,6 +347,7 @@ class SCICLOPS():
         a = False
         while a == False:
             a = self.check_complete()
+            sleep(1)
 
         print('ACTION COMPLETE')
 
@@ -728,42 +729,32 @@ class SCICLOPS():
         # Move above desired tower
         self.set_speed(100)
         self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
-        sleep(1)
         # check coordinates
         self.check_complete_loop()
         
         # Remove plate from tower
         self.close()
-        self.set_speed(10)
+        self.set_speed(15)
         self.jog('Z', -1000)
-        sleep(1)
         # move up certain amount
         self.jog('Z', 10)
         self.open()
-        sleep(1)
-        # TODO: modify grab height to be down from above
         grab_height = self.plate_info[plate_type]['grab_tower']
         self.jog('Z', grab_height)
         self.close()
-        # check plate
-        sleep(1)
         self.set_speed(100)
         self.jog('Z', 1000)
-        sleep(1)
         # check coordinates
         self.check_complete_loop()
         
         # Place in exchange
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
-        sleep(1)
         # check coordinates
         self.check_complete_loop()
         self.jog('Z', -380)
-        self.set_speed(1)
+        self.set_speed(5)
         self.jog('Z', -30)
         self.open()
-        sleep(1)
-        # check plate
         self.set_speed(100)
         self.jog('Z', 1000)
         # check coordinates
@@ -781,7 +772,6 @@ class SCICLOPS():
         
         # Move back to neutral
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-        sleep(1)
         # check coordinates
         self.check_complete_loop()
 
@@ -855,7 +845,6 @@ class SCICLOPS():
         self.set_speed(100)
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
-        sleep(1)
         # check coordinates
         self.check_complete_loop()
         plate_type = self.labware['exchange']['type']
@@ -867,14 +856,11 @@ class SCICLOPS():
         else:
             # remove lid
             self.jog('Z', -380)
-            # TODO: modify grab height to be down from above
-            sleep(1)
             self.set_speed(7)
             lid_height = self.plate_info[plate_type]['grab_lid_exchange']
             self.jog('Z', lid_height)
             self.close()
-            sleep(1)
-            # check plate
+
             self.set_speed(100)
             self.jog('Z', 1000)
             # check coordinates
@@ -882,7 +868,6 @@ class SCICLOPS():
 
             if trash == True:
                 # move above trash
-                sleep(1)
                 self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
                 self.check_complete_loop()
 
@@ -892,7 +877,6 @@ class SCICLOPS():
                 self.jog('Z', 1000)
 
                 # return to home
-                sleep(1)
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
                 # check coordinates
                 self.check_complete_loop()
@@ -905,17 +889,13 @@ class SCICLOPS():
 
 
                 # move above desired lid nest
-                sleep(1)
                 self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
                 # check coordinates
                 self.check_complete_loop()
 
                 # place in lid nest
                 self.jog('Z', -400)
-                sleep(1)
                 self.open()
-                # check plate
-                sleep(1)
                 self.jog('Z', 1000)
                 # check coordinates
                 self.check_complete_loop()
@@ -951,17 +931,14 @@ class SCICLOPS():
 
             # grab lid
             self.close()
-            self.jog('Z', -400)
+            self.jog('Z', -380)
             self.set_speed(7)
             self.jog('Z', -1000)
             self.jog('Z', 10)
             self.open()
-            # TODO: modify grab height to be down from above
             lid_height = self.plate_info[plate_type]['grab_lid_nest']
             self.jog('Z', lid_height)
             self.close()
-            # check plate
-            sleep(1)
             self.set_speed(100)
             self.jog('Z', 1000)
             self.check_complete_loop()
@@ -974,8 +951,6 @@ class SCICLOPS():
             # place lid onto plate
             self.jog('Z', -400)
             self.open()
-            # check plate
-            sleep(1)
             self.jog('Z', 1000)
             self.check_complete_loop()
 
@@ -993,17 +968,15 @@ class SCICLOPS():
     def plate_to_stack(self, tower, add_lid):
         # Move arm up and to neutral position to avoid hitting any objects
         self.open() 
-        self.set_speed(3)
+        self.set_speed(10)
         self.jog('Y', -1000)
         self.jog('Z', 1000) 
         self.set_speed(12) 
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         self.check_complete_loop()
-        sleep(1)
         plate_type = self.labware['exchange']['type']
         if add_lid == True:
             lidnest = self.check_for_lid()
-            sleep(1)
             self.replace_lid()
         
         #TODO: check to see if given stack is full, use function to account for different labware, maybe checks all stacks to find one with same labware?
@@ -1014,30 +987,24 @@ class SCICLOPS():
         # check coordinates
         self.check_complete_loop()
         # grab plate
-        self.set_speed(7)
+        self.set_speed(100)
         self.jog('Z', -380)
         # TODO: modify grab height to be down from above
         grab_height = self.plate_info[plate_type]['grab_exchange']
         self.jog('Z', grab_height)
         self.close()
-        # check plate
-        sleep(1)
-        self.set_speed(12)
+        self.set_speed(100)
         self.jog('Z', 1000)
         self.check_complete_loop()
 
         # move above tower, place plate in tower
-        sleep(1)
         self.move(R=self.labware[tower]['pos']['R'], Z=23.5188, P=self.labware[tower]['pos']['P'], Y=self.labware[tower]['pos']['Y'])
         # check coordinates
         self.check_complete_loop()
-        self.set_speed(7)
+        self.set_speed(10)
         self.jog('Z', -1000)
-        sleep(1)
         self.open()
-        # checkplate
-        sleep(1)
-        self.set_speed(12)
+        self.set_speed(100)
         self.jog('Z', 1000)
         # check coordinates
         self.check_complete_loop()
@@ -1059,37 +1026,47 @@ class SCICLOPS():
     def lidnest_to_trash(self, lidnest):
         # Move arm up and to neutral position to avoid hitting any objects
         self.open() 
-        self.set_speed(3) 
+        self.set_speed(10) 
         self.jog('Y', -1000)
         self.jog('Z', 1000) 
         self.set_speed(12)
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+        self.check_complete_loop()
         # check to make sure lid present
         if self.labware[lidnest]['howmany'] >= 1: # lid in nest
             lid_type = self.labware[lidnest]['type']
             # move above lidnest
-            self.open()
+            self.set_speed(100)
+            self.close()
             self.move(R=self.labware[lidnest]['pos']['R'], Z=23.5188, P=self.labware[lidnest]['pos']['P'], Y=self.labware)
+            self.check_complete_loop()
 
             # grab lid
+            self.jog('Z', -380)
             self.set_speed(7)
             self.jog('Z', -1000)
+            self.jog('Z', 10)
+            self.open()
             lid_height = self.plate_info[lid_type]['grab_lid_nest']
             self.jog('Z', lid_height)
             self.close()
-            self.set_speed(12)
+            self.set_speed(100)
             self.jog('Z', 1000)
+            self.check_complete_loop()
         
             # move above trash
             self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
+            self.check_complete_loop()
             
             # drop lid 
             self.jog('Z', -1000)
             self.open()
             self.jog('Z', 1000)
+            self.check_complete_loop()
 
             # back to neutral
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            self.check_complete_loop()
 
             # update labware
             self.labware[lidnest]['howmany'] -= 1
@@ -1103,11 +1080,12 @@ class SCICLOPS():
     def plate_to_trash(self, plate_info, add_lid):
         # Move arm up and to neutral position to avoid hitting any objects
         self.open() 
-        self.set_speed(3)
+        self.set_speed(10)
         self.jog('Y', -1000)
         self.jog('Z', 1000) 
         self.set_speed(12) 
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+        self.check_complete_loop()
         # check if plate is present
         if self.labware['exchange']['howmany'] >= 1:
             # check if add_lid is true, if yes, add lid
@@ -1117,28 +1095,34 @@ class SCICLOPS():
             plate_type = self.labware['exchange']['type']
 
             # move over exchange
+            self.set_speed(100)
             self.open()
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
+            self.check_complete_loop()
 
             # grab plate
+            self.jog('Z', -380)
             self.set_speed(7)
-            self.jog('Z', -1000)
-            grab_height = self.plate_info[plate_type]['grab_exchange']
+            grab_height = self.plate_info[plate_type]['grab_lid_exchange']
             self.jog('Z', grab_height)
             self.close()
-            self.set_speed(12)
+            self.set_speed(100)
             self.jog('Z', 1000)
+            self.check_complete_loop()
 
             # move over trash 
             self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
+            self.check_complete_loop()
 
             # drop plate
             self.jog('Z', -1000)
             self.open()
             self.jog('Z', 1000)
+            self.check_complete_loop()
 
             # back to neutral
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
+            self.check_complete_loop()
 
             # update labware
             self.labware['exchange']['howmany'] -= 1
