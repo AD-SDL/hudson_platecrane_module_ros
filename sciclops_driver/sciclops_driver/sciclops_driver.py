@@ -278,29 +278,6 @@ class SCICLOPS():
             print(self.CURRENT_POS)
         except:
             pass
-    
-    def pull_position(self):
-        '''
-        Requests sciclops position and returns coordinates.
-        Coordinates:
-        Z: Vertical axis
-        R: Base turning axis
-        Y: Extension axis
-        P: Gripper turning axis
-        '''
-
-        command = 'GETPOS\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
-        
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"Z:([-.\d]+), R:([-.\d]+), Y:([-.\d]+), P:([-.\d]+)" # Format of coordinates provided in feedback
-            find_current_pos = re.search(exp,out_msg)
-            self.CURRENT_POS = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
-            
-            return float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])
-        except:
-            pass
 
     def get_status(self):
         '''
@@ -371,24 +348,27 @@ class SCICLOPS():
         except:
             pass
     
-    def reset(self):
-        '''
-        Resets Sciclops
-        '''
+    #TODO: swings outward and collides with pf400
+    # def reset(self):
+    #     '''
+    #     Resets Sciclops
+    #     '''
 
-        command = 'RESET\r\n' # Command interpreted by Sciclops
-        out_msg =  self.send_command(command)
-        
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
-            find_reset = re.search(exp,out_msg)
-            self.RESET = find_reset[1] # TODO: test
+    #     self.set_speed(5)
 
-            print(self.RESET)
+    #     command = 'RESET\r\n' # Command interpreted by Sciclops
+    #     out_msg =  self.send_command(command)
         
-        except:
-            pass
+    #     try:
+    #         # Checks if specified format is found in feedback
+    #         exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
+    #         find_reset = re.search(exp,out_msg)
+    #         self.RESET = find_reset[1] 
+
+    #         print(self.RESET)
+        
+    #     except:
+    #         pass
 
     def get_config(self):
         '''
@@ -690,15 +670,6 @@ class SCICLOPS():
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
-    def confirm_coords(self, Z, R, Y, P):
-        '''
-        compares inputted coordinates to actual current coordinates, returns True if match
-        '''
-        curr_Z, curr_R, curr_Y, curr_P = self.pull_position()
-        if "Z:%s" % (Z) == curr_Z and "R:%s" % (R) == curr_R and "Y:%s" % (Y) == curr_Y and "P:%s" % (P) == curr_P:
-            return True
-        else:
-            return False
 
     def get_plate(self, location, remove_lid, trash):
         '''
@@ -989,7 +960,6 @@ class SCICLOPS():
         # grab plate
         self.set_speed(100)
         self.jog('Z', -380)
-        # TODO: modify grab height to be down from above
         grab_height = self.plate_info[plate_type]['grab_exchange']
         self.jog('Z', grab_height)
         self.close()
@@ -1103,7 +1073,7 @@ class SCICLOPS():
             # grab plate
             self.jog('Z', -380)
             self.set_speed(7)
-            grab_height = self.plate_info[plate_type]['grab_lid_exchange']
+            grab_height = self.plate_info[plate_type]['grab_plate_exchange']
             self.jog('Z', grab_height)
             self.close()
             self.set_speed(100)
