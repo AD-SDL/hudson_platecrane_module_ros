@@ -1038,7 +1038,7 @@ class SCICLOPS():
             # move above lidnest
             self.set_speed(100)
             self.close()
-            self.move(R=self.labware[lidnest]['pos']['R'], Z=23.5188, P=self.labware[lidnest]['pos']['P'], Y=self.labware)
+            self.move(R=self.labware[lidnest]['pos']['R'], Z=23.5188, P=self.labware[lidnest]['pos']['P'], Y=self.labware[lidnest]['pos']['Y'])
             self.check_complete_loop()
 
             # grab lid
@@ -1077,7 +1077,7 @@ class SCICLOPS():
     
 
     #* Remove plate from exchange, throw away
-    def plate_to_trash(self, plate_info, add_lid):
+    def plate_to_trash(self, add_lid):
         # Move arm up and to neutral position to avoid hitting any objects
         self.open() 
         self.set_speed(10)
