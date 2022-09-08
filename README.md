@@ -1,10 +1,30 @@
 # sciclops_driver
 
-## Authos and Maintainers
-* Sanjiv Parthasarathy
-* Rafael Vescovi
-* Eric Codrea
-<p>&nbsp;</p>
+
+
+
+## Install
+
+The sciclops driver can be installed as a stand-alone python package or a ROS-Node 
+
+### Python Driver
+
+  git clone https://github.com/AD-SDL/sciclops_module
+  cd sciclops_module/sciclops_driver
+  python setup.py install 
+
+### Ros Packages
+
+  mkdir ~/sciclops_ws
+  cd ~/sciclops_ws
+
+  mkdir src
+  cd src
+  git clone https://github.com/AD-SDL/sciclops_module
+  git clone https://github.com/AD-SDL/wei_ros
+  cd ..
+  colcon build
+
 
 ## Description
 A repository for the Hudson Plate Stacker (Sciclops).
@@ -66,10 +86,10 @@ In terminal:
         * Home
         * Status
 
-## Python Dependencies
-Code devloped and tested with Python 3.10.4
 
-## Required Packages:
-* USB
-* Regular Expressions
 
+## Authos and Maintainers
+* Sanjiv Parthasarathy
+* Rafael Vescovi
+* Eric Codrea
+* Abe Stroka

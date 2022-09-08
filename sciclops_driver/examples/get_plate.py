@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 '''
 Example user imput to execute get_plate function in Hudson driver from message
 '''
@@ -37,4 +39,3 @@ sciclops = SCICLOPS()
 
 # execute get plate function
 sciclops.get_plate(location=var['location'], remove_lid=var['remove_lid'], trash=var['trash'])
-
