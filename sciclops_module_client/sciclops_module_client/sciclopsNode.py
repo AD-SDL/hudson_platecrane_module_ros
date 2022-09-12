@@ -32,8 +32,39 @@ class sciclopsNode(Node):
         self.description = {
             'name': NODE_NAME,
             'type': 'sciclops_plate_stacker',
-            'actions':
-            {'get_plate':'$tower $lid $trash'
+            'actions'
+            {
+            'Get Plate 1',
+            'Get Plate 1 Remove Lid',
+            'Get Plate 1 Remove Lid Trash',
+            'Get Plate 2',
+            'Get Plate 2 Remove Lid',
+            'Get Plate 2 Remove Lid Trash',
+            'Get Plate 3',
+            'Get Plate 3 Remove Lid',
+            'Get Plate 3 Remove Lid Trash',
+            'Get Plate 4',
+            'Get Plate 4 Remove Lid',
+            'Get Plate 4 Remove Lid Trash',
+            'Get Plate 5',
+            'Get Plate 5 Remove Lid',
+            'Get Plate 5 Remove Lid Trash',
+            'Remove Lid',
+            'Remove Lid Trash',
+            'Replace Lid',
+            'Plate to Stack 1',
+            'Plate to Stack 1 Add Lid',
+            'Plate to Stack 2',
+            'Plate to Stack 2 Add Lid',
+            'Plate to Stack 3',
+            'Plate to Stack 3 Add Lid',
+            'Plate to Stack 4',
+            'Plate to Stack 4 Add Lid',
+            'Plate to Stack 5',
+            'Plate to Stack 5 Add Lid',
+            'Home',
+            'Status'
+
             }
         }
 
@@ -93,9 +124,140 @@ class sciclopsNode(Node):
 
             self.sciclops.get_plate(pos, lid, trash)
             
-            ##TODO: Get plate is delivering answer way too fast
-            sleep(20)
-            response.action_response = True
+
+            case "Get Plate 1 Remove Lid":
+                self.sciclops.get_plate('tower1', True, False)
+
+                response.action_response = True
+
+            case "Get Plate 1 Remove Lid Trash":
+                self.sciclops.get_plate('tower1', True, True)
+
+                response.action_response = True
+            
+            case "Get Plate 2":
+                    self.sciclops.get_plate('tower2', False, False)
+
+                    response.action_response = True
+
+            case "Get Plate 2 Remove Lid":
+                    self.sciclops.get_plate('tower2', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 2 Remove Lid Trash":
+                    self.sciclops.get_plate('tower2', True, True)
+
+                    response.action_response = True
+                        
+            case "Get Plate 3":
+                    self.sciclops.get_plate('tower3', False, False)
+
+                    response.action_response = True
+                
+            case "Get Plate 3 Remove Lid":
+                    self.sciclops.get_plate('tower3', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 3 Remove Lid Trash":
+                    self.sciclops.get_plate('tower3', True, True)
+
+                    response.action_response = True
+                        
+            case "Get Plate 4":
+                    self.sciclops.get_plate('tower4', False, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 4 Remove Lid":
+                    self.sciclops.get_plate('tower4', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 4 Remove Lid Trash":
+                    self.sciclops.get_plate('tower4', True, True)
+
+                    response.action_response = True
+                        
+            case "Get Plate 5":
+                    self.sciclops.get_plate('tower5', False, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 5 Remove Lid":
+                    self.sciclops.get_plate('tower5', True, False)
+
+                    response.action_response = True
+            
+            case "Get Plate 5 Remove Lid Trash":
+                    self.sciclops.get_plate('tower5', True, True)
+
+                    response.action_response = True
+            
+            case "Remove Lid":
+                    self.sciclops.remove_lid(False)
+
+                    response.action_response = True
+            
+            case "Remove Lid Trash":
+                    self.sciclops.remove_lid(True)
+
+                    response.action_response = True
+
+            case "Replace Lid":
+                    self.sciclops.replace_lid()
+
+                    response.action_response = True
+            
+            case "Plate to Stack 1":
+                    self.sciclops.plate_to_stack('tower1', False)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 1 Add Lid":
+                    self.sciclops.plate_to_stack('tower1', True)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 2":
+                    self.sciclops.plate_to_stack('tower2', False)
+
+                    response.action_response = True
+
+            case "Plate to Stack 2 Add Lid":
+                    self.sciclops.plate_to_stack('tower2', True)
+
+                    response.action_response = True
+
+            case "Plate to Stack 3":
+                    self.sciclops.plate_to_stack('tower3', False)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 3 Add Lid":
+                    self.sciclops.plate_to_stack('tower3', True)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 4":
+                    self.sciclops.plate_to_stack('tower4', False)
+
+                    response.action_response = True
+
+            case "Plate to Stack 4 Add Lid":
+                    self.sciclops.plate_to_stack('tower4', True)
+
+                    response.action_response = True
+            
+            case "Plate to Stack 5":
+                    self.sciclops.plate_to_stack('tower5', False)
+
+                    response.action_response = True
+
+            case "Plate to Stack 5 Add Lid":
+                    self.sciclops.plate_to_stack('tower5', True)
+
 
         self.state = "COMPLETED"
 
