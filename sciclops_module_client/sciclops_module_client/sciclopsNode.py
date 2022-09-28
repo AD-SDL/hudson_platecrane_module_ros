@@ -32,39 +32,11 @@ class sciclopsNode(Node):
         self.description = {
             'name': NODE_NAME,
             'type': 'sciclops_plate_stacker',
-            'actions'
+            'actions':
             {
-            'Get Plate 1',
-            'Get Plate 1 Remove Lid',
-            'Get Plate 1 Remove Lid Trash',
-            'Get Plate 2',
-            'Get Plate 2 Remove Lid',
-            'Get Plate 2 Remove Lid Trash',
-            'Get Plate 3',
-            'Get Plate 3 Remove Lid',
-            'Get Plate 3 Remove Lid Trash',
-            'Get Plate 4',
-            'Get Plate 4 Remove Lid',
-            'Get Plate 4 Remove Lid Trash',
-            'Get Plate 5',
-            'Get Plate 5 Remove Lid',
-            'Get Plate 5 Remove Lid Trash',
-            'Remove Lid',
-            'Remove Lid Trash',
-            'Replace Lid',
-            'Plate to Stack 1',
-            'Plate to Stack 1 Add Lid',
-            'Plate to Stack 2',
-            'Plate to Stack 2 Add Lid',
-            'Plate to Stack 3',
-            'Plate to Stack 3 Add Lid',
-            'Plate to Stack 4',
-            'Plate to Stack 4 Add Lid',
-            'Plate to Stack 5',
-            'Plate to Stack 5 Add Lid',
-            'Home',
-            'Status'
-
+                'status':'',
+                'home':'',
+                'get_plate':'pos lid trash'
             }
         }
 
