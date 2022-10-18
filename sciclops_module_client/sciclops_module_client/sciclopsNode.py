@@ -21,13 +21,9 @@ class sciclopsNode(Node):
         The init function is neccesary for the sciclopsNode class to initialize all variables, parameters, and other functions.
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
         '''
-
         super().__init__(NODE_NAME)
-        
         self.sciclops = SCICLOPS()
-        print("Sciclops is online") 
         self.state = "UNKNOWN"
-
         
         self.description = {
             'name': NODE_NAME,
@@ -69,13 +65,11 @@ class sciclopsNode(Node):
         return response
 
     def actionCallback(self, request, response):
-
         '''
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
         '''
         
-
         if request.action_handle=='status':
             self.sciclops.get_status()
             response.action_response = True
@@ -101,41 +95,22 @@ class sciclopsNode(Node):
         return response
 
 
-        #     case "Home":
-
-
-
     def stateCallback(self):
-
         '''
         Publishes the sciclops state to the 'state' topic. 
         '''
-
         msg = String()
-
         msg.data = 'State: %s' % self.state
-
         self.statePub.publish(msg)
-
         self.get_logger().info('Publishing: "%s"' % msg.data)
-        
         self.state = "READY"
 
-
-
 def main(args = None):
-
     NAME = "sciclopsNode"
-
     rclpy.init(args=args)  # initialize Ros2 communication
-
     node = sciclopsNode(NODE_NAME=NAME)
-
     rclpy.spin(node)     # keep Ros2 communication open for action node
-
     rclpy.shutdown()     # kill Ros2 communication
 
-
 if __name__ == '__main__':
-
     main()
