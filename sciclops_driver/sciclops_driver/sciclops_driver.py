@@ -58,13 +58,22 @@ class SCICLOPS():
         '''
         plates = {
             '96_well':{
-                'height': 16.6625,
-                'grab_exchange': -30, # from Z = -356.5375
-                'grab_lid_exchange': -21,
-                'grab_tower': -18,
-                'grab_lid_tower': -13,
-                'grab_lid_nest': -12
+            'height': 16.2562,
+            'grab_exchange': -30, # downward motion from Z = -356.5375
+            'grab_lid_exchange': -21, # downward motion from Z = -356.5375
+            'grab_tower': -18, # downward motion from 10 above top of plate
+            'grab_lid_tower': -13,
+            'grab_lid_nest': -12
+            },
+            'pcr_plate':{
+            'height': 15.2762,
+            'grab_exchange': -28, # from Z = -356.5375
+            'grab_lid_exchange': 0, # downward motion from Z = -356.5375, no lid
+            'grab_tower': -17, # downward motion from 10 above top of plate
+            'grab_lid_tower': 0, # no lid
+            'grab_lid_nest': 0 # no lid
             }
+            
         }
 
         return plates
@@ -85,7 +94,7 @@ class SCICLOPS():
                 'Y': 171.9895,
                 'P': 8.6648
                 },
-            'type': '96_well',
+            'type': 'pcr_plate',
             'howmany': 1,
             'grab_height': 8,
             'cap_height': 20,
@@ -95,7 +104,7 @@ class SCICLOPS():
             'tower2':{
             'pos': {
                 'Z': 23.5188,
-                'R': 151.5,
+                'R': 151.3,
                 'Y': 171.4872,
                 'P': 8.4943
                 },
@@ -177,7 +186,7 @@ class SCICLOPS():
                 'Z': 23.5188,
                 'R': 109.2741,
                 'Y': 32.7484,
-                'P': 99.2955
+                'P': 100.8955
                 },
             'type': '96_well',
             'howmany': 0,
