@@ -680,7 +680,7 @@ class SCICLOPS():
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
 
-    def get_plate(self, location, remove_lid, trash):
+    def get_plate(self, location, remove_lid=False, trash=False):
         '''
         Grabs plate and places on exchange. Paramater is the stack that the Sciclops is requested to remove the plate from.
         Format: "Stack<num>"
