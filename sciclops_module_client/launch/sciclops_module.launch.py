@@ -5,7 +5,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='sciclops_module_client',
-            namespace='sciclops_module',
+            namespace = 'std_ns',
             executable='sciclopsNode',
             name='sciclopsNode'
         ),
