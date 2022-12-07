@@ -35,6 +35,12 @@ class SCICLOPS():
         self.labware = self.load_labware()
         self.plate_info = self.load_plate_info()
         self.success_count = 0
+        self.status = self.get_status()
+        self.error = self.get_error()
+
+        # if not is_homed:
+        #     self.home()
+
             
     
 
