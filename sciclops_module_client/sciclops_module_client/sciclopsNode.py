@@ -88,7 +88,12 @@ class sciclopsNode(Node):
             lid = vars.get('lid',False)
             trash = vars.get('trash',False)
 
-            self.sciclops.get_plate(pos, lid, trash)
+            err = self.sciclops.get_plate(pos, lid, trash)
+
+            response.action_response = 0
+            response.action_msg= "all good sciclops"
+            self.get_logger().info('Finished Action: ' + request.action_handle)
+            return response
             
         self.state = "COMPLETED"
 
