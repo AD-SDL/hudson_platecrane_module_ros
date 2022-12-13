@@ -132,3 +132,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .vscode/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
