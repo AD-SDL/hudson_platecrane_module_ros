@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<robot name="Sciclops" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <!-- Links -->
+  <xacro:macro name="Sciclops" params = "prefix">
+    <link name="${prefix}sciclops_base">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_base.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_base.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="${prefix}sciclops_link1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint1.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint1.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="${prefix}sciclops_link2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint2.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint2.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="${prefix}sciclops_link3">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint3.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint3.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <link name="${prefix}sciclops_link4">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint4.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="aluminum"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/sciclops_joint4.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <!-- Joints -->
+
+  <joint name="Sciclops_joint1" type="prismatic">
+    <parent link="${prefix}sciclops_base"/>
+    <child link="${prefix}sciclops_link1"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0.055 -0.09 0.065" rpy="0 0 0"/> 
+    <limit effort="1000.0" lower="0" upper="0.3" velocity="0.5"/>
+  </joint>
+
+  <joint name="Sciclops_joint2" type="prismatic">
+    <parent link="${prefix}sciclops_link1"/>
+    <child link="${prefix}sciclops_link2"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/> 
+    <limit effort="1000.0" lower="0" upper="0.3" velocity="0.5"/>
+  </joint>
+
+  <joint name="Sciclops_joint3" type="prismatic">
+    <parent link="${prefix}sciclops_link2"/>
+    <child link="${prefix}sciclops_link3"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/> 
+    <limit effort="1000.0" lower="0" upper="0.3" velocity="0.5"/>
+  </joint>
+
+  <joint name="Sciclops_joint4" type="prismatic">
+    <parent link="${prefix}sciclops_link3"/>
+    <child link="${prefix}sciclops_link4"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/> 
+    <limit effort="1000.0" lower="0" upper="0.3" velocity="0.5"/>
+  </joint>    
+
+
+  </xacro:macro>
+
+</robot>
