@@ -64,106 +64,39 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        OT2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        OT2_2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hand:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        inner_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        left_finger:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        module_cart_link_1:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        module_cart_link_2:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        module_cart_link_3:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        module_cart_link_4:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
+        
         module_cart_link_5:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        module_cart_link_6:
+
+        sciclops_base:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        module_cart_link_7:
+        sciclops_link1:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        module_cart_link_8:
+        sciclops_link2:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        outer_link:
+        sciclops_link3:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        pf400_module:
+        sciclops_link4:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
-        rail:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rail_base:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        right_finger:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        z_carriage:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        z_column:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
+
       Mass Properties:
         Inertia: false
         Mass: false
@@ -216,7 +149,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 61; 56; 70
-    Fixed Frame: module_carts/pf400_cart
+    Fixed Frame: module_carts/cart_5
     Frame Rate: 30
   Name: root
   Tools:
