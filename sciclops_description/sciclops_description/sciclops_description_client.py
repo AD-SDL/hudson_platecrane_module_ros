@@ -28,7 +28,7 @@ class SciclopsDescriptionClient(Node):
         state_cb_group = ReentrantCallbackGroup()
 
         self.statePub = self.create_publisher(String, NODE_NAME + '/state',10)
-        self.stateTimer = self.create_timer(timer_period, callback = self.stateCallback, callback_group = state_cb_group)
+        # self.stateTimer = self.create_timer(timer_period, callback = self.stateCallback, callback_group = state_cb_group)
 
         self.joint_publisher = self.create_publisher(JointState,'joint_states', 10, callback_group = joint_cb_group)
         self.joint_state_handler = self.create_timer(timer_period, callback = self.joint_state_publisher_callback, callback_group = joint_cb_group)
@@ -48,11 +48,12 @@ class SciclopsDescriptionClient(Node):
     def joint_state_publisher_callback(self):
         
         # self.get_logger().info("BUGG")
-        joint_states = self.sciclops.refresh_joint_state()
+        # joint_states = self.sciclops.refresh_joint_state()
+        joint_states = [-0.4,0.0,0.0,0.0]
         sciclops_joint_msg = JointState()
         sciclops_joint_msg.header = Header()
         sciclops_joint_msg.header.stamp = self.get_clock().now().to_msg()
-        sciclops_joint_msg.name = ['J1', 'J2', 'J3', 'J4', 'J5','J5_mirror', 'J6']
+        sciclops_joint_msg.name = ['Sciclops_joint1', 'Sciclops_joint2','Sciclops_joint3','Sciclops_joint4']
         sciclops_joint_msg.position = joint_states
         # print(joint_states)
 
