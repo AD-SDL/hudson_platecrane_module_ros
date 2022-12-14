@@ -4,7 +4,7 @@
 
   <!-- Links -->
   <xacro:macro name="Sciclops" params = "prefix">
-    <link name="${prefix}sciclops_base">
+  <link name="${prefix}sciclops_base">
     <visual>
       <origin xyz="0 0 0" rpy="1.5708 0 0"/>
       <geometry>
