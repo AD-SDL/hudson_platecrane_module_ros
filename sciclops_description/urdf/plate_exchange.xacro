@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot name="Plate_Exchange_Deck" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <!-- Links -->
+  <xacro:macro name="plate_exchange_deck" params = "prefix">
+  <link name="${prefix}plate_exchange">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/exchange_deck.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/exchange_deck.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+  </xacro:macro>
+
+</robot>
