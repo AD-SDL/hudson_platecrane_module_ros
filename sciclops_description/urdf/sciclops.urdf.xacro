@@ -91,7 +91,7 @@
     <child link="${prefix}sciclops_link1"/>
     <axis xyz="0 1 0"/>
     <origin xyz="0 0 0" rpy="1.5708 0 0"/> 
-    <limit effort="1000.0" lower="-3.1" upper="3.1" velocity="0.5"/>
+    <limit effort="1000.0" lower="-6.2" upper="6.2" velocity="0.5"/>
   </joint>
 
   <joint name="Sciclops_joint2" type="prismatic">
@@ -107,15 +107,15 @@
     <child link="${prefix}sciclops_link3"/>
     <axis xyz="0 0 1"/>
     <origin xyz="0 0 0" rpy="0 0 0"/> 
-    <limit effort="1000.0" lower="-0.1" upper="0" velocity="0.5"/>
+    <limit effort="1000.0" lower="-0.2" upper="0" velocity="0.5"/>
   </joint>
 
   <joint name="Sciclops_joint4" type="revolute">
     <parent link="${prefix}sciclops_link3"/>
     <child link="${prefix}sciclops_link4"/>
     <axis xyz="0 1 0"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/> 
-    <limit effort="1000.0" lower="-3.1" upper="3.1" velocity="0.5"/>
+    <origin xyz="-0.0001 0.611 -0.265" rpy="0 0 0"/> 
+    <limit effort="1000.0" lower="-6.2" upper="6.2" velocity="0.5"/>
   </joint>    
 
 
