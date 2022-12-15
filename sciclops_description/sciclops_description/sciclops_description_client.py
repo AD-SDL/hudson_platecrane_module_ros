@@ -49,11 +49,11 @@ class SciclopsDescriptionClient(Node):
         
         # self.get_logger().info("BUGG")
         # joint_states = self.sciclops.refresh_joint_state()
-        joint_states = [-0.4,0.0,0.0,0.0]
+        joint_states = [-0.4,0.0,0.0,0.0,0.04,0.04]
         sciclops_joint_msg = JointState()
         sciclops_joint_msg.header = Header()
         sciclops_joint_msg.header.stamp = self.get_clock().now().to_msg()
-        sciclops_joint_msg.name = ['Sciclops_joint1', 'Sciclops_joint2','Sciclops_joint3','Sciclops_joint4']
+        sciclops_joint_msg.name = ['Sciclops_joint1','Sciclops_joint2','Sciclops_joint3','Sciclops_joint4','Sciclops_gripper','Sciclops_gripper_mirror']
         sciclops_joint_msg.position = joint_states
         # print(joint_states)
 
