@@ -53,6 +53,8 @@ class SciclopsDescriptionClient(Node):
         #TODO: Create a function in the driver level to complete the lines between #53 - #61
         #TODO: Make sure the angles are in radius format 
         #TODO: Call only one function from the driver that would return all joint angles in radius format
+        #TODO: Make sure calling this function doesn't interrupt rest of the socket communication
+        
         self.sciclops.get_position()
         self.sciclops.get_gripper_lenght()
         robot_joint_states = self.sciclops.CURRENT_POS
