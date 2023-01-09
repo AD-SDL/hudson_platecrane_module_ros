@@ -13,7 +13,7 @@ def generate_launch_description():
 
   pkg_share = FindPackageShare(package='sciclops_description').find('sciclops_description')
   default_rviz_config_path = os.path.join(pkg_share, 'config/sciclops_rviz_config.rviz')
-  default_urdf_model_path = os.path.join(pkg_share, 'urdf/sciclops_robot.xacro') 
+  default_urdf_model_path = os.path.join(pkg_share, 'urdf/sciclops_module.xacro') 
  
   fake_hardware = LaunchConfiguration('fake_hardware')
   urdf_model = LaunchConfiguration('urdf_model')
