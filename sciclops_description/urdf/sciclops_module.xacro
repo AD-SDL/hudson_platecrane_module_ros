@@ -5,8 +5,8 @@
   <xacro:include filename="$(find sciclops_description)/urdf/materials.xacro" />
   
   <!-- Module Carts -->
-  <xacro:include filename="$(find sciclops_description)/urdf/module_carts.urdf.xacro" />
-  <xacro:Module_Carts prefix="module_carts/"/>
+  <xacro:include filename="$(find sciclops_description)/urdf/module_cart_5.urdf.xacro" />
+  <xacro:Module_Cart_5 prefix="module_carts/"/>
 
   <!-- Sciclops -->
   <xacro:include filename="$(find sciclops_description)/urdf/sciclops.urdf.xacro" />

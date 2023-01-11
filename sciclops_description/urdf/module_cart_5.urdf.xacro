@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<robot name="Module_Cart_5" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+
+  <!-- Links -->
+  <xacro:macro name="Module_Cart_5" params = "prefix">
+
+
+  <link name="${prefix}cart_5">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/module_cart.stl" scale="1 1 1"/>
+      </geometry>
+      <material name="darkbluegreen"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://sciclops_description/meshes/module_cart.stl" scale="1 1 1"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+
+  <!-- Joints -->
+
+  
+<!-- 
+  <joint name="pf400_cart_to_cart_5" type="fixed">
+    <parent link="${prefix}pf400_cart"/>
+    <child link="${prefix}cart_5"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="1.00 -0.46 0" rpy="0 0 0"/>
+    <limit effort="1000.0" lower="0" upper="0" velocity="0.5"/>
+  </joint> -->
+
+  </xacro:macro>
+
+</robot>
