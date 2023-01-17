@@ -251,10 +251,13 @@ class SCICLOPS():
        
         return response_buffer
 
-    def get_error(self, response_buffer):
+    def get_error(self, response_buffer=None):
         '''
         Gets error message from the feedback.
         '''
+
+        if not response_buffer: 
+            return  
 
         output_line = response_buffer[response_buffer[:-1].rfind("\n"):]
         exp = r"(\d)(\d)(\d)(\d)(.*\w)" # Format of feedback that indicates an error message
