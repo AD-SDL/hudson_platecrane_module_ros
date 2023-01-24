@@ -36,7 +36,7 @@ class ScilopsClient(Node):
         
         self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().value
         self.product_id = self.get_parameter("product_id").get_parameter_value().value
-        self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID:" + str(self.product_id))
+        self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
 
         self.connect_robot()
         
@@ -71,17 +71,48 @@ class ScilopsClient(Node):
             self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
 
         else:
-            self.get_logger().info("PF400 online")
+            self.get_logger().info("SCICLOPS online")
 
     def stateCallback(self):
         '''
         Publishes the sciclops state to the 'state' topic. 
         '''
         msg = String()
-        msg.data = 'State: %s' % self.state
-        self.statePub.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.state = "READY"
+
+        try:
+            self.sciclops.get_status() 
+            state = self.sciclops.status
+
+        except Exception as err:
+            self.get_logger().error("SCICLOPS IS NOT RESPONDING! ERROR: " + str(err))
+            self.state = "SCICLOPS CONNECTION ERROR"
+
+
+        if self.state != "SCICLOPS CONNECTION ERROR":
+            #TODO: EDIT THE DRIVER TO RECEIVE ACTUAL ROBOT STATUS
+            if state == "Ready":
+                self.state = "READY"
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().info(msg.data)
+
+            elif state == "RUNNING":
+                self.state = "BUSY"
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().info(msg.data)
+
+            elif state == "ERROR":
+                self.state = "ERROR"
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().error(msg.data)
+        else:
+            msg.data = 'State: %s' % self.state
+            self.statePub.publish(msg)
+            self.get_logger().error(msg.data)
+            self.get_logger().warn("Trying to connect again! Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
+            self.connect_robot()
 
     def descriptionCallback(self, request, response):
         """The descriptionCallback function is a service that can be called to showcase the available actions a robot
