@@ -41,7 +41,7 @@ class ScilopsClient(Node):
         self.connect_robot()
         
         self.description = {
-            'name': TEMP_NODE_NAME,
+            'name': node_name,
             'type': 'sciclops_plate_stacker',
             'actions':
             {
