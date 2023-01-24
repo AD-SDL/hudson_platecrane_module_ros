@@ -13,10 +13,9 @@ class SCICLOPS():
     Python interface that allows remote commands to be executed to the Sciclops. 
     '''
     
-    def __init__(self):
-        self.VENDOR_ID = 0x7513
-        self.PRODUCT_ID = 0x0002
-        self.host_path = self.connect_sciclops()
+    def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID =0x0002):
+
+        self.host_path = self.connect_sciclops(VENDOR_ID, PRODUCT_ID)
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
@@ -44,12 +43,12 @@ class SCICLOPS():
             
     
 
-    def connect_sciclops(self):
+    def connect_sciclops(self,VENDOR_ID, PRODUCT_ID):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
         
-        host_path = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
+        host_path = usb.core.find(idVendor = VENDOR_ID, idProduct = PRODUCT_ID)
 
         if host_path  is None:
             sys.exit("Could not find Id System Barcode Reader.")
