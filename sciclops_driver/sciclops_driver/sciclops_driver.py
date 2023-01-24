@@ -13,7 +13,7 @@ class SCICLOPS():
     Python interface that allows remote commands to be executed to the Sciclops. 
     '''
     
-    def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID =0x0002):
+    def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID = 0x0002):
 
         self.host_path = self.connect_sciclops(VENDOR_ID, PRODUCT_ID)
         self.TEACH_PLATE = 15.0
