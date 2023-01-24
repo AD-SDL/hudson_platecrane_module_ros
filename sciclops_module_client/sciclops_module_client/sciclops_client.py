@@ -25,8 +25,20 @@ class ScilopsClient(Node):
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
         '''
         super().__init__(TEMP_NODE_NAME)
-        self.sciclops = SCICLOPS()
+        node_name = self.get_name()
         self.state = "UNKNOWN"
+
+        # Setting temporary default parameter values        
+        self.declare_parameter("vendor_id",0x7513)
+        self.declare_parameter("product_id",0x0002)
+
+        # Receiving the real IP and PORT from the launch parameters
+        
+        self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().int_value
+        self.product_id = self.get_parameter("product_id").get_parameter_value().int_value
+        self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID:" + str(self.product_id))
+
+        self.connect_robot()
         
         self.description = {
             'name': TEMP_NODE_NAME,
@@ -43,12 +55,33 @@ class ScilopsClient(Node):
         state_cb_group = ReentrantCallbackGroup()
 
         timer_period = 1  # seconds
-        self.statePub = self.create_publisher(String, 'sciclops_state', 10)
+        self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
-        self.actionSrv = self.create_service(WeiActions, TEMP_NODE_NAME + "/action_handler", self.actionCallback, callback_group = action_cb_group)
+        self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
-        self.descriptionSrv = self.create_service(WeiDescription, TEMP_NODE_NAME + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
+        self.descriptionSrv = self.create_service(WeiDescription, node_name + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
+   
+    def connect_robot(self):
+        try:
+            self.sciclops = SCICLOPS(VENDOR_ID = self.vendor_id, PRODUCT_ID = self.product_id)
+
+        except Exception as error_msg:
+            self.state = "SCICLOPS CONNECTION ERROR"
+            self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
+
+        else:
+            self.get_logger().info("PF400 online")
+
+    def stateCallback(self):
+        '''
+        Publishes the sciclops state to the 'state' topic. 
+        '''
+        msg = String()
+        msg.data = 'State: %s' % self.state
+        self.statePub.publish(msg)
+        self.get_logger().info('Publishing: "%s"' % msg.data)
+        self.state = "READY"
 
     def descriptionCallback(self, request, response):
         """The descriptionCallback function is a service that can be called to showcase the available actions a robot
@@ -106,16 +139,6 @@ class ScilopsClient(Node):
         return response
 
 
-    def stateCallback(self):
-        '''
-        Publishes the sciclops state to the 'state' topic. 
-        '''
-        msg = String()
-        msg.data = 'State: %s' % self.state
-        self.statePub.publish(msg)
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.state = "READY"
-
 def main(args = None):
 
     rclpy.init(args=args)  # initialize Ros2 communication
@@ -135,6 +158,6 @@ def main(args = None):
             sciclops_client.destroy_node()
     finally:
         rclpy.shutdown()
-        
+
 if __name__ == '__main__':
     main()
