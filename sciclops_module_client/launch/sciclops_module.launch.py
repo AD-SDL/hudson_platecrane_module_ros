@@ -13,18 +13,18 @@ def generate_launch_description():
 
     declare_use_vendor_id_cmd = DeclareLaunchArgument(
         name = 'vendor_id',
-        default_value = 0x7513,
+        default_value = "0x7513",
         description = 'Flag to accept vendor_id address')
 
     declare_use_product_id_cmd = DeclareLaunchArgument(
         name = 'product_id',
-        default_value = 0x0002,
+        default_value = "0x0002",
         description = 'Flag to accept product_id number')
 
     scisclops_client = Node(
             package='sciclops_module_client',
             namespace = 'std_ns',
-            executable='sciclopsNode',
+            executable='sciclops_client',
             name='SciclopsNode',
             parameters=[
                 {'vendor_id':vendor_id},
