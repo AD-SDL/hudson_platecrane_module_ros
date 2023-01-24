@@ -34,8 +34,8 @@ class ScilopsClient(Node):
 
         # Receiving the real IP and PORT from the launch parameters
         
-        self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().value
-        self.product_id = self.get_parameter("product_id").get_parameter_value().value
+        self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().integer_value
+        self.product_id = self.get_parameter("product_id").get_parameter_value().integer_value
         self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
 
         self.connect_robot()
@@ -64,6 +64,7 @@ class ScilopsClient(Node):
    
     def connect_robot(self):
         try:
+            print("HERE")
             self.sciclops = SCICLOPS(VENDOR_ID = self.vendor_id, PRODUCT_ID = self.product_id)
 
         except Exception as error_msg:
@@ -161,7 +162,7 @@ class ScilopsClient(Node):
             err = self.sciclops.get_plate(pos, lid, trash)
 
             response.action_response = 0
-            response.action_msg= "all good sciclops"
+            response.action_msg= "All good sciclops"
             self.get_logger().info('Finished Action: ' + request.action_handle)
             return response
             
