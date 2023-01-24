@@ -2,6 +2,9 @@
 
 import rclpy                 # import Rospy
 from rclpy.node import Node  # import Rospy Node
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
+
 from std_msgs.msg import String
 
 from wei_services.srv import WeiDescription 
@@ -11,22 +14,22 @@ from time import sleep
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
-class sciclopsNode(Node):
+class ScilopsClient(Node):
     '''
-    The sciclopsNode inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
+    The ScilopsClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
     based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
     '''
-    def __init__(self, NODE_NAME = "sciclopsNode"):
+    def __init__(self, TEMP_NODE_NAME = "ScilopsClientNode"):
         '''
-        The init function is neccesary for the sciclopsNode class to initialize all variables, parameters, and other functions.
+        The init function is neccesary for the ScilopsClient class to initialize all variables, parameters, and other functions.
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
         '''
-        super().__init__(NODE_NAME)
+        super().__init__(TEMP_NODE_NAME)
         self.sciclops = SCICLOPS()
         self.state = "UNKNOWN"
         
         self.description = {
-            'name': NODE_NAME,
+            'name': TEMP_NODE_NAME,
             'type': 'sciclops_plate_stacker',
             'actions':
             {
@@ -35,14 +38,17 @@ class sciclopsNode(Node):
                 'get_plate':'pos lid trash'
             }
         }
+        action_cb_group = ReentrantCallbackGroup()
+        description_cb_group = ReentrantCallbackGroup()
+        state_cb_group = ReentrantCallbackGroup()
 
         timer_period = 1  # seconds
         self.statePub = self.create_publisher(String, 'sciclops_state', 10)
-        self.stateTimer = self.create_timer(timer_period, self.stateCallback)
+        self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
-        self.actionSrv = self.create_service(WeiActions, NODE_NAME + "/action_handler", self.actionCallback)
+        self.actionSrv = self.create_service(WeiActions, TEMP_NODE_NAME + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
-        self.descriptionSrv = self.create_service(WeiDescription, NODE_NAME + "/description_handler", self.descriptionCallback)
+        self.descriptionSrv = self.create_service(WeiDescription, TEMP_NODE_NAME + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
 
     def descriptionCallback(self, request, response):
         """The descriptionCallback function is a service that can be called to showcase the available actions a robot
@@ -111,11 +117,24 @@ class sciclopsNode(Node):
         self.state = "READY"
 
 def main(args = None):
-    NAME = "sciclopsNode"
-    rclpy.init(args=args)  # initialize Ros2 communication
-    node = sciclopsNode(NODE_NAME=NAME)
-    rclpy.spin(node)     # keep Ros2 communication open for action node
-    rclpy.shutdown()     # kill Ros2 communication
 
+    rclpy.init(args=args)  # initialize Ros2 communication
+
+    try:
+        sciclops_client = ScilopsClient()
+        executor = MultiThreadedExecutor()
+        executor.add_node(sciclops_client)
+
+        try:
+            sciclops_client.get_logger().info('Beginning client, shut down with CTRL-C')
+            executor.spin()
+        except KeyboardInterrupt:
+            sciclops_client.get_logger().info('Keyboard interrupt, shutting down.\n')
+        finally:
+            executor.shutdown()
+            sciclops_client.destroy_node()
+    finally:
+        rclpy.shutdown()
+        
 if __name__ == '__main__':
     main()
