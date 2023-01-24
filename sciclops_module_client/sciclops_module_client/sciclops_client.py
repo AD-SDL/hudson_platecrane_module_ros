@@ -34,8 +34,8 @@ class ScilopsClient(Node):
 
         # Receiving the real IP and PORT from the launch parameters
         
-        self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().int_value
-        self.product_id = self.get_parameter("product_id").get_parameter_value().int_value
+        self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().value
+        self.product_id = self.get_parameter("product_id").get_parameter_value().value
         self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID:" + str(self.product_id))
 
         self.connect_robot()
