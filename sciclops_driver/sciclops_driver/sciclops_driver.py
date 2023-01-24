@@ -305,9 +305,9 @@ class SCICLOPS():
             # Checks if specified format is found in feedback
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
             find_status= re.search(exp,out_msg)
-            self.STATUS = find_status[1]
+            self.status = find_status[1]
         
-            print(self.STATUS)
+            print(self.status)
         
         except:
             pass
