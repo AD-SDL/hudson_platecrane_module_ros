@@ -51,11 +51,19 @@ class SCICLOPS():
         host_path = usb.core.find(idVendor = self.VENDOR_ID, idProduct = self.PRODUCT_ID)
 
         if host_path is None:
-            raise Exception("Could not find Id System Barcode Reader.")
+            raise Exception("Could not establish connection.")
 
         else:
             print('Device Connected')
             return host_path
+
+    def disconnect_robot(self):
+        try:
+            usb.util.dispose_resources(self.host_path)
+        except Exception as err:
+            print(err)
+        else:
+            print("Robot is disconnected")
 
     def load_plate_info(self):
         '''
@@ -254,6 +262,8 @@ class SCICLOPS():
         '''
         Gets error message from the feedback.
         '''
+        if not response_buffer: 
+            return  
 
         output_line = response_buffer[response_buffer[:-1].rfind("\n"):]
         exp = r"(\d)(\d)(\d)(\d)(.*\w)" # Format of feedback that indicates an error message
