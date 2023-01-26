@@ -19,7 +19,7 @@ class SCICLOPS():
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
-        # self.CURRENT_POS = [0, 0 ,0, 0]
+        self.CURRENT_POS = [0, 0 ,0, 0]
         # self.NEST_ADJUSTMENT = 20.0
         # self.STATUS = 0
         # self.VERSION = 0
@@ -43,7 +43,7 @@ class SCICLOPS():
             
     
 
-    def connect_sciclops(self,VENDOR_ID, PRODUCT_ID):
+    def connect_sciclops(self, VENDOR_ID, PRODUCT_ID):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
@@ -1120,7 +1120,7 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    dummy_sciclops = SCICLOPS(usb.core.find(idVendor= 0x7513, idProduct=0x0002))
+    dummy_sciclops = SCICLOPS()
     dummy_sciclops.check_plate()
 
 #Finished commands

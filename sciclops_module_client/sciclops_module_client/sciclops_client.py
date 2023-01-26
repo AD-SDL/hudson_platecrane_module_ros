@@ -64,8 +64,7 @@ class ScilopsClient(Node):
    
     def connect_robot(self):
         try:
-            print("HERE")
-            self.sciclops = SCICLOPS(VENDOR_ID = self.vendor_id, PRODUCT_ID = self.product_id)
+            self.sciclops = SCICLOPS()
 
         except Exception as error_msg:
             self.state = "SCICLOPS CONNECTION ERROR"
