@@ -54,7 +54,7 @@ class ScilopsClient(Node):
         description_cb_group = ReentrantCallbackGroup()
         state_cb_group = ReentrantCallbackGroup()
 
-        timer_period = 1  # seconds
+        timer_period = 0.5  # seconds
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
@@ -82,7 +82,11 @@ class ScilopsClient(Node):
 
         try:
             self.sciclops.get_status() 
-            state = self.sciclops.status
+            status_state = self.sciclops.status
+            self.sciclops.check_complete
+            job = self.sciclops.job_flag
+            self.get_logger().warn(status_state)
+            self.get_logger().warn(job)
 
         except Exception as err:
             self.get_logger().error("SCICLOPS IS NOT RESPONDING! ERROR: " + str(err))
@@ -91,19 +95,19 @@ class ScilopsClient(Node):
 
         if self.state != "SCICLOPS CONNECTION ERROR":
             #TODO: EDIT THE DRIVER TO RECEIVE ACTUAL ROBOT STATUS
-            if state == "Ready":
+            if status_state == "Ready":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-            elif state == "RUNNING":
+            elif status_state == "RUNNING":
                 self.state = "BUSY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-            elif state == "ERROR":
+            elif status_state == "ERROR":
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
@@ -159,7 +163,7 @@ class ScilopsClient(Node):
             lid = vars.get('lid',False)
             trash = vars.get('trash',False)
 
-            err = self.sciclops.get_plate(pos, lid, trash)
+            self.sciclops.get_plate(pos, lid, trash)
 
             response.action_response = 0
             response.action_msg= "All good sciclops"
