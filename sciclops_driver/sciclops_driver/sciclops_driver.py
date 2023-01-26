@@ -20,7 +20,7 @@ class SCICLOPS():
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
-        # self.CURRENT_POS = [0, 0 ,0, 0]
+        self.CURRENT_POS = [0, 0 ,0, 0]
         # self.NEST_ADJUSTMENT = 20.0
         # self.STATUS = 0
         # self.VERSION = 0
@@ -1126,8 +1126,14 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    dummy_sciclops = SCICLOPS(usb.core.find(idVendor= 0x7513, idProduct=0x0002))
-    dummy_sciclops.check_plate()
+    s = SCICLOPS()
+    s.get_error()
+    s.get_status()
+    print("STATUS MSG: ", s.status)
+    # s.check_closed()
+    # print(s.CURRENT_POS)
+
+    # dummy_sciclops.check_plate()
 
 #Finished commands
 # "GETPOS"
