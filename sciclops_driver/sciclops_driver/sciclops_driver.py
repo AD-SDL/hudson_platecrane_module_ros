@@ -477,6 +477,7 @@ class SCICLOPS():
         except:
             pass
 
+
     def home(self, axis = ""):
         '''
         Homes all of the axes. Returns to neutral position (above exchange)
