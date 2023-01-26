@@ -41,8 +41,6 @@ class SCICLOPS():
         # if not is_homed:
         #     self.home()
 
-            
-    
 
     def connect_sciclops(self):
         '''
