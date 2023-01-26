@@ -20,7 +20,7 @@ class SCICLOPS():
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
-        self.CURRENT_POS = [0, 0 ,0, 0]
+        self.current_pos = [0, 0 ,0, 0]
         # self.NEST_ADJUSTMENT = 20.0
         # self.STATUS = 0
         # self.VERSION = 0
@@ -37,6 +37,7 @@ class SCICLOPS():
         self.success_count = 0
         self.status = self.get_status()
         self.error = self.get_error()
+        self.job_flag = ""
 
         # if not is_homed:
         #     self.home()
@@ -272,7 +273,7 @@ class SCICLOPS():
         try:
         # Checks if specified format is found in the last line of feedback
             if output_line[5][5:9] != "0000": 
-                self.ERROR = "ERROR: %s" % output_line[5]
+                self.error = "ERROR: %s" % output_line[5]
                 
         except: 
             pass
@@ -297,9 +298,9 @@ class SCICLOPS():
             # Checks if specified format is found in feedback
             exp = r"Z:([-.\d]+), R:([-.\d]+), Y:([-.\d]+), P:([-.\d]+)" # Format of coordinates provided in feedback
             find_current_pos = re.search(exp,out_msg)
-            self.CURRENT_POS = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
+            self.current_pos = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
             
-            print(self.CURRENT_POS)
+            print(self.current_pos)
         except:
             pass
 
@@ -334,11 +335,15 @@ class SCICLOPS():
             # Checks if specified format is found in feedback
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
             find_status= re.search(exp,out_msg)
-            self.STATUS = find_status[1]
-        
+            self.status = find_status[1]
+
+            self.job_flag = "READY"
+
             return True
         
         except:
+            self.job_flag = "BUSY"
+
             return False
     
     def check_complete_loop(self):
@@ -373,26 +378,26 @@ class SCICLOPS():
             pass
     
     #TODO: swings outward and collides with pf400
-    # def reset(self):
-    #     '''
-    #     Resets Sciclops
-    #     '''
+    def reset(self):
+        '''
+        Resets Sciclops
+        '''
 
-    #     self.set_speed(5)
+        self.set_speed(5)
 
-    #     command = 'RESET\r\n' # Command interpreted by Sciclops
-    #     out_msg =  self.send_command(command)
+        command = 'RESET\r\n' # Command interpreted by Sciclops
+        out_msg =  self.send_command(command)
         
-    #     try:
-    #         # Checks if specified format is found in feedback
-    #         exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
-    #         find_reset = re.search(exp,out_msg)
-    #         self.RESET = find_reset[1] 
+        try:
+            # Checks if specified format is found in feedback
+            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
+            find_reset = re.search(exp,out_msg)
+            self.RESET = find_reset[1] 
 
-    #         print(self.RESET)
+            print(self.RESET)
         
-    #     except:
-    #         pass
+        except:
+            pass
 
     def get_config(self):
         '''
