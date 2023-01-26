@@ -14,8 +14,9 @@ class SCICLOPS():
     '''
     
     def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID = 0x0002):
-
-        self.host_path = self.connect_sciclops(VENDOR_ID, PRODUCT_ID)
+        self.VENDOR_ID = 0x7513
+        self.PRODUCT_ID = 0x0002
+        self.host_path = self.connect_sciclops()
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
@@ -43,11 +44,12 @@ class SCICLOPS():
             
     
 
-    def connect_sciclops(self, VENDOR_ID, PRODUCT_ID):
+    def connect_sciclops(self):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
-        host_path = usb.core.find(idVendor = VENDOR_ID, idProduct = PRODUCT_ID)
+        host_path = usb.core.find(idVendor = self.VENDOR_ID, idProduct = self.PRODUCT_ID)
+
         if host_path is None:
             raise Exception("Could not find Id System Barcode Reader.")
 
@@ -248,7 +250,7 @@ class SCICLOPS():
        
         return response_buffer
 
-    def get_error(self, response_buffer):
+    def get_error(self, response_buffer = None):
         '''
         Gets error message from the feedback.
         '''
@@ -1120,8 +1122,8 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    dummy_sciclops = SCICLOPS()
-    dummy_sciclops.check_plate()
+    # dummy_sciclops = SCICLOPS()
+    # dummy_sciclops.check_plate()
 
 #Finished commands
 # "GETPOS"

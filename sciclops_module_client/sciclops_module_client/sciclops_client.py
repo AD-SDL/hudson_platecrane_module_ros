@@ -64,11 +64,14 @@ class ScilopsClient(Node):
    
     def connect_robot(self):
         try:
+            self.get_logger().info("Trying robot connection")
             self.sciclops = SCICLOPS()
+            sleep(5)
 
         except Exception as error_msg:
             self.state = "SCICLOPS CONNECTION ERROR"
             self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
+            sleep(10)
 
         else:
             self.get_logger().info("SCICLOPS online")
