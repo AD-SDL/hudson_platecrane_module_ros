@@ -66,12 +66,10 @@ class ScilopsClient(Node):
         try:
             self.get_logger().info("Trying robot connection")
             self.sciclops = SCICLOPS()
-            sleep(5)
 
         except Exception as error_msg:
             self.state = "SCICLOPS CONNECTION ERROR"
             self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
-            sleep(10)
 
         else:
             self.get_logger().info("SCICLOPS online")
@@ -188,6 +186,8 @@ def main(args = None):
         except KeyboardInterrupt:
             sciclops_client.get_logger().info('Keyboard interrupt, shutting down.\n')
         finally:
+            sciclops_client.sciclops.disconnect_robot()
+            sciclops_client.get_logger().warn("Robot connection is closed")
             executor.shutdown()
             sciclops_client.destroy_node()
     finally:
