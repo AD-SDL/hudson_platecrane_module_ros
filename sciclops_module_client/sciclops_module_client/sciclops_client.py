@@ -27,6 +27,7 @@ class ScilopsClient(Node):
         super().__init__(TEMP_NODE_NAME)
         node_name = self.get_name()
         self.state = "UNKNOWN"
+        self.action_flag = "READY"
 
         # Setting temporary default parameter values        
         self.declare_parameter("vendor_id",0x7513)
@@ -39,7 +40,12 @@ class ScilopsClient(Node):
         self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
 
         self.connect_robot()
-        
+
+        self.sciclops.get_status() 
+        self.robot_status = self.sciclops.status
+        self.sciclops.check_complete()
+        self.job = self.sciclops.job_flag
+
         self.description = {
             'name': node_name,
             'type': 'sciclops_plate_stacker',
@@ -54,7 +60,7 @@ class ScilopsClient(Node):
         description_cb_group = ReentrantCallbackGroup()
         state_cb_group = ReentrantCallbackGroup()
 
-        timer_period = 0.5  # seconds
+        timer_period = 5.5 # seconds
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
@@ -81,33 +87,54 @@ class ScilopsClient(Node):
         msg = String()
 
         try:
-            self.sciclops.get_status() 
-            status_state = self.sciclops.status
-            self.sciclops.check_complete
-            job = self.sciclops.job_flag
-            self.get_logger().warn(status_state)
-            self.get_logger().warn(job)
+            self.robot_status = self.sciclops.status
+            self.job = self.sciclops.job_flag
+            # self.sciclops.get_status() 
+            # self.robot_status = self.sciclops.status
+            # self.sciclops.check_complete()
+            # job = self.sciclops.job_flag
+            # print(type(self.robot_status))
+            # self.get_logger().warn(self.robot_status)
+            # self.get_logger().warn(job)
 
         except Exception as err:
             self.get_logger().error("SCICLOPS IS NOT RESPONDING! ERROR: " + str(err))
             self.state = "SCICLOPS CONNECTION ERROR"
 
+        if self.state == "COMPLETED":
+            msg.data = 'State: %s' % self.state
+            self.statePub.publish(msg)
+            self.get_logger().info(msg.data)
+            self.state = "READY" # TODO: THERE IS A DEADLOCK ISSUE HERE
 
         if self.state != "SCICLOPS CONNECTION ERROR":
             #TODO: EDIT THE DRIVER TO RECEIVE ACTUAL ROBOT STATUS
-            if status_state == "Ready":
+            if self.robot_status == "1" and self.job == "READY" and self.action_flag == "READY":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-            elif status_state == "RUNNING":
+            elif self.job == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-            elif status_state == "ERROR":
+            elif self.robot_status == "0":
+                self.state = "ERROR"
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().error(msg.data)
+                self.get_logger().error("ROBOT is not homed")
+                self.get_logger().warn("Homing the robot")
+                # self.sciclops.get_plate("tower1")
+                # sleep(60)
+                # self.sciclops.reset()
+                # sleep(20)
+                # self.sciclops.home()
+                # sleep(30)
+            elif self.robot_status == "ERROR":
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
@@ -144,18 +171,21 @@ class ScilopsClient(Node):
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
         '''
-        
+        if self.state != "ERROR" or self.state != "SCICLOPS CONNECTION ERROR":
+            self.action_flag = "BUSY"
+
         if request.action_handle=='status':
             self.sciclops.get_status()
             response.action_response = True
         if request.action_handle=='home':            
-            self.state = "BUSY"
-            self.stateCallback()
+            # self.state = "BUSY"
+            # self.stateCallback()
             self.sciclops.home()    
             response.action_response = True
+
         if request.action_handle=='get_plate':
-            self.state = "BUSY"
-            self.stateCallback()
+            # self.state = "BUSY"
+            self.get_logger().info("Starting get plate")
             vars = eval(request.vars)
             print(vars)
 
@@ -168,9 +198,13 @@ class ScilopsClient(Node):
             response.action_response = 0
             response.action_msg= "All good sciclops"
             self.get_logger().info('Finished Action: ' + request.action_handle)
+            self.action_flag = "READY"
+            self.state = "COMPLETED"
+
             return response
             
         self.state = "COMPLETED"
+        self.action_flag = "READY"
 
         return response
 
