@@ -6,6 +6,7 @@ import usb.util
 import sys
 import re
 
+            
 
 class SCICLOPS():
     '''
@@ -14,6 +15,7 @@ class SCICLOPS():
     '''
     
     def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID = 0x0002):
+
         self.VENDOR_ID = 0x7513
         self.PRODUCT_ID = 0x0002
         self.host_path = self.connect_sciclops()
@@ -22,11 +24,11 @@ class SCICLOPS():
         self.COMPRESSION_DISTANCE = 3.35
         self.current_pos = [0, 0 ,0, 0]
         # self.NEST_ADJUSTMENT = 20.0
-        # self.STATUS = 0
+        self.STATUS = 0
         # self.VERSION = 0
         # self.CONFIG = 0
-        # self.ERROR = ""
-        # self.GRIPLENGTH = 0
+        self.ERROR = ""
+        self.GRIPLENGTH = 0
         # self.COLLAPSEDDISTANCE = 0
         # self.STEPSPERUNIT = [0, 0 ,0, 0]
         # self.HOMEMSG = ""
@@ -37,13 +39,10 @@ class SCICLOPS():
         self.success_count = 0
         self.status = self.get_status()
         self.error = self.get_error()
-        self.job_flag = ""
+        self.job_flag = "READY"
 
         # if not is_homed:
         #     self.home()
-
-            
-    
 
     def connect_sciclops(self):
         '''
@@ -259,10 +258,11 @@ class SCICLOPS():
        
         return response_buffer
 
-    def get_error(self, response_buffer = None):
+    def get_error(self, response_buffer=None):
         '''
         Gets error message from the feedback.
         '''
+
         if not response_buffer: 
             return  
 
@@ -273,7 +273,7 @@ class SCICLOPS():
         try:
         # Checks if specified format is found in the last line of feedback
             if output_line[5][5:9] != "0000": 
-                self.error = "ERROR: %s" % output_line[5]
+                self.ERROR = "ERROR: %s" % output_line[5]
                 
         except: 
             pass
@@ -336,12 +336,12 @@ class SCICLOPS():
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
             find_status= re.search(exp,out_msg)
             self.status = find_status[1]
-
             self.job_flag = "READY"
-
+        
             return True
         
         except:
+
             self.job_flag = "BUSY"
 
             return False
@@ -379,27 +379,25 @@ class SCICLOPS():
     
     #TODO: swings outward and collides with pf400
     def reset(self):
-        '''
-        Resets Sciclops
-        '''
-    
+         '''
+         Resets Sciclops
+         '''
 
-        self.set_speed(5)
+         self.set_speed(5)
 
-        command = 'RESET\r\n' # Command interpreted by Sciclops
-        out_msg =  self.send_command(command)
-    
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
-            find_reset = re.search(exp,out_msg)
-            self.RESET = find_reset[1] 
+         command = 'RESET\r\n' # Command interpreted by Sciclops
+         out_msg =  self.send_command(command)
+        
+         try:
+             # Checks if specified format is found in feedback
+             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
+             find_reset = re.search(exp,out_msg)
+             self.RESET = find_reset[1] 
 
-            print(self.RESET)
-    
-        except:
-            pass
-
+             print(self.RESET)
+        
+         except:
+             pass
 
     def get_config(self):
         '''
@@ -476,7 +474,6 @@ class SCICLOPS():
 
         except:
             pass
-
 
     def home(self, axis = ""):
         '''
@@ -1140,7 +1137,15 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    # dummy_sciclops = SCICLOPS()
+    s = SCICLOPS()
+    # s.get_error()
+    # s.get_status()
+    s.reset()
+    s.home()
+    print("STATUS MSG: ", s.status)
+    # s.check_closed()
+    # print(s.CURRENT_POS)
+
     # dummy_sciclops.check_plate()
 
 #Finished commands
