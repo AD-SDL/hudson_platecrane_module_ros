@@ -60,7 +60,7 @@ class ScilopsClient(Node):
         description_cb_group = ReentrantCallbackGroup()
         state_cb_group = ReentrantCallbackGroup()
 
-        timer_period = 5.5 # seconds
+        timer_period = 0.5 # seconds
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
@@ -101,11 +101,6 @@ class ScilopsClient(Node):
             self.get_logger().error("SCICLOPS IS NOT RESPONDING! ERROR: " + str(err))
             self.state = "SCICLOPS CONNECTION ERROR"
 
-        if self.state == "COMPLETED":
-            msg.data = 'State: %s' % self.state
-            self.statePub.publish(msg)
-            self.get_logger().info(msg.data)
-            self.state = "READY" # TODO: THERE IS A DEADLOCK ISSUE HERE
 
         if self.state != "SCICLOPS CONNECTION ERROR":
             #TODO: EDIT THE DRIVER TO RECEIVE ACTUAL ROBOT STATUS
@@ -139,6 +134,13 @@ class ScilopsClient(Node):
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
+            
+            elif self.state == "COMPLETED":
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().info(msg.data)
+                self.sciclops.get_status() 
+                self.sciclops.check_complete()
         else:
             msg.data = 'State: %s' % self.state
             self.statePub.publish(msg)
