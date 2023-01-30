@@ -39,7 +39,7 @@ class SCICLOPS():
         self.success_count = 0
         self.status = self.get_status()
         self.error = self.get_error()
-        self.job_flag = "READY"
+        self.movement_state = "READY"
 
         # if not is_homed:
         #     self.home()
@@ -336,13 +336,13 @@ class SCICLOPS():
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
             find_status= re.search(exp,out_msg)
             self.status = find_status[1]
-            self.job_flag = "READY"
+            self.movement_state = "READY"
         
             return True
         
         except:
 
-            self.job_flag = "BUSY"
+            self.movement_state = "BUSY"
 
             return False
     
