@@ -141,6 +141,7 @@ class ScilopsClient(Node):
                 self.get_logger().info(msg.data)
                 self.sciclops.get_status() 
                 self.sciclops.check_complete()
+                self.state = "UNKOWN" #Seting to "UNKOWN" state to prevent wrong state data being published after "COMPLETED" is already published for ones.
         else:
             msg.data = 'State: %s' % self.state
             self.statePub.publish(msg)
