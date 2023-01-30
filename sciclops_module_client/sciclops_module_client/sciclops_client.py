@@ -44,7 +44,7 @@ class ScilopsClient(Node):
         self.sciclops.get_status() 
         self.robot_status = self.sciclops.status
         self.sciclops.check_complete()
-        self.job = self.sciclops.job_flag
+        self.job = self.sciclops.movement_state
 
         self.description = {
             'name': node_name,
@@ -88,11 +88,11 @@ class ScilopsClient(Node):
 
         try:
             self.robot_status = self.sciclops.status
-            self.job = self.sciclops.job_flag
+            self.job = self.sciclops.movement_state
             # self.sciclops.get_status() 
             # self.robot_status = self.sciclops.status
             # self.sciclops.check_complete()
-            # job = self.sciclops.job_flag
+            # job = self.sciclops.movement_state
             # print(type(self.robot_status))
             # self.get_logger().warn(self.robot_status)
             # self.get_logger().warn(job)
@@ -139,8 +139,8 @@ class ScilopsClient(Node):
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
-                self.sciclops.get_status() 
-                self.sciclops.check_complete()
+                self.sciclops.get_status() #Getting new status from the robot to reset the state
+                self.sciclops.check_complete() #Getting the new movement state from the robot to reset the movement state 
                 self.state = "UNKOWN" #Seting to "UNKOWN" state to prevent wrong state data being published after "COMPLETED" is already published for ones.
         else:
             msg.data = 'State: %s' % self.state
