@@ -60,7 +60,7 @@ class ScilopsClient(Node):
         description_cb_group = ReentrantCallbackGroup()
         state_cb_group = ReentrantCallbackGroup()
 
-        timer_period = 0.5 # seconds
+        timer_period = 1 # seconds
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
@@ -141,7 +141,6 @@ class ScilopsClient(Node):
                 self.get_logger().info(msg.data)
                 self.sciclops.get_status() #Getting new status from the robot to reset the state
                 self.sciclops.check_complete() #Getting the new movement state from the robot to reset the movement state 
-                self.state = "UNKOWN" #Seting to "UNKOWN" state to prevent wrong state data being published after "COMPLETED" is already published for ones.
         else:
             msg.data = 'State: %s' % self.state
             self.statePub.publish(msg)
