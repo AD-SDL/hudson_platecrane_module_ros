@@ -6,6 +6,7 @@ import usb.util
 import sys
 import re
 
+            
 
 class SCICLOPS():
     '''
@@ -13,20 +14,21 @@ class SCICLOPS():
     Python interface that allows remote commands to be executed to the Sciclops. 
     '''
     
-    def __init__(self):
+    def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID = 0x0002):
+
         self.VENDOR_ID = 0x7513
         self.PRODUCT_ID = 0x0002
         self.host_path = self.connect_sciclops()
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
         self.COMPRESSION_DISTANCE = 3.35
-        self.CURRENT_POS = [0, 0 ,0, 0]
+        self.current_pos = [0, 0 ,0, 0]
         # self.NEST_ADJUSTMENT = 20.0
-        # self.STATUS = 0
+        self.STATUS = 0
         # self.VERSION = 0
         # self.CONFIG = 0
-        # self.ERROR = ""
-        # self.GRIPLENGTH = 0
+        self.ERROR = ""
+        self.GRIPLENGTH = 0
         # self.COLLAPSEDDISTANCE = 0
         # self.STEPSPERUNIT = [0, 0 ,0, 0]
         # self.HOMEMSG = ""
@@ -37,24 +39,31 @@ class SCICLOPS():
         self.success_count = 0
         self.status = self.get_status()
         self.error = self.get_error()
+        self.movement_state = "READY"
 
         # if not is_homed:
         #     self.home()
-
 
     def connect_sciclops(self):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
-        
-        host_path = usb.core.find(idVendor=self.VENDOR_ID, idProduct=self.PRODUCT_ID)
+        host_path = usb.core.find(idVendor = self.VENDOR_ID, idProduct = self.PRODUCT_ID)
 
-        if host_path  is None:
-            sys.exit("Could not find Id System Barcode Reader.")
+        if host_path is None:
+            raise Exception("Could not establish connection.")
+
         else:
             print('Device Connected')
+            return host_path
 
-        return host_path
+    def disconnect_robot(self):
+        try:
+            usb.util.dispose_resources(self.host_path)
+        except Exception as err:
+            print(err)
+        else:
+            print("Robot is disconnected")
 
     def load_plate_info(self):
         '''
@@ -289,9 +298,9 @@ class SCICLOPS():
             # Checks if specified format is found in feedback
             exp = r"Z:([-.\d]+), R:([-.\d]+), Y:([-.\d]+), P:([-.\d]+)" # Format of coordinates provided in feedback
             find_current_pos = re.search(exp,out_msg)
-            self.CURRENT_POS = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
+            self.current_pos = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
             
-            print(self.CURRENT_POS)
+            print(self.current_pos)
         except:
             pass
 
@@ -307,9 +316,9 @@ class SCICLOPS():
             # Checks if specified format is found in feedback
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
             find_status= re.search(exp,out_msg)
-            self.STATUS = find_status[1]
+            self.status = find_status[1]
         
-            print(self.STATUS)
+            print(self.status)
         
         except:
             pass
@@ -326,11 +335,15 @@ class SCICLOPS():
             # Checks if specified format is found in feedback
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
             find_status= re.search(exp,out_msg)
-            self.STATUS = find_status[1]
+            self.status = find_status[1]
+            self.movement_state = "READY"
         
             return True
         
         except:
+
+            self.movement_state = "BUSY"
+
             return False
     
     def check_complete_loop(self):
@@ -1125,8 +1138,10 @@ if __name__ == "__main__":
     Runs given function.
     '''
     s = SCICLOPS()
-    s.get_error()
-    s.get_status()
+    # s.get_error()
+    # s.get_status()
+    s.reset()
+    s.home()
     print("STATUS MSG: ", s.status)
     # s.check_closed()
     # print(s.CURRENT_POS)

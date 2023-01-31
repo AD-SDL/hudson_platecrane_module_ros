@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sciclopsNode = sciclops_module_client.sciclopsNode:main',
+            'sciclops_client = sciclops_module_client.sciclops_client:main',
         ],
    },
 )
