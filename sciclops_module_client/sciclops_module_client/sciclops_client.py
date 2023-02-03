@@ -127,6 +127,7 @@ class ScilopsClient(Node):
 
 
         if self.state != "SCICLOPS CONNECTION ERROR":
+
             if self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
@@ -157,11 +158,13 @@ class ScilopsClient(Node):
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
-            
+                self.action_flag = "READY"
+
             elif self.state == "COMPLETED":
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
+                self.action_flag = "READY"
 
         else:
             msg.data = 'State: %s' % self.state
@@ -195,17 +198,47 @@ class ScilopsClient(Node):
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
         '''
-        if self.state != "ERROR" or self.state != "SCICLOPS CONNECTION ERROR":
-            self.action_flag = "BUSY"
+        if self.state == "SCICLOPS CONNECTION ERROR":
+            message = "Connection error, cannot accept a job!"
+            self.get_logger().error(message)
+            response.action_response = -1
+            response.action_msg = message
+            return response
 
-        if request.action_handle=='status':
-            self.sciclops.get_status()
-            response.action_response = True
-        elif request.action_handle=='home':            
-            # self.state = "BUSY"
-            # self.stateCallback()
-            self.sciclops.home()    
-            response.action_response = True
+        while self.state != "READY":
+            self.get_logger().warn("Waiting for SCICLOPS to switch READY state...")
+            sleep(0.5)
+            
+        self.action_flag = "BUSY"
+
+        if request.action_handle == 'status':
+            try:
+                self.sciclops.get_status()
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Get status failed. Error:" + err
+            else:    
+                response.action_response = 0
+                response.action_msg= "Get status successfully completed"  
+
+            self.state = "COMPLETED"
+            return response 
+
+
+        elif request.action_handle == 'home':            
+
+            try:
+                self.sciclops.home()  
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Homing failed. Error:" + err
+            else:    
+                response.action_response = 0
+                response.action_msg= "Homing successfully completed"  
+            
+            self.state = "COMPLETED"
+            return response
+
 
         elif request.action_handle=='get_plate':
             # self.state = "BUSY"
@@ -217,16 +250,27 @@ class ScilopsClient(Node):
             lid = vars.get('lid',False)
             trash = vars.get('trash',False)
 
-            self.sciclops.get_plate(pos, lid, trash)
+            try:
+                self.sciclops.get_plate(pos, lid, trash)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Get plate failed. Error:" + err
+            else:    
+                response.action_response = 0
+                response.action_msg= "Get plate successfully completed"
 
-            response.action_response = 0
-            response.action_msg= "All good sciclops"
             self.get_logger().info('Finished Action: ' + request.action_handle)
-            self.action_flag = "READY"
             self.state = "COMPLETED"
 
             return response
-            
+
+        else: 
+            msg = "UNKOWN ACTION REQUEST! Available actions: status, home, get_plate"
+            response.action_response = -1
+            response.action_msg= msg
+            self.get_logger().error('Error: ' + msg)
+            self.state = "COMPLETED"
+            return response
 
 
 
