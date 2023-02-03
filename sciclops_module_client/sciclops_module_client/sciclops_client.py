@@ -46,7 +46,7 @@ class ScilopsClient(Node):
         self.robot_movement_state = self.sciclops.movement_state
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
-        
+
         self.description = {
             'name': node_name,
             'type': 'sciclops_plate_stacker',
@@ -123,7 +123,6 @@ class ScilopsClient(Node):
 
 
         if self.state != "SCICLOPS CONNECTION ERROR":
-            #TODO: EDIT THE DRIVER TO RECEIVE ACTUAL ROBOT STATUS
             if self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
@@ -159,8 +158,7 @@ class ScilopsClient(Node):
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
-                self.sciclops.get_status() #Getting new status from the robot to reset the state
-                self.sciclops.check_complete() #Getting the new movement state from the robot to reset the movement state 
+
         else:
             msg.data = 'State: %s' % self.state
             self.statePub.publish(msg)
