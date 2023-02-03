@@ -33,8 +33,7 @@ class ScilopsClient(Node):
         self.declare_parameter("vendor_id",0x7513)
         self.declare_parameter("product_id",0x0002)
 
-        # Receiving the real IP and PORT from the launch parameters
-        
+        # Receiving the real vendor_id and product_id from the launch parameters
         self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().integer_value
         self.product_id = self.get_parameter("product_id").get_parameter_value().integer_value
         self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
@@ -44,8 +43,10 @@ class ScilopsClient(Node):
         self.sciclops.get_status() 
         self.robot_status = self.sciclops.status
         self.sciclops.check_complete()
-        self.job = self.sciclops.movement_state
-
+        self.robot_movement_state = self.sciclops.movement_state
+        self.past_movement_state = "-1"
+        self.state_refresher_timer = 0
+        
         self.description = {
             'name': node_name,
             'type': 'sciclops_plate_stacker',
@@ -60,7 +61,7 @@ class ScilopsClient(Node):
         description_cb_group = ReentrantCallbackGroup()
         state_cb_group = ReentrantCallbackGroup()
 
-        timer_period = 1 # seconds
+        timer_period = 0.5 # seconds
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
 
@@ -80,6 +81,31 @@ class ScilopsClient(Node):
         else:
             self.get_logger().info("SCICLOPS online")
 
+    def robot_state_refresher_callback(self):
+        "Refreshes the robot states if robot cannot update the state parameters automatically because it is not running any jobs"
+        try:
+            # TODO: FIX the bug: When Action call and refresh state callback function is executed at the same time action call is being ignored.
+            # Refresh state callback runs "update state" functions while action_callback is running transfer and Network socket losses data when multiple commands were sent 
+
+            if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
+                self.sciclops.check_complete()
+                # self.get_logger().info("Refresh state")
+                self.state_refresher_timer = 0 
+            
+            if self.past_movement_state == self.robot_movement_state:
+                self.state_refresher_timer += 1
+            elif self.past_movement_state != self.robot_movement_state:
+                self.past_movement_state = self.robot_movement_state
+                self.state_refresher_timer = 0 
+
+            if self.state_refresher_timer > 180: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
+                # self.get_logger().info("Refresh state, robot state is frozen...")
+                self.action_flag = "READY"
+
+        except Exception as err:
+            # self.state = "PF400 CONNECTION ERROR"
+            self.get_logger().error(str(err))
+
     def stateCallback(self):
         '''
         Publishes the sciclops state to the 'state' topic. 
@@ -88,14 +114,8 @@ class ScilopsClient(Node):
 
         try:
             self.robot_status = self.sciclops.status
-            self.job = self.sciclops.movement_state
-            # self.sciclops.get_status() 
-            # self.robot_status = self.sciclops.status
-            # self.sciclops.check_complete()
-            # job = self.sciclops.movement_state
-            # print(type(self.robot_status))
-            # self.get_logger().warn(self.robot_status)
-            # self.get_logger().warn(job)
+            self.robot_movement_state = self.sciclops.movement_state
+
 
         except Exception as err:
             self.get_logger().error("SCICLOPS IS NOT RESPONDING! ERROR: " + str(err))
@@ -104,13 +124,13 @@ class ScilopsClient(Node):
 
         if self.state != "SCICLOPS CONNECTION ERROR":
             #TODO: EDIT THE DRIVER TO RECEIVE ACTUAL ROBOT STATUS
-            if self.robot_status == "1" and self.job == "READY" and self.action_flag == "READY":
+            if self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-            elif self.job == "BUSY" or self.action_flag == "BUSY":
+            elif self.robot_movement_state == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
@@ -121,8 +141,8 @@ class ScilopsClient(Node):
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
-                self.get_logger().error("ROBOT is not homed")
-                self.get_logger().warn("Homing the robot")
+                self.get_logger().error("ROBOT IS NOT HOMED")
+                # self.get_logger().warn("Homing the robot")
                 # self.sciclops.get_plate("tower1")
                 # sleep(60)
                 # self.sciclops.reset()
@@ -179,13 +199,13 @@ class ScilopsClient(Node):
         if request.action_handle=='status':
             self.sciclops.get_status()
             response.action_response = True
-        if request.action_handle=='home':            
+        elif request.action_handle=='home':            
             # self.state = "BUSY"
             # self.stateCallback()
             self.sciclops.home()    
             response.action_response = True
 
-        if request.action_handle=='get_plate':
+        elif request.action_handle=='get_plate':
             # self.state = "BUSY"
             self.get_logger().info("Starting get plate")
             vars = eval(request.vars)
@@ -205,10 +225,7 @@ class ScilopsClient(Node):
 
             return response
             
-        self.state = "COMPLETED"
-        self.action_flag = "READY"
 
-        return response
 
 
 def main(args = None):
