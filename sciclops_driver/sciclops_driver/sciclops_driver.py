@@ -379,27 +379,6 @@ class SCICLOPS():
     
     #TODO: swings outward and collides with pf400
     def reset(self):
-<<<<<<< HEAD
-        '''
-        Resets Sciclops
-        '''
-
-        self.set_speed(5)
-
-        command = 'RESET\r\n' # Command interpreted by Sciclops
-        out_msg =  self.send_command(command)
-        
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
-            find_reset = re.search(exp,out_msg)
-            self.RESET = find_reset[1] 
-
-            print(self.RESET)
-        
-        except:
-            pass
-=======
          '''
          Resets Sciclops
          '''
@@ -419,7 +398,6 @@ class SCICLOPS():
         
          except:
              pass
->>>>>>> f19d9bae2d53c4eb4453817187c97d168a76907d
 
     def get_config(self):
         '''
@@ -1162,8 +1140,8 @@ if __name__ == "__main__":
     s = SCICLOPS()
     # s.get_error()
     # s.get_status()
-    s.reset()
-    s.home()
+    # s.reset()
+    # s.home()
     print("STATUS MSG: ", s.status)
     # s.check_closed()
     # print(s.CURRENT_POS)
