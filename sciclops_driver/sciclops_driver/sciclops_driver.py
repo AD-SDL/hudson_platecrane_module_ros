@@ -364,26 +364,26 @@ class SCICLOPS():
             pass
     
     #TODO: swings outward and collides with pf400
-    # def reset(self):
-    #     '''
-    #     Resets Sciclops
-    #     '''
+    def reset(self):
+        '''
+        Resets Sciclops
+        '''
 
-    #     self.set_speed(5)
+        self.set_speed(5)
 
-    #     command = 'RESET\r\n' # Command interpreted by Sciclops
-    #     out_msg =  self.send_command(command)
+        command = 'RESET\r\n' # Command interpreted by Sciclops
+        out_msg =  self.send_command(command)
         
-    #     try:
-    #         # Checks if specified format is found in feedback
-    #         exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
-    #         find_reset = re.search(exp,out_msg)
-    #         self.RESET = find_reset[1] 
+        try:
+            # Checks if specified format is found in feedback
+            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the version
+            find_reset = re.search(exp,out_msg)
+            self.RESET = find_reset[1] 
 
-    #         print(self.RESET)
+            print(self.RESET)
         
-    #     except:
-    #         pass
+        except:
+            pass
 
     def get_config(self):
         '''
