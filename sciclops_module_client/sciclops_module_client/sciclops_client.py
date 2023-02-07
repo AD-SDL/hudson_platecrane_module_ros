@@ -150,16 +150,18 @@ class ScilopsClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.get_logger().error("ROBOT IS NOT HOMED")
-                self.get_logger().warn("Homing the robot")
                 
-                # self.lock.acquire()
-                self.sciclops.get_plate("tower1")
-                sleep(60)
-                self.sciclops.reset()
-                sleep(20)
-                self.sciclops.home()
-                sleep(30)
-                # self.lock.release()
+                if self.robot_home_iter == 0 :
+                    self.robot_home_iter = 1
+                    self.get_logger().warn("Homing the robot")
+                    self.sciclops.get_plate("tower1")
+                    sleep(60)
+                    self.sciclops.reset()
+                    sleep(20)
+                    self.sciclops.home()
+                    sleep(30)
+
+                self.robot_home_iter = 0    
 
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
