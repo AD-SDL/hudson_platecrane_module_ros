@@ -160,8 +160,7 @@ class ScilopsClient(Node):
                     sleep(20)
                     self.sciclops.home()
                     sleep(30)
-
-                self.robot_home_iter = 0    
+                    self.robot_home_iter = 0    
 
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
