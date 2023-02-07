@@ -11,6 +11,7 @@ from wei_services.srv import WeiDescription
 from wei_services.srv import WeiActions   
 
 from time import sleep
+import threading
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
@@ -72,7 +73,9 @@ class ScilopsClient(Node):
         self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
         self.descriptionSrv = self.create_service(WeiDescription, node_name + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
-   
+        
+        self.lock = threading.Lock()
+
     def connect_robot(self):
         try:
             self.get_logger().info("Trying robot connection")
@@ -147,13 +150,15 @@ class ScilopsClient(Node):
                 self.get_logger().error(msg.data)
                 self.get_logger().error("ROBOT IS NOT HOMED")
                 self.get_logger().warn("Homing the robot")
+                self.lock.acquire()
                 self.sciclops.get_plate("tower1")
                 sleep(60)
                 self.sciclops.reset()
                 sleep(20)
                 self.sciclops.home()
                 sleep(30)
-                
+                self.lock.release()
+
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
