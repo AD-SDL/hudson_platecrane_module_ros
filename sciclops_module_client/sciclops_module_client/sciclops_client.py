@@ -153,11 +153,18 @@ class ScilopsClient(Node):
                 
                 if self.robot_home_iter == 0 :
                     self.robot_home_iter = 1
-                    self.get_logger().warn("Homing the robot")
-                    # self.sciclops.get_plate("tower1")
-                    # sleep(60)
+                    self.get_logger().warn("Resetting the robot")
                     self.sciclops.reset()
                     sleep(20)
+                    self.get_logger().warn("Homing the robot")
+                    sleep(30)
+                    self.get_logger().warn("Moving robot joints")
+                    self.sciclops.get_plate("tower1")
+                    sleep(60)
+                    self.get_logger().warn("Resetting the robot")
+                    self.sciclops.reset()
+                    sleep(20)
+                    self.get_logger().warn("Homing the robot")
                     self.sciclops.home()
                     sleep(30)
                     self.get_logger().warn("Homing completed")
