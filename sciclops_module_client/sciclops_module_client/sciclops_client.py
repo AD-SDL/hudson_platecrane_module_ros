@@ -47,6 +47,7 @@ class ScilopsClient(Node):
         self.robot_movement_state = self.sciclops.movement_state
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
+        self.robot_home_iter = 0
 
         self.description = {
             'name': node_name,
@@ -74,7 +75,7 @@ class ScilopsClient(Node):
 
         self.descriptionSrv = self.create_service(WeiDescription, node_name + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
         
-        self.lock = threading.Lock()
+        # self.lock = threading.Lock()
 
     def connect_robot(self):
         try:
@@ -150,14 +151,15 @@ class ScilopsClient(Node):
                 self.get_logger().error(msg.data)
                 self.get_logger().error("ROBOT IS NOT HOMED")
                 self.get_logger().warn("Homing the robot")
-                self.lock.acquire()
+                
+                # self.lock.acquire()
                 self.sciclops.get_plate("tower1")
                 sleep(60)
                 self.sciclops.reset()
                 sleep(20)
                 self.sciclops.home()
                 sleep(30)
-                self.lock.release()
+                # self.lock.release()
 
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
