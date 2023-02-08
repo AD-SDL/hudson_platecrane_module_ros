@@ -138,6 +138,12 @@ class ScilopsClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
+            elif self.state == "COMPLETED":
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().info(msg.data)
+                self.action_flag = "READY"
+
             elif self.robot_movement_state == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
                 msg.data = 'State: %s' % self.state
@@ -168,11 +174,6 @@ class ScilopsClient(Node):
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
 
-            elif self.state == "COMPLETED":
-                msg.data = 'State: %s' % self.state
-                self.statePub.publish(msg)
-                self.get_logger().info(msg.data)
-                self.action_flag = "READY"
 
         else:
             msg.data = 'State: %s' % self.state
