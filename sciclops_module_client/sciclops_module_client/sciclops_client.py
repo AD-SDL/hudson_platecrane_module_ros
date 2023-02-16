@@ -11,6 +11,7 @@ from wei_services.srv import WeiDescription
 from wei_services.srv import WeiActions   
 
 from time import sleep
+import threading
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
@@ -46,6 +47,7 @@ class ScilopsClient(Node):
         self.robot_movement_state = self.sciclops.movement_state
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
+        self.robot_home_iter = 0
 
         self.description = {
             'name': node_name,
@@ -72,7 +74,9 @@ class ScilopsClient(Node):
         self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
         self.descriptionSrv = self.create_service(WeiDescription, node_name + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
-   
+        
+        # self.lock = threading.Lock()
+
     def connect_robot(self):
         try:
             self.get_logger().info("Trying robot connection")
@@ -134,6 +138,12 @@ class ScilopsClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
+            elif self.state == "COMPLETED":
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().info(msg.data)
+                self.action_flag = "READY"
+
             elif self.robot_movement_state == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
                 msg.data = 'State: %s' % self.state
@@ -146,13 +156,17 @@ class ScilopsClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.get_logger().error("ROBOT IS NOT HOMED")
-                # self.get_logger().warn("Homing the robot")
-                # self.sciclops.get_plate("tower1")
-                # sleep(60)
-                # self.sciclops.reset()
-                # sleep(20)
-                # self.sciclops.home()
-                # sleep(30)
+                
+                if self.robot_home_iter == 0 :
+                    self.robot_home_iter = 1
+                    self.get_logger().warn("Resetting the robot")
+                    self.sciclops.reset()
+                    sleep(25)
+                    self.get_logger().warn("Homing the robot")
+                    sleep(25)
+                    self.get_logger().warn("Homing completed")
+                    self.robot_home_iter = 0    
+
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
@@ -160,11 +174,6 @@ class ScilopsClient(Node):
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
 
-            elif self.state == "COMPLETED":
-                msg.data = 'State: %s' % self.state
-                self.statePub.publish(msg)
-                self.get_logger().info(msg.data)
-                self.action_flag = "READY"
 
         else:
             msg.data = 'State: %s' % self.state
