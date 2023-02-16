@@ -278,7 +278,7 @@ class ScilopsClient(Node):
             response.action_response = -1
             response.action_msg= msg
             self.get_logger().error('Error: ' + msg)
-            self.state = "COMPLETED"
+            self.state = "ERROR"
             return response
 
 
