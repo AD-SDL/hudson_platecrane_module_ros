@@ -1,3 +1,4 @@
+import asyncio
 from asyncio.unix_events import DefaultEventLoopPolicy
 from pickle import TRUE
 from time import sleep  
@@ -323,7 +324,7 @@ class SCICLOPS():
         except:
             pass
     
-    def check_complete(self):
+    async def check_complete(self):
         '''
         Checks to see if current sciclops action has completed
         '''
@@ -337,7 +338,7 @@ class SCICLOPS():
             find_status= re.search(exp,out_msg)
             self.status = find_status[1]
             self.movement_state = "READY"
-        
+
             return True
         
         except:
@@ -345,16 +346,17 @@ class SCICLOPS():
             self.movement_state = "BUSY"
 
             return False
-    
-    def check_complete_loop(self):
+        finally:
+            await asyncio.sleep(0.1)
+
+    async def check_complete_loop(self):
         '''
         continuously runs check_complete until it returns True
         '''
         a = False
         while a == False:
-            a = self.check_complete()
-            sleep(1)
-
+            a = await self.check_complete()
+            
         print('ACTION COMPLETE')
 
 
@@ -724,13 +726,13 @@ class SCICLOPS():
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
 
         # Move above desired tower
         self.set_speed(100)
         self.move(R=tower_info['pos']['R'], Z=23.5188, P=tower_info['pos']['P'], Y=tower_info['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         
         # Remove plate from tower
         self.close()
@@ -745,12 +747,12 @@ class SCICLOPS():
         self.set_speed(100)
         self.jog('Z', 1000)
         # check coordinates
-        self.check_complete_loop()
+        # asyncio.run(self.check_complete_loop())
         
         # Place in exchange
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        # asyncio.run(self.check_complete_loop())
         self.jog('Z', -380)
         self.set_speed(5)
         self.jog('Z', -30)
@@ -758,7 +760,7 @@ class SCICLOPS():
         self.set_speed(100)
         self.jog('Z', 1000)
         # check coordinates
-        self.check_complete_loop()
+        # asyncio.run(self.check_complete_loop())
         self.labware['exchange']['howmany']+=1
         self.labware['exchange']['type'] = self.labware[location]['type']
         self.labware['exchange']['size'] = self.labware[location]['size']
@@ -773,7 +775,7 @@ class SCICLOPS():
         # Move back to neutral
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        # asyncio.run(self.check_complete_loop())
 
         # update labware
         self.labware[location]['howmany']-=1
@@ -846,7 +848,7 @@ class SCICLOPS():
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         plate_type = self.labware['exchange']['type']
 
 
@@ -864,12 +866,12 @@ class SCICLOPS():
             self.set_speed(100)
             self.jog('Z', 1000)
             # check coordinates
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             if trash == True:
                 # move above trash
                 self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
-                self.check_complete_loop()
+                asyncio.run(self.check_complete_loop())
 
                 # drop in trash
                 self.jog('Z', -400)
@@ -879,7 +881,7 @@ class SCICLOPS():
                 # return to home
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
                 # check coordinates
-                self.check_complete_loop()
+                asyncio.run(self.check_complete_loop())
                 
                 # update labware
                 self.labware['exchange']['has_lid'] = False
@@ -891,19 +893,19 @@ class SCICLOPS():
                 # move above desired lid nest
                 self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
                 # check coordinates
-                self.check_complete_loop()
+                asyncio.run(self.check_complete_loop())
 
                 # place in lid nest
                 self.jog('Z', -400)
                 self.open()
                 self.jog('Z', 1000)
                 # check coordinates
-                self.check_complete_loop()
+                asyncio.run(self.check_complete_loop())
 
                 # return to home
                 self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
                 # check coordinates
-                self.check_complete_loop()
+                asyncio.run(self.check_complete_loop())
 
                 # update labware dict
                 self.labware[lid_nest]['howmany']+=1
@@ -927,7 +929,7 @@ class SCICLOPS():
             # move above desired lidnest 
             self.move(R=self.labware[lid_nest]['pos']['R'], Z=23.5188, P=self.labware[lid_nest]['pos']['P'], Y=self.labware[lid_nest]['pos']['Y'])
             # check coordinates
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # grab lid
             self.close()
@@ -941,24 +943,24 @@ class SCICLOPS():
             self.close()
             self.set_speed(100)
             self.jog('Z', 1000)
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # move above exchange
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
             # check coordinates
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # place lid onto plate
             self.jog('Z', -400)
             self.open()
             self.jog('Z', 1000)
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
 
             # return to home
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
             # check coordinates
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # update labware dict
             self.labware[lid_nest]['howmany']-=1
@@ -973,7 +975,7 @@ class SCICLOPS():
         self.jog('Z', 1000) 
         self.set_speed(12) 
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         plate_type = self.labware['exchange']['type']
         if add_lid == True:
             lidnest = self.check_for_lid()
@@ -985,7 +987,7 @@ class SCICLOPS():
         self.open()
         self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         # grab plate
         self.set_speed(100)
         self.jog('Z', -380)
@@ -994,25 +996,25 @@ class SCICLOPS():
         self.close()
         self.set_speed(100)
         self.jog('Z', 1000)
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
 
         # move above tower, place plate in tower
         self.move(R=self.labware[tower]['pos']['R'], Z=23.5188, P=self.labware[tower]['pos']['P'], Y=self.labware[tower]['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         self.set_speed(10)
         self.jog('Z', -1000)
         self.open()
         self.set_speed(100)
         self.jog('Z', 1000)
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
 
 
         # move to home
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
         # check coordinates
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
 
         # update labware dict
         self.labware['exchange']['howmany']-=1
@@ -1030,7 +1032,7 @@ class SCICLOPS():
         self.jog('Z', 1000) 
         self.set_speed(12)
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         # check to make sure lid present
         if self.labware[lidnest]['howmany'] >= 1: # lid in nest
             lid_type = self.labware[lidnest]['type']
@@ -1038,7 +1040,7 @@ class SCICLOPS():
             self.set_speed(100)
             self.close()
             self.move(R=self.labware[lidnest]['pos']['R'], Z=23.5188, P=self.labware[lidnest]['pos']['P'], Y=self.labware[lidnest]['pos']['Y'])
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # grab lid
             self.jog('Z', -380)
@@ -1051,21 +1053,21 @@ class SCICLOPS():
             self.close()
             self.set_speed(100)
             self.jog('Z', 1000)
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
         
             # move above trash
             self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
             
             # drop lid 
             self.jog('Z', -1000)
             self.open()
             self.jog('Z', 1000)
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # back to neutral
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # update labware
             self.labware[lidnest]['howmany'] -= 1
@@ -1084,7 +1086,7 @@ class SCICLOPS():
         self.jog('Z', 1000) 
         self.set_speed(12) 
         self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-        self.check_complete_loop()
+        asyncio.run(self.check_complete_loop())
         # check if plate is present
         if self.labware['exchange']['howmany'] >= 1:
             # check if add_lid is true, if yes, add lid
@@ -1097,7 +1099,7 @@ class SCICLOPS():
             self.set_speed(100)
             self.open()
             self.move(R=self.labware['exchange']['pos']['R'], Z=23.5188, P=self.labware['exchange']['pos']['P'], Y=self.labware['exchange']['pos']['Y'])
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # grab plate
             self.jog('Z', -380)
@@ -1107,21 +1109,21 @@ class SCICLOPS():
             self.close()
             self.set_speed(100)
             self.jog('Z', 1000)
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # move over trash 
             self.move(R=self.labware['trash']['pos']['R'], Z=23.5188, P=self.labware['trash']['pos']['P'], Y=self.labware['trash']['pos']['Y'])
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # drop plate
             self.jog('Z', -1000)
             self.open()
             self.jog('Z', 1000)
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # back to neutral
             self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-            self.check_complete_loop()
+            asyncio.run(self.check_complete_loop())
 
             # update labware
             self.labware['exchange']['howmany'] -= 1
