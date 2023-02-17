@@ -65,7 +65,7 @@ class ScilopsClient(Node):
         state_refresher_cb_group = ReentrantCallbackGroup()
 
 
-        timer_period = 0.7 # seconds
+        timer_period = 1 # seconds
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
         
