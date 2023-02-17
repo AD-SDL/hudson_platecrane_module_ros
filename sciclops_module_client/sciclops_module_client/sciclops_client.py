@@ -12,6 +12,7 @@ from wei_services.srv import WeiActions
 
 from time import sleep
 import threading
+import asyncio
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
@@ -43,7 +44,7 @@ class ScilopsClient(Node):
 
         self.sciclops.get_status() 
         self.robot_status = self.sciclops.status
-        self.sciclops.check_complete()
+        asyncio.run(self.sciclops.check_complete())
         self.robot_movement_state = self.sciclops.movement_state
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
@@ -65,11 +66,13 @@ class ScilopsClient(Node):
         state_refresher_cb_group = ReentrantCallbackGroup()
 
 
-        timer_period = 0.5 # seconds
+        state_pub_timer_period = 1 # seconds
+        state_refresher_timer_period = 5.3 # seconds
+
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
-        self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
+        self.stateTimer = self.create_timer(state_pub_timer_period, self.stateCallback, callback_group = state_cb_group)
         
-        self.StateRefresherTimer = self.create_timer(timer_period + 0.1, callback = self.robot_state_refresher_callback, callback_group = state_refresher_cb_group)
+        self.StateRefresherTimer = self.create_timer(state_refresher_timer_period, callback = self.robot_state_refresher_callback, callback_group = state_refresher_cb_group)
 
         self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
@@ -96,7 +99,7 @@ class ScilopsClient(Node):
             # Refresh state callback runs "update state" functions while action_callback is running transfer and Network socket losses data when multiple commands were sent 
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
-                self.sciclops.check_complete()
+                asyncio.run(self.sciclops.check_complete())
                 # self.get_logger().info("Refresh state")
                 self.state_refresher_timer = 0 
             
@@ -138,6 +141,12 @@ class ScilopsClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
+            elif self.state == "COMPLETED":
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().info(msg.data)
+                self.action_flag = "READY"
+
             elif self.robot_movement_state == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
                 msg.data = 'State: %s' % self.state
@@ -168,11 +177,6 @@ class ScilopsClient(Node):
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
 
-            elif self.state == "COMPLETED":
-                msg.data = 'State: %s' % self.state
-                self.statePub.publish(msg)
-                self.get_logger().info(msg.data)
-                self.action_flag = "READY"
 
         else:
             msg.data = 'State: %s' % self.state
@@ -277,7 +281,7 @@ class ScilopsClient(Node):
             response.action_response = -1
             response.action_msg= msg
             self.get_logger().error('Error: ' + msg)
-            self.state = "COMPLETED"
+            self.state = "ERROR"
             return response
 
 
