@@ -12,6 +12,7 @@ from wei_services.srv import WeiActions
 
 from time import sleep
 import threading
+import asyncio
 
 from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
@@ -43,7 +44,7 @@ class ScilopsClient(Node):
 
         self.sciclops.get_status() 
         self.robot_status = self.sciclops.status
-        async self.sciclops.check_complete()
+        asyncio.run(self.sciclops.check_complete())
         self.robot_movement_state = self.sciclops.movement_state
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
@@ -98,7 +99,7 @@ class ScilopsClient(Node):
             # Refresh state callback runs "update state" functions while action_callback is running transfer and Network socket losses data when multiple commands were sent 
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
-                async self.sciclops.check_complete()
+                asyncio.run(self.sciclops.check_complete())
                 # self.get_logger().info("Refresh state")
                 self.state_refresher_timer = 0 
             
