@@ -65,11 +65,13 @@ class ScilopsClient(Node):
         state_refresher_cb_group = ReentrantCallbackGroup()
 
 
-        timer_period = 1 # seconds
+        state_pub_timer_period = 1 # seconds
+        state_refresher_timer_period = 5.3 # seconds
+
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
-        self.stateTimer = self.create_timer(timer_period, self.stateCallback, callback_group = state_cb_group)
+        self.stateTimer = self.create_timer(state_pub_timer_period, self.stateCallback, callback_group = state_cb_group)
         
-        self.StateRefresherTimer = self.create_timer(timer_period + 2.5, callback = self.robot_state_refresher_callback, callback_group = state_refresher_cb_group)
+        self.StateRefresherTimer = self.create_timer(state_refresher_timer_period, callback = self.robot_state_refresher_callback, callback_group = state_refresher_cb_group)
 
         self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
