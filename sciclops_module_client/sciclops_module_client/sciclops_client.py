@@ -106,8 +106,8 @@ class ScilopsClient(Node):
                 self.past_movement_state = self.robot_movement_state
                 self.state_refresher_timer = 0 
 
-            if self.state_refresher_timer > 60: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
-                self.get_logger().info("Refresh state, robot state is frozen...")
+            if self.state_refresher_timer > 30: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
+                # self.get_logger().info("Refresh state, robot state is frozen...")
                 self.action_flag = "READY"
 
         except Exception as err:
