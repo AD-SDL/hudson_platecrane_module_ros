@@ -1,7 +1,7 @@
 import asyncio
 from asyncio.unix_events import DefaultEventLoopPolicy
 from pickle import TRUE
-from time import sleep  
+import time  
 import serial
 import logging
 import re
@@ -21,37 +21,23 @@ class SCICLOPS():
         self.baud_rate = baud_rate
         self.connection = None 
         self.connect_sciclops()
-        self.TEACH_PLATE = 15.0
-        self.STD_FINGER_LENGTH = 17.2
-        self.COMPRESSION_DISTANCE = 3.35
-        self.current_pos = [0, 0 ,0, 0]
-        # self.NEST_ADJUSTMENT = 20.0
+    
         self.STATUS = 0
-        # self.VERSION = 0
-        # self.CONFIG = 0
         self.ERROR = ""
         self.GRIPLENGTH = 0
-        # self.COLLAPSEDDISTANCE = 0
-        # self.STEPSPERUNIT = [0, 0 ,0, 0]
-        # self.HOMEMSG = ""
-        # self.OPENMSG = ""
-        # self.CLOSEMSG = ""
-        self.labware = self.load_labware()
-        self.plate_info = self.load_plate_info()
-        self.success_count = 0
+
         # self.status = self.get_status()
         # self.error = self.get_error()
         self.movement_state = "READY"
 
-        # if not is_homed:
-        #     self.home()
+
 
     def connect_sciclops(self):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
         try:
-            self.connection = serial.Serial(self.host_path, self.baud_rate)
+            self.connection = serial.Serial(self.host_path, self.baud_rate, write_timeout = 1, )
         except:
             raise Exception("Could not establish connection")
             
@@ -63,9 +49,51 @@ class SCICLOPS():
             print(err)
         else:
             print("Robot is disconnected")
+        pass
+
+    def command_response(self, time_wait):                         
+        '''
+        Records the data outputted by the Sciclops and sets it to equal "" if no data is outputted in the provided time.
+        '''
+
+        response_timer = time.time()
+        while time.time() - response_timer < time_wait: 
+            if self.connection.in_waiting != 0:           
+                response = self.connection.read_all()
+                response_string = response.decode('utf-8')
+                break
+            else:
+                response_string = ""
+        return response_string
+    
+
+    def send_command(self, command, timeout=1):
+        '''
+        Sends provided command to Peeler and stores data outputted by the peelr.
+        Indicates when the confirmation that the Peeler received the command by displaying 'ACK TRUE.' 
+        '''
+
+        ready_timer = time.time()
+        response_buffer = ""
+
+        self.connection.write(command.encode('utf-8'))
+
+        # Waits till there is "ready" in the response_buffer indicating
+        # the command is done executing.
+        while "ready" not in response_buffer:
+            new_string = self.command_response(timeout)
+
+            response_buffer = response_buffer + new_string
+            
+            if time.time() - ready_timer > 20:
+                break
+            
+            print(response_buffer)
+
+        return response_buffer
 
 
-    def send_command(self, command):
+    def old_send_command(self, command):
         '''
         Sends provided command to Sciclops and stores data outputted by the sciclops.
         '''
@@ -144,47 +172,7 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    s = SCICLOPS("/dev/ttyUSB2")
-    print(s.connection)
-    # s.get_error()
-    # s.get_status()
-    # s.reset()
-    # s.home()
-    # print("STATUS MSG: ", s.status)
-    # s.check_closed()
-    # print(s.CURRENT_POS)
-
-    # dummy_sciclops.check_plate()
-
-#Finished commands
-# "GETPOS"
-# "STATUS"
-# "VERSION"
-# "GETCONFIG"
-# "GETGRIPPERLENGTH"
-# "GETCOLLAPSEDISTANCE"
-# "GETSTEPSPERUNIT"
-# "HOME"
-# "OPEN"
-# "CLOSE"
-# "GETGRIPPERISCLOSED"
-# "GETGRIPPERISOPEN"
-# "GETPLATEPRESENT"
-# "SETSPEED "
-# "MOVE "
-# "JOG"
-# "DELETEPOINT (ADD POINT)"
-# "LISTPOINTS"
-# "LOADPOINT R:0,Z:0,P:0,Y:0"
-# "LIMP TRUE/FALSE"
-
-# #Unfinished Commands
-# "GETLIMITS"
-
-# #Unknown Commands
-# "LISTMOTIONS"
-# "AUTOTEACH"
-# "GETPOINT"
-# "READINP 15"
-# "GETGRIPSTRENGTH"
-# "READINP"
+    s = SCICLOPS("/dev/ttyUSB1")
+    # print(s.connection)
+    s.get_status()
+   
