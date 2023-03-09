@@ -37,7 +37,8 @@ class SCICLOPS():
         Connect to serial port / If wrong port entered inform user 
         '''
         try:
-            self.connection = serial.Serial(self.host_path, self.baud_rate, write_timeout = 1, )
+            self.connection = serial.Serial(self.host_path, self.baud_rate, write_timeout = 1 )
+            print(self.connection.name)
         except:
             raise Exception("Could not establish connection")
             
@@ -57,13 +58,12 @@ class SCICLOPS():
         '''
 
         response_timer = time.time()
-        while time.time() - response_timer < time_wait: 
-            if self.connection.in_waiting != 0:           
-                response = self.connection.read_all()
-                response_string = response.decode('utf-8')
-                break
-            else:
-                response_string = ""
+        if self.connection.in_waiting != 0:           
+            response = self.connection.read_until(expected=b'\r')
+            response_string = response.decode('utf-8')
+            # print(response_string)
+        else:
+            response_string = ""
         return response_string
     
 
@@ -77,13 +77,13 @@ class SCICLOPS():
         response_buffer = ""
 
         self.connection.write(command.encode('utf-8'))
+        response = self.connection.read_until(expected=b'\r').decode('utf-8')
 
         # Waits till there is "ready" in the response_buffer indicating
         # the command is done executing.
         while "ready" not in response_buffer:
-            new_string = self.command_response(timeout)
-
-            response_buffer = response_buffer + new_string
+            # new_string = self.command_response(timeout)
+            # response_buffer = response_buffer + new_string
             
             if time.time() - ready_timer > 20:
                 break
@@ -172,7 +172,8 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    s = SCICLOPS("/dev/ttyUSB1")
+    s = SCICLOPS("/dev/ttyUSB2")
     # print(s.connection)
     s.get_status()
+    # s.send_command("")
    
