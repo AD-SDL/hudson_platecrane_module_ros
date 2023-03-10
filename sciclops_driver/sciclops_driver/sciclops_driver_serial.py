@@ -2,8 +2,7 @@ import asyncio
 from asyncio.unix_events import DefaultEventLoopPolicy
 from pickle import TRUE
 from time import sleep  
-import usb.core
-import usb.util
+from serial import Serial
 import sys
 import re
 
@@ -15,10 +14,10 @@ class SCICLOPS():
     Python interface that allows remote commands to be executed to the Sciclops. 
     '''
     
-    def __init__(self, VENDOR_ID = 0x7513, PRODUCT_ID = 0x0002):
+    def __init__(self, PORT = '/dev/ttyUSB0', BAUD = 9600):
 
-        self.VENDOR_ID = VENDOR_ID
-        self.PRODUCT_ID = PRODUCT_ID
+        self.PORT = PORT
+        self.BAUD = BAUD
         self.host_path = self.connect_sciclops()
         self.TEACH_PLATE = 15.0
         self.STD_FINGER_LENGTH = 17.2
@@ -49,8 +48,7 @@ class SCICLOPS():
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
-        host_path = usb.core.find(idVendor = self.VENDOR_ID, idProduct = self.PRODUCT_ID)
-
+        TODO:CREATE SERIAL CONNECT
         if host_path is None:
             raise Exception("Could not establish connection.")
 
@@ -60,7 +58,7 @@ class SCICLOPS():
 
     def disconnect_robot(self):
         try:
-            usb.util.dispose_resources(self.host_path)
+            TODO:CREATE SERIAL DISCONNECT
         except Exception as err:
             print(err)
         else:
@@ -235,6 +233,7 @@ class SCICLOPS():
         Sends provided command to Sciclops and stores data outputted by the sciclops.
         '''
 
+        TODO:CREATE SERIAL WRITE 
         self.host_path.write(4,command)
 
         response_buffer = "Write: "+ command
