@@ -229,11 +229,11 @@ if __name__ == "__main__":
     # s.get_status()
     # s.get_position()
     # s.home()
-    # s.move(117902, 1000, -5882, 0)
     # s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
-    s.send_command("Move_R Safe\r\n")
+    # s.send_command("Move_R Safe\r\n")
+    # s.send_command("Move_R Safe\r\n")
     # s.get_position()
 
     # s.home()

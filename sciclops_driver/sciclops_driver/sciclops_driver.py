@@ -202,7 +202,7 @@ class SCICLOPS():
                 'Y': 32.7484,
                 'P': 100.8955
                 },
-            'type': '96_well',loadpoint
+            'type': '96_well',
             'howmany': 0,
             'size': [10,11,2],
             'grab_height': 0,
