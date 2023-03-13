@@ -232,12 +232,37 @@ if __name__ == "__main__":
     # s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
-    # s.send_command("Move_R Safe\r\n")
-    # s.send_command("Move_R Safe\r\n")
+    # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
+    # s.send_command("move_abs Z")
+    # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
+    s.send_command("MOVE Y 5000\r\n")  
+
+    # s.send_command("Move_Z Safe\r\n")  
+    # s.send_command("Move_Y Safe\r\n")    
+  
+    # s.send_command("MOVE Safe\r\n")
+    
+
+    # s.send_command("Move_Z Safe\r\n")    
+    # s.send_command("Move_Y Safe\r\n")    
+
+    # s.send_command("MOVE PeelerNest\r\n")
+    
+
+    # s.send_command("Move_Z Safe\r\n")    
+    # s.send_command("Move_Y Safe\r\n")    
+
+    # s.send_command("MOVE Stack1\r\n")
+    
+
+
+    # s.send_command("Move_R PeelerNest\r\n")
+    # s.send_command("Move_Z PeelerNest\r\n")
+    # s.send_command("Move_P PeelerNest\r\n")
+
     # s.get_position()
 
     # s.home()
-    # s.send_command("")
 
 #    Crash error outputs 21(R axis),14(z axis) 
 # 1:Safe, 117902, 2349, -5882, 0
