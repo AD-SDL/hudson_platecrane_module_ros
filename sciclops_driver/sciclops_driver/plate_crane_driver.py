@@ -54,7 +54,7 @@ class PLATE_CRANE():
         if self.robot_status == 0:
             self.home()
 
-    def home(self, timeout = 13):
+    def home(self, timeout = 28):
         '''
         Homes all of the axes. Returns to neutral position (above exchange)
         '''
@@ -256,24 +256,37 @@ class PLATE_CRANE():
 
         # self.deletepoint(R, Z, P, Y)
     
-    def move_location(self, loc):
+    def move_location(self, loc, move_time = 0):
         '''
         Move to preset locations located in load_labware function
         '''
 
-        #check if loc exists (later)
-        self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
+        cmd = "MOVE "+ loc +"\r\n"
+        self.send_command(cmd, timeout = move_time)
 
     def move_tower_neutral(self):
 
-        cmd = "Move_Z Safe\r\n"
-        output_msg = self.send_command(cmd, timeout=5)
+        self.move_single("Z", "Safe")
+
+    def move_arm_neutral(self):
+
+        self.move_single("Y", "Safe")
+
+    def move_gripper_neutral(self):
+
+        self.move_single("P", "Safe")
+
+    def move_joints_neutral(self):
+        self.move_tower_neutral()
+        self.move_arm_neutral()
+        self.move_gripper_neutral()
 
     def transfer(self):
         '''
         Transfer a plate plate in between two locations
         '''
-        self.move_tower_neutral()
+        self.move_joints_neutral()
+        self.move_location()
         
 
 if __name__ == "__main__":
@@ -281,8 +294,9 @@ if __name__ == "__main__":
     Runs given function.
     '''
     s = PLATE_CRANE("/dev/ttyUSB2")
-    # print(s.connection)
-
+    source_loc = Stack
+    target_loc = 
+    s.transfer(source_loc, target_loc)
     # s.get_status()
     # s.get_position()
     # s.home()
