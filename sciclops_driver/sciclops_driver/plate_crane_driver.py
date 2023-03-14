@@ -71,9 +71,12 @@ class PLATE_CRANE():
         ready_timer = time.time()
         response_buffer = ""
 
-        self.connection.write(command.encode('utf-8'))
- 
-
+        try:
+            self.connection.write(command.encode('utf-8'))
+        except serial.SerialException as err:
+            print(err)
+            self.robot_error = err
+            
         # Waits till there is "ready" in the response_buffer indicating
         # the command is done executing.
         while "ready" not in response_buffer:
@@ -165,27 +168,57 @@ class PLATE_CRANE():
             print(self.JOGMSG)
         except:
             pass
-    
-    def move(self, R, Z, P, Y):
+
+    def move(self, axis:str, location:str):
         '''
-        Moves to specified coordinates
+        Moves on a single axis using an existing location on robot's database
+        '''
+
+        # self.loadpoint(TEMP, R, Z, P, Y)
+
+        command = "MOVE TEMP\r\n" 
+        out_msg_move = self.send_command(command)
+
+        try:
+            out_msg_move = self.send_command(command)
+
+            # Checks if specified format is found in feedback
+            # move_msg_index = out_msg_move.find("0000") # Format of feedback that indicates success message
+            # self.MOVEMSG = out_msg_move[move_msg_index+4:]
+        except Exception as err:
+            print(err)
+            self.robot_error = err
+        else:
+            self.move_status = "COMPLETED"
+            pass
+
+        # self.deletepoint(TEMP, R, Z, P, Y) 
+
+    def move_single(self, axis:str, location:str):
+        '''
+        Moves on a single axis using an existing location on robot's database
         '''
 
         # self.loadpoint(R, Z, P, Y)
 
-        command = "MOVE + R +" " + Z + " " + " +"\r\n" 
-        out_msg_move = self.send_command(command)
+        command = "MOVE_"+ axis.upper() + " " + location + "\r\n" 
 
         try:
+            out_msg_move = self.send_command(command)
+
             # Checks if specified format is found in feedback
-            move_msg_index = out_msg_move.find("0000") # Format of feedback that indicates success message
-            self.MOVEMSG = out_msg_move[move_msg_index+4:]
-        except:
+            # move_msg_index = out_msg_move.find("0000") # Format of feedback that indicates success message
+            # self.MOVEMSG = out_msg_move[move_msg_index+4:]
+        except Exception as err:
+            print(err)
+            self.robot_error = err
+        else:
+            self.move_status = "COMPLETED"
             pass
 
         # self.deletepoint(R, Z, P, Y)
     
-    def move_loc(self, loc):
+    def move_location(self, loc):
         '''
         Move to preset locations located in load_labware function
         '''
