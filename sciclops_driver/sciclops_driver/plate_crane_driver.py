@@ -311,6 +311,8 @@ class PLATE_CRANE():
         self.pick_plate(source)
         self.place_plate(target)
 
+        #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
+
         
 
 if __name__ == "__main__":
