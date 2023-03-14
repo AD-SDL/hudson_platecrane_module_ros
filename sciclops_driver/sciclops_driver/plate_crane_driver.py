@@ -21,13 +21,14 @@ class PLATE_CRANE():
         self.baud_rate = baud_rate
         self.connection = None 
         self.connect_plate_crane()
-    
-        self.STATUS = 0
-        self.ERROR = ""
-        self.GRIPLENGTH = 0
+
+        self.status = 0
+        self.error = ""
+        self.gripper_length = 0
 
         # self.status = self.get_status()
         # self.error = self.get_error()
+        self.robot_status = ""
         self.movement_state = "READY"
 
 
@@ -37,8 +38,7 @@ class PLATE_CRANE():
         Connect to serial port / If wrong port entered inform user 
         '''
         try:
-            self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=2)
-            print(self.connection.name)
+            self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
         except:
             raise Exception("Could not establish connection")
             
@@ -51,18 +51,19 @@ class PLATE_CRANE():
         '''
         Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
         '''
+        
+        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
+        response = ""
+        response_string = ""
+        # print("OUT", self.connection.out_waiting)
+        # print("IN", self.connection.in_waiting)
 
         if self.connection.in_waiting != 0:           
-            # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
-            response_string = ""
             response = self.connection.readlines()
-            for line_index in range(1, len(response)):
+            for line_index in range(0, len(response)):
                 response_string += "\n" + response[line_index].decode('utf-8').replace("\r\n", "")
-            # print(response_string)
-            # response_string = response.decode('utf-8')
-            # print(response_string)
-        else:
-            response_string = ""
+        # else:        
+        #     response_string = ""
         return response_string
     
 
@@ -72,7 +73,6 @@ class PLATE_CRANE():
         Indicates when the confirmation that the Peeler received the command by displaying 'ACK TRUE.' 
         '''
 
-        ready_timer = time.time()
 
         try:
             self.connection.write(command.encode('utf-8'))
@@ -86,11 +86,23 @@ class PLATE_CRANE():
 
         while response_msg == "":
             response_msg = self.get_response(timeout)
-        print(response_msg)
+        print(response_msg) # Print the full output message including the initial command that was sent
+        response_msg = response_msg.pop(0) # Remove the intilial command from the response
 
         return response_msg
 
+    def get_robot_movement_state(self):
+        self.get_status()
 
+        if self.robot_status == "":
+            self.movement_state = "BUSY"
+        else:
+            self.movement_state = "READY"
+
+    def wait_robot_movement(self):
+        self.get_robot_movement_state()
+        if self.movement_state != "READY":
+            self.wait_robot_movement()
 
     def get_status(self):
         '''
@@ -98,18 +110,20 @@ class PLATE_CRANE():
         '''
 
         command = 'STATUS\r\n' # Command interpreted by plate_crane
-        out_msg =  self.send_command(command)
+        self.robot_status =  self.send_command(command)
         
         try:
             # Checks if specified format is found in feedback
             exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
-            find_status= re.search(exp,out_msg)
+            find_status= re.search(exp,self.robot_status)
             self.status = find_status[1]
         
             print(self.status)
         
         except:
             pass
+
+        return self.robot_status
 
     def get_location_list(self):
         '''
@@ -152,6 +166,7 @@ class PLATE_CRANE():
                 print(self.current_pos)
             except:
                 pass
+
     def jog(self, axis, distance):
         '''
         Moves the specified axis the specified distance.
@@ -259,9 +274,12 @@ if __name__ == "__main__":
     '''
     s = PLATE_CRANE("/dev/ttyUSB2")
     # print(s.connection)
+
+    # s.get_status()
+    # s.get_position()
+    s.home()
+    s.wait_robot_movement()
     s.get_status()
-    s.get_position()
-    # s.home()
     s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
