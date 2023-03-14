@@ -281,16 +281,18 @@ class PLATE_CRANE():
         self.move_arm_neutral()
         self.move_gripper_neutral()
 
-    def pick_plate(self, source:str, joint_values:bool == False):
+    def pick_plate(self, source:str, joint_values:bool = False):
         if joint_values:
             # Create a new location data 
             # Move to this location
             pass
-        
+
         self.move_joints_neutral()
         self.move_location(source)
+        self.move_joints_neutral()
 
-    def place_plate(self, target:str, joint_values:bool == False):
+
+    def place_plate(self, target:str, joint_values:bool = False):
         if joint_values:
             # Create a new location data 
             # Move to this location
@@ -298,6 +300,7 @@ class PLATE_CRANE():
 
         self.move_joints_neutral()
         self.move_location(target)
+        self.move_joints_neutral()
 
     def transfer(self, source:str, target:str):
         '''
