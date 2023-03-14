@@ -47,7 +47,7 @@ class PLATE_CRANE():
         
         pass
 
-    def get_response(self, time_wait):                         
+    def receive_command(self, time_wait):                         
         '''
         Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
         '''
@@ -85,7 +85,7 @@ class PLATE_CRANE():
         response_msg = ""
 
         while response_msg == "":
-            response_msg = self.get_response(timeout)
+            response_msg = self.receive_command(timeout)
         print(response_msg) # Print the full output message including the initial command that was sent
         response_msg = response_msg.pop(0) # Remove the intilial command from the response
 
