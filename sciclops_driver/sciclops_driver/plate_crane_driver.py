@@ -20,17 +20,14 @@ class PLATE_CRANE():
         self.host_path = host_path
         self.baud_rate = baud_rate
         self.connection = None 
-        self.connect_plate_crane()
 
         self.status = 0
         self.error = ""
         self.gripper_length = 0
-
-        # self.status = self.get_status()
-        # self.error = self.get_error()
         self.robot_status = ""
         self.movement_state = "READY"
-
+        self.connect_plate_crane()
+        self.initialize()
 
 
     def connect_plate_crane(self):
@@ -41,8 +38,7 @@ class PLATE_CRANE():
             self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
             self.connection_status = serial.Serial(self.host_path, self.baud_rate, timeout=1)
         except:
-            raise Exception("Could not establish connection")
-            
+            raise Exception("Could not establish connection")    
 
     def disconnect_robot(self):
         
@@ -52,6 +48,11 @@ class PLATE_CRANE():
             print(err)
         else:
             print("Robot is successfully disconnected")
+
+    def initialize(self):
+        self.get_status()
+        if self.robot_status == 0:
+            self.home()
 
     def home(self, timeout = 13):
         '''
@@ -274,12 +275,12 @@ if __name__ == "__main__":
     s = PLATE_CRANE("/dev/ttyUSB2")
     # print(s.connection)
 
-    s.get_status()
-    s.get_position()
-    s.home()
+    # s.get_status()
+    # s.get_position()
+    # s.home()
     # s.wait_robot_movement()
-    s.get_status()
-    s.get_position()
+    # s.get_status()
+    # s.get_position()
 
     # s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
