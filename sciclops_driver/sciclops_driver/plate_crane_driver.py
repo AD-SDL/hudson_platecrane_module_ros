@@ -9,10 +9,10 @@ import sys
 
             
 
-class SCICLOPS():
+class PLATE_CRANE():
     '''
     Description: 
-    Python interface that allows remote commands to be executed to the Sciclops. 
+    Python interface that allows remote commands to be executed to the plate_crane. 
     '''
     
     def __init__(self, host_path= "/dev/ttyUSB2", baud_rate=9600):
@@ -20,7 +20,7 @@ class SCICLOPS():
         self.host_path = host_path
         self.baud_rate = baud_rate
         self.connection = None 
-        self.connect_sciclops()
+        self.connect_plate_crane()
     
         self.STATUS = 0
         self.ERROR = ""
@@ -32,7 +32,7 @@ class SCICLOPS():
 
 
 
-    def connect_sciclops(self):
+    def connect_plate_crane(self):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
@@ -49,7 +49,7 @@ class SCICLOPS():
 
     def command_response(self, time_wait):                         
         '''
-        Records the data outputted by the Sciclops and sets it to equal "" if no data is outputted in the provided time.
+        Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
         '''
 
         response_timer = time.time()
@@ -91,10 +91,10 @@ class SCICLOPS():
 
     def get_status(self):
         '''
-        Checks status of Sciclops
+        Checks status of plate_crane
         '''
 
-        command = 'STATUS\r\n' # Command interpreted by Sciclops
+        command = 'STATUS\r\n' # Command interpreted by plate_crane
         out_msg =  self.send_command(command)
         
         try:
@@ -110,10 +110,10 @@ class SCICLOPS():
 
     def get_location_list(self):
         '''
-        Checks status of Sciclops
+        Checks status of plate_crane
         '''
 
-        command = 'LISTPOINTS\r\n' # Command interpreted by Sciclops
+        command = 'LISTPOINTS\r\n' # Command interpreted by plate_crane
         out_msg =  self.send_command(command)
         
         try:
@@ -129,7 +129,7 @@ class SCICLOPS():
 
     def get_position(self):
             '''
-            Requests and stores sciclops position.
+            Requests and stores plate_crane position.
             Coordinates:
             Z: Vertical axis
             R: Base turning axis
@@ -137,7 +137,7 @@ class SCICLOPS():
             P: Gripper turning axis
             '''
 
-            command = 'GETPOS\r\n' # Command interpreted by Sciclops
+            command = 'GETPOS\r\n' # Command interpreted by plate_crane
             out_msg = self.send_command(command)
             
             try:
@@ -154,7 +154,7 @@ class SCICLOPS():
         Moves the specified axis the specified distance.
         '''
 
-        command = 'JOG %s,%d\r\n' %(axis,distance) # Command interpreted by Sciclops
+        command = 'JOG %s,%d\r\n' %(axis,distance) # Command interpreted by plate_crane
         out_msg = self.send_command(command)
 
 
@@ -199,7 +199,7 @@ class SCICLOPS():
         '''
 
         # Moves axes to home position
-        command = 'HOME\r\n' # Command interpreted by Sciclops
+        command = 'HOME\r\n' # Command interpreted by plate_crane
         out_msg = self.send_command(command)
 
         try:
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    s = SCICLOPS("/dev/ttyUSB2")
+    s = PLATE_CRANE("/dev/ttyUSB2")
     # print(s.connection)
     # s.get_status()
     # s.get_position()
