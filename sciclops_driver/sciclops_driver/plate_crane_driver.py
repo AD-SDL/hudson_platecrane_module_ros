@@ -47,15 +47,19 @@ class PLATE_CRANE():
         
         pass
 
-    def command_response(self, time_wait):                         
+    def get_response(self, time_wait):                         
         '''
         Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
         '''
 
-        response_timer = time.time()
         if self.connection.in_waiting != 0:           
-            response = self.connection.read_until(expected=b'\r')
-            response_string = response.decode('utf-8')
+            # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
+            response_string = ""
+            response = self.connection.readlines()
+            for line_index in range(1, len(response)):
+                response_string += "\n" + response[line_index].decode('utf-8').replace("\r\n", "")
+            # print(response_string)
+            # response_string = response.decode('utf-8')
             # print(response_string)
         else:
             response_string = ""
@@ -69,26 +73,22 @@ class PLATE_CRANE():
         '''
 
         ready_timer = time.time()
-        response_buffer = ""
 
         try:
             self.connection.write(command.encode('utf-8'))
         except serial.SerialException as err:
             print(err)
             self.robot_error = err
+  
+        new_msg = ""
+        previous_msg = ""
+        response_msg = ""
 
-        # Waits till there is "ready" in the response_buffer indicating
-        # the command is done executing.
-        # while "ready" not in response_buffer:
-        new_string = self.command_response(timeout)
-        response_buffer = response_buffer + new_string
-            
-            # if time.time() - ready_timer > 1:
-            #     break
-            
-        print(response_buffer)
+        while response_msg == "":
+            response_msg = self.get_response(timeout)
+        print(response_msg)
 
-        return response_buffer
+        return response_msg
 
 
 
@@ -259,16 +259,16 @@ if __name__ == "__main__":
     '''
     s = PLATE_CRANE("/dev/ttyUSB2")
     # print(s.connection)
-    # s.get_status()
-    # s.get_position()
+    s.get_status()
+    s.get_position()
     # s.home()
-    # s.get_location_list()
+    s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
     # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
     # s.send_command("move_abs Z")
     # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
-    s.send_command("MOVE Y 5000\r\n")  
+    # s.send_command("MOVE Y 5000\r\n")  
 
     # s.send_command("Move_Z Safe\r\n")  
     # s.send_command("Move_Y Safe\r\n")    
@@ -320,3 +320,10 @@ if __name__ == "__main__":
 # 20:Solo.Position6, 48425, -27211, -7818, 2793
 # 21:MotorolaScanner.Reader, 224262, -30041, -7281, 2793
 # 22:TorreyPinesRIC20.Nest, -8570, -25921, -9865, 1224
+# 23:Solo.Position4, 21612, -27209, -8787, 239
+# 24:Hidex.Nest, 210013, -30145, 490, 2331
+# 25:Liconic.Nest, 79498, -28067, -6710, 4099
+# 26:HidexSafe, 209959, -28731, 490, -262
+# 27:LidNest1AfterHidex, 163104, -30599, -5866, -308
+# 28:SealerNest, 210256, -1050, 491, 5730
+# 29:LidNest3, 163106, -31002, -5867, -308
