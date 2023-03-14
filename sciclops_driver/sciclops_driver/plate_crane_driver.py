@@ -190,6 +190,41 @@ class PLATE_CRANE():
             except:
                 pass
 
+    def gripper_open(self):
+        '''
+        Opens gripper
+        '''
+
+        command = 'OPEN\r\n' # Command interpreted by Sciclops
+        out_msg = self.send_command(command)
+
+
+    def gripper_close(self):
+        '''
+        Closes gripper
+        '''
+
+        command = 'CLOSE\r\n' # Command interpreted by Sciclops
+        out_msg = self.send_command(command)
+
+        
+    def check_open(self):
+        '''
+        Checks if gripper is open
+        '''
+
+        command = 'GETGRIPPERISOPEN\r\n' # Command interpreted by Sciclops
+        out_msg = self.send_command(command)
+
+
+    def check_closed(self):
+        '''
+        Checks if gripper is closed
+        '''
+
+        command = 'GETGRIPPERISCLOSED\r\n' # Command interpreted by Sciclops
+        out_msg = self.send_command(command)
+
     def jog(self, axis, distance):
         '''
         Moves the specified axis the specified distance.
@@ -199,15 +234,8 @@ class PLATE_CRANE():
         out_msg = self.send_command(command)
 
 
-        try:
-            # Checks if specified format is found in feedback
-            jog_msg_index = out_msg.find("0000") # Format of feedback that indicates success message
-            self.JOGMSG = out_msg[jog_msg_index+4:]
-            print(self.JOGMSG)
-        except:
-            pass
 
-    def move(self, axis:str, location:str):
+    def move_joint_angles(self, location:str):
         '''
         Moves on a single axis using an existing location on robot's database
         '''
@@ -286,9 +314,10 @@ class PLATE_CRANE():
             # Create a new location data 
             # Move to this location
             pass
-
+        self.gripper_open()
         self.move_joints_neutral()
         self.move_location(source)
+        self.gripper_close()
         self.move_joints_neutral()
 
 
@@ -300,6 +329,7 @@ class PLATE_CRANE():
 
         self.move_joints_neutral()
         self.move_location(target)
+        self.gripper_open()
         self.move_joints_neutral()
 
     def transfer(self, source:str, target:str):
@@ -323,6 +353,7 @@ if __name__ == "__main__":
     source_loc = "Stack1"
     target_loc = "Stack2"
     s.transfer(source_loc, target_loc)
+
     # s.get_status()
     # s.get_position()
     # s.home()
