@@ -76,15 +76,15 @@ class PLATE_CRANE():
         except serial.SerialException as err:
             print(err)
             self.robot_error = err
-            
+
         # Waits till there is "ready" in the response_buffer indicating
         # the command is done executing.
-        while "ready" not in response_buffer:
-            new_string = self.command_response(timeout)
-            response_buffer = response_buffer + new_string
+        # while "ready" not in response_buffer:
+        new_string = self.command_response(timeout)
+        response_buffer = response_buffer + new_string
             
-            if time.time() - ready_timer > 1:
-                break
+            # if time.time() - ready_timer > 1:
+            #     break
             
         print(response_buffer)
 
