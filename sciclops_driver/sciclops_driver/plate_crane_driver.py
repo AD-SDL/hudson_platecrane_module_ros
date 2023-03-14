@@ -55,49 +55,54 @@ class PLATE_CRANE():
         # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
         response = ""
         response_string = ""
-        # print("OUT", self.connection.out_waiting)
-        # print("IN", self.connection.in_waiting)
+        initial_command_msg = ""
 
         if self.connection.in_waiting != 0:           
             response = self.connection.readlines()
-            for line_index in range(0, len(response)):
-                response_string += "\n" + response[line_index].decode('utf-8').replace("\r\n", "")
-        # else:        
-        #     response_string = ""
-        return response_string
+            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
+            if len(response) > 1:
+                for line_index in range(1, len(response)):
+                    response_string += "\n" + response[line_index].decode('utf-8').strip("\r\n")
+            else:        
+                response_string = ""
+        return response_string, initial_command_msg
     
 
-    def send_command(self, command, timeout=1):
+    def send_command(self, command, timeout=0):
         '''
         Sends provided command to Peeler and stores data outputted by the peelr.
         Indicates when the confirmation that the Peeler received the command by displaying 'ACK TRUE.' 
         '''
 
-
         try:
             self.connection.write(command.encode('utf-8'))
+
         except serial.SerialException as err:
             print(err)
             self.robot_error = err
-  
-        new_msg = ""
-        previous_msg = ""
-        response_msg = ""
 
-        while response_msg == "":
-            response_msg = self.receive_command(timeout)
-        print(response_msg) # Print the full output message including the initial command that was sent
-        response_msg = response_msg.pop(0) # Remove the intilial command from the response
+        response_msg = ""
+        initial_command_msg = ""
+
+        time.sleep(timeout)
+
+        while initial_command_msg == "" :
+            response_msg, initial_command_msg = self.receive_command(timeout)
+    
+        # Print the full output message including the initial command that was sent
+        print(initial_command_msg) 
+        print(response_msg + "\n")
 
         return response_msg
 
     def get_robot_movement_state(self):
         self.get_status()
-
+        # print("Here"+ self.robot_status)
         if self.robot_status == "":
             self.movement_state = "BUSY"
         else:
             self.movement_state = "READY"
+        print(self.movement_state)
 
     def wait_robot_movement(self):
         self.get_robot_movement_state()
@@ -241,25 +246,15 @@ class PLATE_CRANE():
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
-    def home(self, axis = ""):
+    def home(self, timeout = 13):
         '''
         Homes all of the axes. Returns to neutral position (above exchange)
         '''
 
         # Moves axes to home position
         command = 'HOME\r\n' # Command interpreted by plate_crane
-        out_msg = self.send_command(command)
+        out_msg = self.send_command(command ,timeout)
 
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the success message
-            home_msg = re.search(exp,out_msg)
-            self.HOMEMSG = home_msg[1]
-
-            print(self.HOMEMSG)
-        except:
-            pass
-        
         # Moves axes to neutral position (above exchange)
         # self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
 
@@ -278,8 +273,10 @@ if __name__ == "__main__":
     # s.get_status()
     # s.get_position()
     s.home()
-    s.wait_robot_movement()
-    s.get_status()
+    # s.wait_robot_movement()
+    # s.get_status()
+    s.get_position()
+
     s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
