@@ -352,7 +352,7 @@ if __name__ == "__main__":
     s = PLATE_CRANE("/dev/ttyUSB2")
     source_loc = "Stack1"
     target_loc = "Stack2"
-    s.transfer(source_loc, target_loc)
+    # s.transfer(source_loc, target_loc)
 
     # s.get_status()
     # s.get_position()
