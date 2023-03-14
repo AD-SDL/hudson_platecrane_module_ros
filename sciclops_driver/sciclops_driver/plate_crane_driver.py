@@ -256,7 +256,7 @@ class PLATE_CRANE():
 
         # self.deletepoint(R, Z, P, Y)
     
-    def move_location(self, loc, move_time = 0):
+    def move_location(self, loc, move_time = 4.5):
         '''
         Move to preset locations located in load_labware function
         '''
@@ -281,12 +281,33 @@ class PLATE_CRANE():
         self.move_arm_neutral()
         self.move_gripper_neutral()
 
-    def transfer(self):
+    def pick_plate(self, source:str, joint_values:bool == False):
+        if joint_values:
+            # Create a new location data 
+            # Move to this location
+            pass
+        
+        self.move_joints_neutral()
+        self.move_location(source)
+
+    def place_plate(self, target:str, joint_values:bool == False):
+        if joint_values:
+            # Create a new location data 
+            # Move to this location
+            pass
+
+        self.move_joints_neutral()
+        self.move_location(target)
+
+    def transfer(self, source:str, target:str):
         '''
         Transfer a plate plate in between two locations
         '''
-        self.move_joints_neutral()
-        self.move_location()
+        # if len(source)
+        #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
+        self.pick_plate(source)
+        self.place_plate(target)
+
         
 
 if __name__ == "__main__":
@@ -294,8 +315,8 @@ if __name__ == "__main__":
     Runs given function.
     '''
     s = PLATE_CRANE("/dev/ttyUSB2")
-    source_loc = Stack
-    target_loc = 
+    source_loc = "Stack1"
+    target_loc = "Stack2"
     s.transfer(source_loc, target_loc)
     # s.get_status()
     # s.get_position()
