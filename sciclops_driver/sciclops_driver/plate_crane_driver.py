@@ -264,9 +264,17 @@ class PLATE_CRANE():
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
 
+    def move_tower_neutral(self):
 
+        cmd = "Move_Z Safe\r\n"
+        output_msg = self.send_command(cmd, timeout=5)
 
-
+    def transfer(self):
+        '''
+        Transfer a plate plate in between two locations
+        '''
+        self.move_tower_neutral()
+        
 
 if __name__ == "__main__":
     '''
@@ -318,32 +326,3 @@ if __name__ == "__main__":
     # s.home()
 
 #    Crash error outputs 21(R axis),14(z axis) 
-# 1:Safe, 117902, 2349, -5882, 0
-# 2:Stack1, 166756, -32015, -5882, 5460
-# 3:Stack2, 149127, -31887, -5882, 5460
-# 4:TEST1, -11600, -34445, 0, 5735
-# 5:TEST2, 100158, -34445, 0, -460
-# 6:TEST3, 212416, -34445, 0, 5735
-# 7:TEST4, 324175, -34445, 0, -460
-# 8:PeelerNest, 298872, -30589, -8299, 5285
-# 9:TEMP, 166756, -32579, -5882, 5460
-# 10:Stack3, 131580, -31925, -5889, 5520
-# 11:Stack4, 113890, -31923, -5866, 5462
-# 12:Stack5, 96239, -31911, -5866, 5462
-# 13:LidNest1, 163105, -31001, -5866, -308
-# 14:LidNest2, 99817, -31001, -5890, -315
-# 15:RapidPick.Source, 257776, -31006, -6627, 1854
-# 16:RapidPick.Destination, 275183, -30960, -5995, 931
-# 17:RapidPick.Destination2, 293181, -30927, -5355, 1383
-# 18:Solo.Position2, -8570, -25921, -9865, 1224
-# 19:Solo.Position3, 20085, -26481, -8850, 5236
-# 20:Solo.Position6, 48425, -27211, -7818, 2793
-# 21:MotorolaScanner.Reader, 224262, -30041, -7281, 2793
-# 22:TorreyPinesRIC20.Nest, -8570, -25921, -9865, 1224
-# 23:Solo.Position4, 21612, -27209, -8787, 239
-# 24:Hidex.Nest, 210013, -30145, 490, 2331
-# 25:Liconic.Nest, 79498, -28067, -6710, 4099
-# 26:HidexSafe, 209959, -28731, 490, -262
-# 27:LidNest1AfterHidex, 163104, -30599, -5866, -308
-# 28:SealerNest, 210256, -1050, 491, 5730
-# 29:LidNest3, 163106, -31002, -5867, -308
