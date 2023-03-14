@@ -46,8 +46,24 @@ class PLATE_CRANE():
 
     def disconnect_robot(self):
         
-        pass
+        try:
+            self.connection.close()
+        except Exception as err:
+            print(err)
+        else:
+            print("Robot is successfully disconnected")
 
+    def home(self, timeout = 13):
+        '''
+        Homes all of the axes. Returns to neutral position (above exchange)
+        '''
+
+        # Moves axes to home position
+        command = 'HOME\r\n' # Command interpreted by plate_crane
+        out_msg = self.send_command(command ,timeout)
+
+
+        
     def receive_command(self, time_wait):                         
         '''
         Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
@@ -246,19 +262,6 @@ class PLATE_CRANE():
 
         #check if loc exists (later)
         self.move(self.labware[loc]['pos']['R'],self.labware[loc]['pos']['Z'],self.labware[loc]['pos']['P'],self.labware[loc]['pos']['Y'])
-
-    def home(self, timeout = 13):
-        '''
-        Homes all of the axes. Returns to neutral position (above exchange)
-        '''
-
-        # Moves axes to home position
-        command = 'HOME\r\n' # Command interpreted by plate_crane
-        out_msg = self.send_command(command ,timeout)
-
-        # Moves axes to neutral position (above exchange)
-        # self.move(R=self.labware['neutral']['pos']['R'], Z=23.5188, P=self.labware['neutral']['pos']['P'], Y=self.labware['neutral']['pos']['Y'])
-
 
 
 
