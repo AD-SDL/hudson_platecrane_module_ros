@@ -39,6 +39,7 @@ class PLATE_CRANE():
         '''
         try:
             self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
+            self.connection_status = serial.Serial(self.host_path, self.baud_rate, timeout=1)
         except:
             raise Exception("Could not establish connection")
             
@@ -91,7 +92,7 @@ class PLATE_CRANE():
     
         # Print the full output message including the initial command that was sent
         print(initial_command_msg) 
-        print(response_msg + "\n")
+        print(response_msg)
 
         return response_msg
 
@@ -270,14 +271,14 @@ if __name__ == "__main__":
     s = PLATE_CRANE("/dev/ttyUSB2")
     # print(s.connection)
 
-    # s.get_status()
-    # s.get_position()
+    s.get_status()
+    s.get_position()
     s.home()
     # s.wait_robot_movement()
-    # s.get_status()
+    s.get_status()
     s.get_position()
 
-    s.get_location_list()
+    # s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
     # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
