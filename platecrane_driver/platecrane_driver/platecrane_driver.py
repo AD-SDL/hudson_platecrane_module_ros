@@ -187,8 +187,9 @@ class PlateCrane():
         '''
 
         command = 'GETPOS\r\n' 
-        out_msg = self.send_command(command)
-            
+        current_position = list(self.send_command(command).split(" "))
+        
+        return current_position
 
     def set_location(self, location_name:str = "TEMP_0", R:int = 0, Z:int = 0, P:int = 0, Y:int = 0):
         '''
@@ -322,6 +323,26 @@ class PlateCrane():
         self.move_arm_neutral()
         self.move_gripper_neutral()
 
+    def move_nuetral_from_module():
+        pass
+
+    def pick_plate_from_module(self, source:str):
+        joint_values = self.get_location_joint_values(source)
+        current_pos = self.get_position()
+
+        module_safe_hight = joint_values[1] + 100
+        jog_hight_steps = current_pos[1] - module_safe_hight
+     
+        self.move_joint_angles()
+        self.move_single("R",source)
+        self.move_single("P", source)
+        self.jog("Z", -jog_hight_steps)
+        self.move_single("Y", source)
+        self.move_single("Z", source)
+        self.jog("Z", jog_hight_steps)
+        self.move_arm_neutral()
+        self.move_joints_neutral()
+
     def pick_plate(self, source:str, joint_values:bool = False):
         if joint_values:
             # Create a new location data 
@@ -344,10 +365,13 @@ class PlateCrane():
         self.gripper_open()
         self.move_joints_neutral()
 
-    def stack_transfer(self):
+    def stack_transfer(self, source:str, target:str):
         '''
         Transfer a plate plate from plate stacker to exchange location
         '''
+        self.pick_plate(source)
+        self.place_plate(target)
+
     
     def transfer(self, source:str, target:str):
         '''
@@ -355,8 +379,10 @@ class PlateCrane():
         '''
         # if len(source)
         #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-        self.pick_plate(source)
-        self.place_plate(target)
+        
+
+        # self.pick_plate(source)
+        # self.place_plate(target)
 
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
@@ -369,7 +395,7 @@ if __name__ == "__main__":
     target_loc = "Stack2"
     # s.transfer(source_loc, target_loc)
     # s.send_command("LOADPOINT TEMP2 210256, -1050, 491, 5730", timeout= 5)
-
+    s.pick_plate_from_module("PeelerNest")
     # s.get_status()
     # s.get_position()
     # s.home()
@@ -377,7 +403,8 @@ if __name__ == "__main__":
     # s.get_status()
     # s.get_position()
     # s.send_command("GETPOINT Safe\r\n")  
-    s.get_location_joint_values("Safe")
+    # s.get_location_joint_values("Safe")
+    # s.send_command("limp TRUE\r\n")
     # s.set_location()
     # s.get_location_list()
     # s.delete_location("TEMP_0")
