@@ -174,7 +174,9 @@ class PlateCrane():
         command = "GETPOINT " + location + "\r\n" 
 
         joint_values =  list(self.send_command(command).split(" "))
-        print(joint_values)
+        joint_values = [eval(x.strip(",")) for x in joint_values]
+
+        return joint_values
 
     def get_position(self):
         '''
@@ -188,7 +190,8 @@ class PlateCrane():
 
         command = 'GETPOS\r\n' 
         current_position = list(self.send_command(command).split(" "))
-        
+        current_position = [eval(x.strip(",")) for x in current_position]
+
         return current_position
 
     def set_location(self, location_name:str = "TEMP_0", R:int = 0, Z:int = 0, P:int = 0, Y:int = 0):
@@ -330,15 +333,19 @@ class PlateCrane():
         joint_values = self.get_location_joint_values(source)
         current_pos = self.get_position()
 
-        module_safe_hight = joint_values[1] + 100
+        module_safe_hight = joint_values[1] + 1000
         jog_hight_steps = current_pos[1] - module_safe_hight
      
-        self.move_joint_angles()
+        self.move_joints_neutral()
+        self.gripper_open()
         self.move_single("R",source)
         self.move_single("P", source)
         self.jog("Z", -jog_hight_steps)
         self.move_single("Y", source)
         self.move_single("Z", source)
+        self.jog("Z", -1000)
+        self.gripper_close()
+        self.jog("Z", 1000)
         self.jog("Z", jog_hight_steps)
         self.move_arm_neutral()
         self.move_joints_neutral()
@@ -395,7 +402,7 @@ if __name__ == "__main__":
     target_loc = "Stack2"
     # s.transfer(source_loc, target_loc)
     # s.send_command("LOADPOINT TEMP2 210256, -1050, 491, 5730", timeout= 5)
-    s.pick_plate_from_module("PeelerNest")
+    s.pick_plate_from_module("SealerNest")
     # s.get_status()
     # s.get_position()
     # s.home()
