@@ -59,7 +59,7 @@ class PlateCrane():
         '''
 
         # Moves axes to home position
-        command = 'HOME\r\n' # Command interpreted by plate_crane
+        command = 'HOME\r\n' 
         out_msg = self.send_command(command ,timeout)
 
 
@@ -79,7 +79,7 @@ class PlateCrane():
             initial_command_msg = response[0].decode('utf-8').strip("\r\n")
             if len(response) > 1:
                 for line_index in range(1, len(response)):
-                    response_string += "\n" + response[line_index].decode('utf-8').strip("\r\n")
+                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
             else:        
                 response_string = ""
         return response_string, initial_command_msg
@@ -87,8 +87,7 @@ class PlateCrane():
 
     def send_command(self, command, timeout=0):
         '''
-        Sends provided command to Peeler and stores data outputted by the peelr.
-        Indicates when the confirmation that the Peeler received the command by displaying 'ACK TRUE.' 
+        Sends provided command over the serial port and stores data outputted.
         '''
 
         try:
@@ -107,6 +106,7 @@ class PlateCrane():
             response_msg, initial_command_msg = self.receive_command(timeout)
     
         # Print the full output message including the initial command that was sent
+        
         print(initial_command_msg) 
         print(response_msg)
 
@@ -114,7 +114,7 @@ class PlateCrane():
 
     def get_robot_movement_state(self):
         self.get_status()
-        # print("Here"+ self.robot_status)
+
         if self.robot_status == "":
             self.movement_state = "BUSY"
         else:
@@ -131,7 +131,7 @@ class PlateCrane():
         Checks status of plate_crane
         '''
 
-        command = 'STATUS\r\n' # Command interpreted by plate_crane
+        command = 'STATUS\r\n' 
         self.robot_status =  self.send_command(command)
         
         try:
@@ -152,7 +152,7 @@ class PlateCrane():
         Checks status of plate_crane
         '''
 
-        command = 'LISTPOINTS\r\n' # Command interpreted by plate_crane
+        command = 'LISTPOINTS\r\n' 
         out_msg =  self.send_command(command)
         
         try:
@@ -165,26 +165,29 @@ class PlateCrane():
         
         except:
             pass
+
     def get_location_joint_values(self, location:str = None):
         '''
         Checks status of plate_crane
         '''
 
-        command = "GETPOINT " + location + "\r\n" # Command interpreted by plate_crane
-        out_msg =  self.send_command(command)
+        command = "GETPOINT " + location + "\r\n" 
+
+        joint_values =  list(self.send_command(command).split(" "))
+        print(joint_values)
 
     def get_position(self):
-            '''
-            Requests and stores plate_crane position.
-            Coordinates:
-            Z: Vertical axis
-            R: Base turning axis
-            Y: Extension axis
-            P: Gripper turning axis
-            '''
+        '''
+        Requests and stores plate_crane position.
+        Coordinates:
+        Z: Vertical axis
+        R: Base turning axis
+        Y: Extension axis
+        P: Gripper turning axis
+        '''
 
-            command = 'GETPOS\r\n' # Command interpreted by plate_crane
-            out_msg = self.send_command(command)
+        command = 'GETPOS\r\n' 
+        out_msg = self.send_command(command)
             
 
     def set_location(self, location_name:str = "TEMP_0", R:int = 0, Z:int = 0, P:int = 0, Y:int = 0):
@@ -213,7 +216,6 @@ class PlateCrane():
         command = 'OPEN\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
 
-
     def gripper_close(self):
         '''
         Closes gripper
@@ -221,8 +223,7 @@ class PlateCrane():
 
         command = 'CLOSE\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
-
-        
+    
     def check_open(self):
         '''
         Checks if gripper is open
@@ -230,7 +231,6 @@ class PlateCrane():
 
         command = 'GETGRIPPERISOPEN\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
-
 
     def check_closed(self):
         '''
@@ -245,7 +245,7 @@ class PlateCrane():
         Moves the specified axis the specified distance.
         '''
 
-        command = 'JOG %s,%d\r\n' %(axis,distance) # Command interpreted by plate_crane
+        command = 'JOG %s,%d\r\n' %(axis,distance) 
         out_msg = self.send_command(command)
 
     def move_joint_angles(self, R:int, Z:int, P:int, Y:int):
@@ -271,7 +271,7 @@ class PlateCrane():
             self.move_status = "COMPLETED"
             pass
 
-        # self.deletepoint(TEMP, R, Z, P, Y) 
+        self.deletepoint("TEMP", R, Z, P, Y) 
 
     def move_single(self, axis:str, location:str):
         '''
@@ -333,7 +333,6 @@ class PlateCrane():
         self.gripper_close()
         self.move_joints_neutral()
 
-
     def place_plate(self, target:str, joint_values:bool = False):
         if joint_values:
             # Create a new location data 
@@ -361,8 +360,6 @@ class PlateCrane():
 
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
-        
-
 if __name__ == "__main__":
     '''
     Runs given function.
@@ -379,7 +376,8 @@ if __name__ == "__main__":
     # s.wait_robot_movement()
     # s.get_status()
     # s.get_position()
-    s.send_command("GETPOINT Safe\r\n")  
+    # s.send_command("GETPOINT Safe\r\n")  
+    s.get_location_joint_values("Safe")
     # s.set_location()
     # s.get_location_list()
     # s.delete_location("TEMP_0")
