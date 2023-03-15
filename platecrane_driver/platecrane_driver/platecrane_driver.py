@@ -8,7 +8,7 @@ import re
 import sys
    
 
-class PLATE_CRANE():
+class PlateCrane():
     '''
     Description: 
     Python interface that allows remote commands to be executed to the plate_crane. 
@@ -348,7 +348,7 @@ if __name__ == "__main__":
     '''
     Runs given function.
     '''
-    s = PLATE_CRANE("/dev/ttyUSB2")
+    s = PlateCrane("/dev/ttyUSB2")
     source_loc = "Stack1"
     target_loc = "Stack2"
     # s.transfer(source_loc, target_loc)
