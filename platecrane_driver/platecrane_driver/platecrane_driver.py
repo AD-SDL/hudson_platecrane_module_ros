@@ -179,22 +179,13 @@ class PlateCrane():
             command = 'GETPOS\r\n' # Command interpreted by plate_crane
             out_msg = self.send_command(command)
             
-            try:
-                # Checks if specified format is found in feedback
-                exp = r"Z:([-.\d]+), R:([-.\d]+), Y:([-.\d]+), P:([-.\d]+)" # Format of coordinates provided in feedback
-                find_current_pos = re.search(exp,out_msg)
-                self.current_pos = [float(find_current_pos[1]), float(find_current_pos[2]), float(find_current_pos[3]), float(find_current_pos[4])]
-                
-                print(self.current_pos)
-            except:
-                pass
 
-    def set_location(self, location_name:str = "TEMP_0", R:str = "0", Z:str = "0", P:str = "0", Y:str = "0"):
+    def set_location(self, location_name:str = "TEMP_0", R:int = 0, Z:int = 0, P:int = 0, Y:int = 0):
         '''
         Saves a new location onto robot
         '''
         
-        command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, Z, P, Y, R) # Command interpreted by Sciclops
+        command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(Z), str(P), str(Y), str(R)) # Command interpreted by Sciclops
         out_msg = self.send_command(command)
     
     def delete_location(self,location_name:str = None):
@@ -250,14 +241,12 @@ class PlateCrane():
         command = 'JOG %s,%d\r\n' %(axis,distance) # Command interpreted by plate_crane
         out_msg = self.send_command(command)
 
-
-
-    def move_joint_angles(self, location:str):
+    def move_joint_angles(self, R:int, Z:int, P:int, Y:int):
         '''
-        Moves on a single axis using an existing location on robot's database
+        Moves on a single axis, using an existing location on robot's database
         '''
 
-        # self.loadpoint(TEMP, R, Z, P, Y)
+        self.set_location("TEMP", R, Z, P, Y)
 
         command = "MOVE TEMP\r\n" 
         out_msg_move = self.send_command(command)
@@ -378,10 +367,12 @@ if __name__ == "__main__":
     # s.wait_robot_movement()
     # s.get_status()
     # s.get_position()
-    s.send_command("LOADPOINT TEMP2, 298872, -30589, -8299, 5285\r\n")  
     # s.send_command("DELETEPOINT R:298872\r\n")  
-
+    s.set_location()
     s.get_location_list()
+    s.delete_location("TEMP_0")
+    s.get_location_list()
+
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
     # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
