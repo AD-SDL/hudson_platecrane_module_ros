@@ -338,6 +338,11 @@ class PlateCrane():
         self.gripper_open()
         self.move_joints_neutral()
 
+    def stack_transfer(self):
+        '''
+        Transfer a plate plate from plate stacker to exchange location
+        '''
+    
     def transfer(self, source:str, target:str):
         '''
         Transfer a plate plate in between two locations
