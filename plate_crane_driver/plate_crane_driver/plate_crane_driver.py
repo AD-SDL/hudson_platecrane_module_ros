@@ -6,8 +6,7 @@ import serial
 import logging
 import re
 import sys
-
-            
+   
 
 class PLATE_CRANE():
     '''
@@ -353,6 +352,7 @@ if __name__ == "__main__":
     source_loc = "Stack1"
     target_loc = "Stack2"
     # s.transfer(source_loc, target_loc)
+    # s.send_command("LOADPOINT TEMP2 210256, -1050, 491, 5730", timeout= 5)
 
     # s.get_status()
     # s.get_position()
@@ -360,8 +360,10 @@ if __name__ == "__main__":
     # s.wait_robot_movement()
     # s.get_status()
     # s.get_position()
+    s.send_command("LOADPOINT TEMP2, 298872, -30589, -8299, 5285\r\n")  
+    # s.send_command("DELETEPOINT R:298872\r\n")  
 
-    # s.get_location_list()
+    s.get_location_list()
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
     # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
