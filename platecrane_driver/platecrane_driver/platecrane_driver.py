@@ -165,6 +165,13 @@ class PlateCrane():
         
         except:
             pass
+    def get_location_joint_values(self, location:str = None):
+        '''
+        Checks status of plate_crane
+        '''
+
+        command = "GETPOINT " + location + "\r\n" # Command interpreted by plate_crane
+        out_msg =  self.send_command(command)
 
     def get_position(self):
             '''
@@ -372,11 +379,11 @@ if __name__ == "__main__":
     # s.wait_robot_movement()
     # s.get_status()
     # s.get_position()
-    # s.send_command("DELETEPOINT R:298872\r\n")  
-    s.set_location()
-    s.get_location_list()
-    s.delete_location("TEMP_0")
-    s.get_location_list()
+    s.send_command("GETPOINT Safe\r\n")  
+    # s.set_location()
+    # s.get_location_list()
+    # s.delete_location("TEMP_0")
+    # s.get_location_list()
 
     # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
