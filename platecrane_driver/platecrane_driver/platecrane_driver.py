@@ -189,7 +189,7 @@ class PlateCrane():
             except:
                 pass
 
-    def set_location(self,location_name, R, Z, P, Y):
+    def set_location(self, location_name:str = "TEMP_0", R:str = "0", Z:str = "0", P:str = "0", Y:str = "0"):
         '''
         Saves a new location onto robot
         '''
@@ -197,14 +197,16 @@ class PlateCrane():
         command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, Z, P, Y, R) # Command interpreted by Sciclops
         out_msg = self.send_command(command)
     
-    def delete_location(self,location_name):
+    def delete_location(self,location_name:str = None):
         '''
         Deletes a location from the robot's database
         '''
+        if not location_name:
+            raise Exception("No location name provided")
         
         command = "DELETEPOINT %s\r\n" % (location_name) # Command interpreted by Sciclops
         out_msg = self.send_command(command)
-        
+
     def gripper_open(self):
         '''
         Opens gripper
