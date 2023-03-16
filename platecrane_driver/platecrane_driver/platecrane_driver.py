@@ -652,13 +652,14 @@ class PlateCrane():
         ...
         :return: [ReturnDescription]
         :rtype: [ReturnType]
-        """        self.pick_plate(source)
+        """        
+        self.pick_plate(source)
         self.place_plate(target)
 
     
-    def transfer(self, source:str, target:str):
+    def module_transfer(self, source:str, target:str):
         """
-        Transfer a plate plate in between two locations
+        Transfer a plate plate in between two modules
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
         :type [ParamName]: [ParamType](, optional)
