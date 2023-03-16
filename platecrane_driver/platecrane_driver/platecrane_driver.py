@@ -9,12 +9,22 @@ import sys
    
 
 class PlateCrane():
-    '''
+    """
     Description: 
     Python interface that allows remote commands to be executed to the plate_crane. 
-    '''
+    """
     
     def __init__(self, host_path= "/dev/ttyUSB2", baud_rate=9600):
+        """[Summary]
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         self.host_path = host_path
         self.baud_rate = baud_rate
@@ -30,9 +40,17 @@ class PlateCrane():
 
 
     def connect_plate_crane(self):
-        '''
+        """
         Connect to serial port / If wrong port entered inform user 
-        '''
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         try:
             self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
             self.connection_status = serial.Serial(self.host_path, self.baud_rate, timeout=1)
@@ -40,6 +58,16 @@ class PlateCrane():
             raise Exception("Could not establish connection")    
 
     def disconnect_robot(self):
+        """[Summary]
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         
         try:
             self.connection.close()
@@ -49,14 +77,35 @@ class PlateCrane():
             print("Robot is successfully disconnected")
 
     def initialize(self):
+        """[Summary]
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
         self.get_status()
         if self.robot_status == 0:
             self.home()
 
     def home(self, timeout = 28):
-        '''
-        Homes all of the axes. Returns to neutral position (above exchange)
-        '''
+
+        """Homes all of the axes. Returns to neutral position (above exchange)
+
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
 
         # Moves axes to home position
         command = 'HOME\r\n' 
@@ -65,10 +114,19 @@ class PlateCrane():
 
         
     def receive_command(self, time_wait):                         
-        '''
-        Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
-        '''
+        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
         
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+
         # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
         response = ""
         response_string = ""
@@ -86,9 +144,18 @@ class PlateCrane():
     
 
     def send_command(self, command, timeout=0):
-        '''
-        Sends provided command over the serial port and stores data outputted.
-        '''
+        """Sends provided command over the serial port and stores data outputted. 
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+
 
         try:
             self.connection.write(command.encode('utf-8'))
@@ -113,6 +180,18 @@ class PlateCrane():
         return response_msg
 
     def get_robot_movement_state(self):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+
         self.get_status()
 
         if self.robot_status == "":
@@ -122,14 +201,32 @@ class PlateCrane():
         print(self.movement_state)
 
     def wait_robot_movement(self):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
         self.get_robot_movement_state()
         if self.movement_state != "READY":
             self.wait_robot_movement()
 
     def get_status(self):
-        '''
-        Checks status of plate_crane
-        '''
+        """Checks status of plate_crane
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'STATUS\r\n' 
         self.robot_status =  self.send_command(command)
@@ -148,9 +245,16 @@ class PlateCrane():
         return self.robot_status
 
     def get_location_list(self):
-        '''
-        Checks status of plate_crane
-        '''
+        """Checks status of plate_crane
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'LISTPOINTS\r\n' 
         out_msg =  self.send_command(command)
@@ -167,9 +271,16 @@ class PlateCrane():
             pass
 
     def get_location_joint_values(self, location:str = None):
-        '''
-        Checks status of plate_crane
-        '''
+        """Checks status of plate_crane
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = "GETPOINT " + location + "\r\n" 
 
@@ -179,14 +290,22 @@ class PlateCrane():
         return joint_values
 
     def get_position(self):
-        '''
+        """
         Requests and stores plate_crane position.
         Coordinates:
         Z: Vertical axis
         R: Base turning axis
         Y: Extension axis
         P: Gripper turning axis
-        '''
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'GETPOS\r\n' 
         current_position = list(self.send_command(command).split(" "))
@@ -195,17 +314,31 @@ class PlateCrane():
         return current_position
 
     def set_location(self, location_name:str = "TEMP_0", R:int = 0, Z:int = 0, P:int = 0, Y:int = 0):
-        '''
-        Saves a new location onto robot
-        '''
+        """Saves a new location onto robot
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         
         command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(Z), str(P), str(Y), str(R)) # Command interpreted by Sciclops
         out_msg = self.send_command(command)
     
     def delete_location(self,location_name:str = None):
-        '''
-        Deletes a location from the robot's database
-        '''
+        """ Deletes a location from the robot's database
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         if not location_name:
             raise Exception("No location name provided")
         
@@ -213,49 +346,92 @@ class PlateCrane():
         out_msg = self.send_command(command)
 
     def gripper_open(self):
-        '''
-        Opens gripper
-        '''
+        """Opens gripper
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'OPEN\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
 
     def gripper_close(self):
-        '''
-        Closes gripper
-        '''
+        """Closes gripper
+        
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
 
         command = 'CLOSE\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
     
     def check_open(self):
-        '''
-        Checks if gripper is open
-        '''
+        """ Checks if gripper is open
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'GETGRIPPERISOPEN\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
 
     def check_closed(self):
-        '''
-        Checks if gripper is closed
-        '''
+        """Checks if gripper is closed
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'GETGRIPPERISCLOSED\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
 
     def jog(self, axis, distance):
-        '''
-        Moves the specified axis the specified distance.
-        '''
+        """Moves the specified axis the specified distance.
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         command = 'JOG %s,%d\r\n' %(axis,distance) 
         out_msg = self.send_command(command)
 
     def move_joint_angles(self, R:int, Z:int, P:int, Y:int):
-        '''
-        Moves on a single axis, using an existing location on robot's database
-        '''
+        """Moves on a single axis, using an existing location on robot's database
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         self.set_location("TEMP", R, Z, P, Y)
 
@@ -278,9 +454,16 @@ class PlateCrane():
         self.deletepoint("TEMP", R, Z, P, Y) 
 
     def move_single(self, axis:str, location:str):
-        '''
-        Moves on a single axis using an existing location on robot's database
-        '''
+        """Moves on a single axis using an existing location on robot's database
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         # self.loadpoint(R, Z, P, Y)
 
@@ -302,34 +485,100 @@ class PlateCrane():
         # self.deletepoint(R, Z, P, Y)
     
     def move_location(self, loc, move_time = 4.5):
-        '''
-        Move to preset locations located in load_labware function
-        '''
+        """Move to preset locations located in load_labware function
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
 
         cmd = "MOVE "+ loc +"\r\n"
         self.send_command(cmd, timeout = move_time)
 
     def move_tower_neutral(self):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
 
         self.move_single("Z", "Safe")
 
     def move_arm_neutral(self):
+        """Summary
 
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         self.move_single("Y", "Safe")
 
     def move_gripper_neutral(self):
+        """Summary
 
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         self.move_single("P", "Safe")
 
     def move_joints_neutral(self):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         self.move_tower_neutral()
         self.move_arm_neutral()
         self.move_gripper_neutral()
 
     def move_nuetral_from_module():
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         pass
 
     def pick_plate_from_module(self, source:str):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         joint_values = self.get_location_joint_values(source)
         current_pos = self.get_position()
 
@@ -351,6 +600,16 @@ class PlateCrane():
         self.move_joints_neutral()
 
     def pick_plate(self, source:str, joint_values:bool = False):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         if joint_values:
             # Create a new location data 
             # Move to this location
@@ -362,6 +621,16 @@ class PlateCrane():
         self.move_joints_neutral()
 
     def place_plate(self, target:str, joint_values:bool = False):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
         if joint_values:
             # Create a new location data 
             # Move to this location
@@ -373,17 +642,32 @@ class PlateCrane():
         self.move_joints_neutral()
 
     def stack_transfer(self, source:str, target:str):
-        '''
+        """
         Transfer a plate plate from plate stacker to exchange location
-        '''
-        self.pick_plate(source)
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """        self.pick_plate(source)
         self.place_plate(target)
 
     
     def transfer(self, source:str, target:str):
-        '''
+        """
         Transfer a plate plate in between two locations
-        '''
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """        
         # if len(source)
         #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
         
@@ -394,9 +678,9 @@ class PlateCrane():
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
 if __name__ == "__main__":
-    '''
+    """
     Runs given function.
-    '''
+    """
     s = PlateCrane("/dev/ttyUSB2")
     source_loc = "Stack1"
     target_loc = "Stack2"
