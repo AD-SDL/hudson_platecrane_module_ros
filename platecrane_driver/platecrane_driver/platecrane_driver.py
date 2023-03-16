@@ -271,7 +271,7 @@ class PlateCrane():
         except:
             pass
 
-    def get_location_joint_values(self, location:str = None):
+    def get_location_joint_values(self, location:str = None) -> list:
         """Checks status of plate_crane
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -290,7 +290,7 @@ class PlateCrane():
 
         return joint_values
 
-    def get_position(self):
+    def get_position(self) -> list:
         """
         Requests and stores plate_crane position.
         Coordinates:
@@ -314,7 +314,7 @@ class PlateCrane():
 
         return current_position
     
-    def get_safe_height_jog_steps(self, location:list):
+    def get_safe_height_jog_steps(self, location:list) -> int:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -428,7 +428,7 @@ class PlateCrane():
         command = 'GETGRIPPERISCLOSED\r\n' # Command interpreted by Sciclops
         out_msg = self.send_command(command)
 
-    def jog(self, axis, distance):
+    def jog(self, axis, distance) -> None:
         """Moves the specified axis the specified distance.
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -443,7 +443,7 @@ class PlateCrane():
         command = 'JOG %s,%d\r\n' %(axis,distance) 
         out_msg = self.send_command(command)
 
-    def move_joint_angles(self, R:int, Z:int, P:int, Y:int):
+    def move_joint_angles(self, R:int, Z:int, P:int, Y:int) -> None:
         """Moves on a single axis, using an existing location on robot's database
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -475,7 +475,7 @@ class PlateCrane():
 
         self.deletepoint("TEMP", R, Z, P, Y) 
 
-    def move_single_axis(self, axis:str, location:str):
+    def move_single_axis(self, axis:str, location:str) -> None:
         """Moves on a single axis using an existing location on robot's database
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -506,7 +506,7 @@ class PlateCrane():
 
         # self.deletepoint(R, Z, P, Y)
     
-    def move_location(self, loc, move_time = 4.5):
+    def move_location(self, loc, move_time = 4.5) -> None:
         """Move to preset locations located in load_labware function
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -521,7 +521,7 @@ class PlateCrane():
         cmd = "MOVE "+ loc +"\r\n"
         self.send_command(cmd, timeout = move_time)
 
-    def move_tower_neutral(self):
+    def move_tower_neutral(self) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -536,7 +536,7 @@ class PlateCrane():
 
         self.move_single_axis("Z", "Safe")
 
-    def move_arm_neutral(self):
+    def move_arm_neutral(self) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -549,7 +549,7 @@ class PlateCrane():
         """
         self.move_single_axis("Y", "Safe")
 
-    def move_gripper_neutral(self):
+    def move_gripper_neutral(self) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -562,7 +562,7 @@ class PlateCrane():
         """
         self.move_single_axis("P", "Safe")
 
-    def move_joints_neutral(self):
+    def move_joints_neutral(self) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -577,20 +577,7 @@ class PlateCrane():
         self.move_arm_neutral()
         self.move_gripper_neutral()
 
-    def move_nuetral_from_module():
-        """Summary
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        pass
-
-    def get_module_plate(self, source:list = None, height_jog_steps:int = None):
+    def get_module_plate(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -608,7 +595,7 @@ class PlateCrane():
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(source)
-            
+
         # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
         #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
         
@@ -619,7 +606,7 @@ class PlateCrane():
         self.jog("Z",  self.plate_above_height)
         self.jog("Z", height_jog_steps)
 
-    def put_module_plate(self, target:list = None, height_jog_steps:int = None):
+    def put_module_plate(self, target:list = None, height_jog_steps:int = None) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -648,7 +635,7 @@ class PlateCrane():
         self.jog("Z",  self.plate_above_height)
         self.jog("Z", height_jog_steps)
 
-    def move_module_entry(self, source:list = None, height_jog_steps:int = None):
+    def move_module_entry(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -671,7 +658,7 @@ class PlateCrane():
         self.move_single_axis("P", source)
         self.jog("Z", -height_jog_steps)
     
-    def pick_module_plate(self, source:str):
+    def pick_module_plate(self, source:str) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -694,7 +681,7 @@ class PlateCrane():
         self.move_arm_neutral()
         self.move_joints_neutral()
 
-    def place_module_plate(self, target:str):
+    def place_module_plate(self, target:str) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -716,7 +703,7 @@ class PlateCrane():
         self.move_arm_neutral()
         self.move_joints_neutral()
 
-    def pick_stack_plate(self, source:str, joint_values:bool = False):
+    def pick_stack_plate(self, source:str) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -727,17 +714,14 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """
-        if joint_values:
-            # Create a new location data 
-            # Move to this location
-            pass
+
         self.gripper_open()
         self.move_joints_neutral()
         self.move_location(source)
         self.gripper_close()
         self.move_joints_neutral()
 
-    def place_stack_plate(self, target:str, joint_values:bool = False):
+    def place_stack_plate(self, target:str) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -748,17 +732,13 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """
-        if joint_values:
-            # Create a new location data 
-            # Move to this location
-            pass
 
         self.move_joints_neutral()
         self.move_location(target)
         self.gripper_open()
         self.move_joints_neutral()
 
-    def stack_transfer(self, source:str, target:str):
+    def stack_transfer(self, source:str, target:str) -> None:
         """
         Transfer a plate plate from plate stacker to exchange location
 
@@ -770,11 +750,26 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """        
+        source = eval(source)
+        target = eval(target)
+
+        if isinstance(source, list): 
+            #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
+            # Create a new location data 
+            # Move to this location
+            self.set_location("source_loc", source[0], source[1], source[2], source[3])
+            source = "source_loc"
+
+        if isinstance(target, list): 
+            self.set_location("target_loc", target[0], target[1], target[2], target[3])
+            source = "target_loc"
+
         self.pick_plate(source)
         self.place_plate(target)
+        #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
     
-    def module_transfer(self, source:str, target:str):
+    def module_transfer(self, source:str, target:str) -> None:
         """
         Transfer a plate plate in between two modules
 
@@ -786,14 +781,23 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """        
-        # if len(source)
-        #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-        
+        source = eval(source)
+        target = eval(target)
 
-        # self.pick_plate(source)
-        # self.place_plate(target)
+        if isinstance(source, list): 
+            #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
+            # Create a new location data 
+            # Move to this location
+            self.set_location("source_loc", source[0], source[1], source[2], source[3])
+            source = "source_loc"
 
-        #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
+        if isinstance(target, list): 
+            self.set_location("target_loc", target[0], target[1], target[2], target[3])
+            source = "target_loc"
+
+        self.pick_module_plate(source)
+        self.place_module_plate(target)
+
 
 if __name__ == "__main__":
     """
