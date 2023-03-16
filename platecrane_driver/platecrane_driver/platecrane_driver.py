@@ -569,6 +569,57 @@ class PlateCrane():
         """
         pass
 
+    def get_module_plate(self, source:list = None, height_jog_steps:int = None):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+        # TODO:Handle the error raising within error_codes.py
+        if not source:
+            raise Exception("Source location was not given")
+        
+        if not height_jog_steps:
+            height_jog_steps = self.get_safe_height_jog_steps(source)
+
+        self.move_single_axis("Y", source)
+        self.move_single_axis("Z", source)
+        self.jog("Z", - self.plate_above_height)
+        self.gripper_close()
+        self.jog("Z",  self.plate_above_height)
+        self.jog("Z", height_jog_steps)
+
+    def put_module_plate(self, target:list = None, height_jog_steps:int = None):
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+        # TODO:Handle the error raising within error_codes.py
+        if not target:
+            raise Exception("Source location was not given")
+        
+        if not height_jog_steps:
+            height_jog_steps = self.get_safe_height_jog_steps(target)    
+
+        self.move_single_axis("Y", target)
+        self.move_single_axis("Z", target)
+        self.jog("Z", - self.plate_above_height)
+        self.gripper_open()
+        self.jog("Z",  self.plate_above_height)
+        self.jog("Z", height_jog_steps)
     def move_module_entry(self, source:list = None, height_jog_steps:int = None):
         """Summary
 
@@ -632,12 +683,7 @@ class PlateCrane():
 
         self.move_module_entry(source, height_jog_steps)
 
-        self.move_single_axis("Y", source)
-        self.move_single_axis("Z", source)
-        self.jog("Z", - self.plate_above_height)
-        self.gripper_close()
-        self.jog("Z",  self.plate_above_height)
-        self.jog("Z", height_jog_steps)
+
 
         self.move_arm_neutral()
         self.move_joints_neutral()
