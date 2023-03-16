@@ -313,7 +313,28 @@ class PlateCrane():
         current_position = [eval(x.strip(",")) for x in current_position]
 
         return current_position
+    
+    def get_safe_height_jog_steps(self, location:list):
+        """Summary
 
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+        
+        joint_values = self.get_location_joint_values(location)
+        current_pos = self.get_position()
+
+        module_safe_height = joint_values[1] +  self.plate_above_height
+
+        height_jog_steps = current_pos[1] - module_safe_height
+
+        return height_jog_steps
+    
     def set_location(self, location_name:str = "TEMP_0", R:int = 0, Z:int = 0, P:int = 0, Y:int = 0):
         """Saves a new location onto robot
 
@@ -587,7 +608,10 @@ class PlateCrane():
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(source)
-
+            
+        # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
+        #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
+        
         self.move_single_axis("Y", source)
         self.move_single_axis("Z", source)
         self.jog("Z", - self.plate_above_height)
@@ -614,12 +638,16 @@ class PlateCrane():
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(target)    
 
+        # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
+        #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
+
         self.move_single_axis("Y", target)
         self.move_single_axis("Z", target)
         self.jog("Z", - self.plate_above_height)
         self.gripper_open()
         self.jog("Z",  self.plate_above_height)
         self.jog("Z", height_jog_steps)
+
     def move_module_entry(self, source:list = None, height_jog_steps:int = None):
         """Summary
 
@@ -642,27 +670,6 @@ class PlateCrane():
         self.move_single_axis("R",source)
         self.move_single_axis("P", source)
         self.jog("Z", -height_jog_steps)
-
-    def get_safe_height_jog_steps(self, location:list):
-        """Summary
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        
-        joint_values = self.get_location_joint_values(location)
-        current_pos = self.get_position()
-
-        module_safe_height = joint_values[1] +  self.plate_above_height
-
-        height_jog_steps = current_pos[1] - module_safe_height
-
-        return height_jog_steps
     
     def pick_module_plate(self, source:str):
         """Summary
@@ -682,13 +689,12 @@ class PlateCrane():
         self.gripper_open()
 
         self.move_module_entry(source, height_jog_steps)
-
-
+        self.get_module_plate(source, height_jog_steps)
 
         self.move_arm_neutral()
         self.move_joints_neutral()
 
-    def place_module_plate(self, source:str):
+    def place_module_plate(self, target:str):
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -699,23 +705,14 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """
-        joint_values = self.get_location_joint_values(source)
-        current_pos = self.get_position()
 
-        module_safe_height = joint_values[1] +  self.plate_above_height
-        height_jog_steps = current_pos[1] - module_safe_height
+        height_jog_steps = self.get_safe_height_jog_steps(target)
      
         self.move_joints_neutral()
 
-        self.move_single_axis("R",source)
-        self.move_single_axis("P", source)
-        self.jog("Z", -height_jog_steps)
-        self.move_single_axis("Y", source)
-        self.move_single_axis("Z", source)
-        self.jog("Z", -1000)
-        self.gripper_close()
-        self.jog("Z", 1000)
-        self.jog("Z", height_jog_steps)
+        self.move_module_entry(target, height_jog_steps)
+        self.put_module_plate(target, height_jog_steps)
+
         self.move_arm_neutral()
         self.move_joints_neutral()
 
