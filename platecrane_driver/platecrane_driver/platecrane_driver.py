@@ -271,6 +271,26 @@ class PlateCrane():
         except:
             pass
 
+    def __update_locations(self, robot_onboard:list, known_locations:list) -> None:
+        """Checks the location database on the robot and saves the missing locations to robot onboard
+
+        :param robot_onboard: List of string locations that are saved on the robot
+        :type robot_onboard: list
+
+        :param known_locations: List of known locations that should exist on robot database
+        :type known_locations: list
+
+        :return: None
+        
+        """
+
+        for loc in known_locations:
+            if loc not in robot_onboard:
+                loc_values = loc.replace(",","").split(" ") # Removing the ',' caracter 
+                loc_values[0] =  loc_values[0][loc_values[0].find(":")+1:] # Removing the index number from the location name
+                self.set_location(loc_values[0], int(loc_values[1], int(loc_values[2], int(loc_values[3]), int(loc_values[4]))))
+
+
     def get_location_joint_values(self, location:str = None) -> list:
         """Checks status of plate_crane
 
