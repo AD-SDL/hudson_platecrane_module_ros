@@ -34,8 +34,9 @@ class PlateCrane():
         self.error = ""
         self.gripper_length = 0
         self.plate_above_height = 1000
+        self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
-        
+
         self.robot_status = ""
         self.movement_state = "READY"
         self.connect_plate_crane()
@@ -761,7 +762,8 @@ class PlateCrane():
         self.move_joints_neutral()
         #TODO: Find the exhange location distance on Y axis from the given Stack number"
         stack_joint_angles = self.get_location_joint_values(target)
-        stack_exchange_joint_angles = stack_joint_angles[], self.stack, stack_joint_angles[], stack_joint_angles[3] - self.stack_exchange_Y_axis_steps
+        stack_exchange_joint_angles = stack_joint_angles[0], self.stack_exchange_Z_height, stack_joint_angles[2], stack_joint_angles[3] - self.stack_exchange_Y_axis_steps
+        self.move_joint_angles(R = stack_exchange_joint_angles[0], Z = stack_exchange_joint_angles[1], P = stack_exchange_joint_angles[2], Y = stack_exchange_joint_angles[3])
         self.gripper_open()
         self.move_joints_neutral()
 
