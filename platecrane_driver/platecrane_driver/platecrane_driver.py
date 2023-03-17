@@ -850,8 +850,10 @@ class PlateCrane():
         try:       
             source = eval(source)
         except NameError as source_type_err:
+            # Location was given as a location name
             print("Source: " + source)   
         else:
+            # Location was given as a joint values
             self.set_location("source_loc", source[0], source[1], source[2], source[3])
             source = "source_loc"
             print("Source: " + source)   
@@ -859,8 +861,10 @@ class PlateCrane():
         try:
             target = eval(target)
         except NameError as target_type_err:
+            # Location was given as a location name
             print("Target: " + target)   
         else:
+            # Location was given as a joint values
             self.set_location("target_loc", target[0], target[1], target[2], target[3])
             target = "target_loc"
             print("Target: " + target)   
