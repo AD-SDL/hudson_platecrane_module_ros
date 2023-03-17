@@ -767,6 +767,22 @@ class PlateCrane():
         self.gripper_open()
         self.move_joints_neutral()
 
+    def place_plate_exchange(self) -> None:
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+        self.move_joints_neutral()
+        self.move_location("Exchange")
+        self.gripper_open()
+        self.move_joints_neutral()
+        
     def stack_transfer(self, source:str, target:str) -> None:
         """
         Transfer a plate plate from plate stacker to exchange location
