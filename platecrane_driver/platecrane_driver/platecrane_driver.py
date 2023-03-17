@@ -735,10 +735,13 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-        self.gripper_open()
+        self.gripper_close()
         self.move_joints_neutral()
         self.move_location(source)
-        self.gripper_close()
+        self.jog("Z", 10)
+        self.gripper_open()
+        self.jog("Z", - self.plate_above_height)
+        self.gripper_close() 
         self.move_joints_neutral()
 
     def place_stack_plate(self, target:str) -> None:
