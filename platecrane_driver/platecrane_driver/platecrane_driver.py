@@ -747,7 +747,7 @@ class PlateCrane():
         self.gripper_close() 
         self.move_joints_neutral()
 
-    def place_stack_plate(self, target:str) -> None:
+    def place_plate_stack_entry(self, target:str) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
