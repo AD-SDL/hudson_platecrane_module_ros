@@ -747,6 +747,22 @@ class PlateCrane():
         self.gripper_close() 
         self.move_joints_neutral()
 
+    def place_plate_exchange(self) -> None:
+        """Summary
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+        self.move_joints_neutral()
+        self.move_location("Exchange")
+        self.gripper_open()
+        self.move_joints_neutral()
+        
     def place_plate_stack_entry(self, target:str) -> None:
         """Summary
 
@@ -764,22 +780,6 @@ class PlateCrane():
         stack_joint_angles = self.get_location_joint_values(target)
         stack_exchange_joint_angles = stack_joint_angles[0], self.stack_exchange_Z_height, stack_joint_angles[2], stack_joint_angles[3] - self.stack_exchange_Y_axis_steps
         self.move_joint_angles(R = stack_exchange_joint_angles[0], Z = stack_exchange_joint_angles[1], P = stack_exchange_joint_angles[2], Y = stack_exchange_joint_angles[3])
-        self.gripper_open()
-        self.move_joints_neutral()
-
-    def place_plate_exchange(self) -> None:
-        """Summary
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        self.move_joints_neutral()
-        self.move_location("Exchange")
         self.gripper_open()
         self.move_joints_neutral()
 
