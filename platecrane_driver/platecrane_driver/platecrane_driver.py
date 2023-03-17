@@ -783,11 +783,11 @@ class PlateCrane():
         self.gripper_open()
         self.move_joints_neutral()
 
-    def pick_plate_exhange(self) -> None:
+    def pick_plate_exchange(self) -> None:
         pass
     def place_plate_stack() -> None:
         pass
-    
+
     def stack_transfer(self, source:str = None, target:str = None) -> None:
         """
         Transfer a plate plate from plate stacker to exchange location
@@ -824,7 +824,7 @@ class PlateCrane():
                 self.set_location("target_loc", target[0], target[1], target[2], target[3])
                 source = "target_loc"
 
-            self.pick_plate_exhange() #TODO: Not completed yet
+            self.pick_plate_exchange() #TODO: Not completed yet
             self.place_plate_stack() #TODO: Not completed yet
 
         
@@ -833,7 +833,7 @@ class PlateCrane():
     
     def module_transfer(self, source:str, target:str) -> None:
         """
-        Transfer a plate plate in between two modules
+        Transfer a plate in between two modules
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
         :type [ParamName]: [ParamType](, optional)
@@ -842,20 +842,30 @@ class PlateCrane():
         ...
         :return: [ReturnDescription]
         :rtype: [ReturnType]
-        """        
-        source = eval(source)
-        target = eval(target)
+        """ 
+        #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
+        # Create a new location data 
+        # Move to this location
 
-        if isinstance(source, list): 
-            #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-            # Create a new location data 
-            # Move to this location
+        try:       
+            source = eval(source)
+        except NameError as source_type_err:
+            print("Source: " + source)   
+        else:
             self.set_location("source_loc", source[0], source[1], source[2], source[3])
             source = "source_loc"
+            print("Source: " + source)   
 
-        if isinstance(target, list): 
+        try:
+            target = eval(target)
+        except NameError as target_type_err:
+            print("Target: " + target)   
+        else:
             self.set_location("target_loc", target[0], target[1], target[2], target[3])
-            source = "target_loc"
+            target = "target_loc"
+            print("Target: " + target)   
+
+
 
         self.pick_module_plate(source)
         self.place_module_plate(target)
