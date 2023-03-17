@@ -782,8 +782,13 @@ class PlateCrane():
         self.move_location("Exchange")
         self.gripper_open()
         self.move_joints_neutral()
-        
-    def stack_transfer(self, source:str, target:str) -> None:
+
+    def pick_plate_exhange(self) -> None:
+        pass
+    def place_plate_stack() -> None:
+        pass
+    
+    def stack_transfer(self, source:str = None, target:str = None) -> None:
         """
         Transfer a plate plate from plate stacker to exchange location
 
@@ -794,23 +799,35 @@ class PlateCrane():
         ...
         :return: [ReturnDescription]
         :rtype: [ReturnType]
-        """        
-        source = eval(source)
-        target = eval(target)
+        """    
+        if source and target:
+            raise Exception("Pass either source or target location. Transfer can either be done to the stack or from the stack")    
+        elif not source and not target:
+            raise Exception("No destination was provided. Pass either source or target location.")
+        
+        if source:
+            source = eval(source)
 
-        if isinstance(source, list): 
-            #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-            # Create a new location data 
-            # Move to this location
-            self.set_location("source_loc", source[0], source[1], source[2], source[3])
-            source = "source_loc"
+            if isinstance(source, list): 
+                #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
+                # Create a new location data 
+                # Move to this location
+                self.set_location("source_loc", source[0], source[1], source[2], source[3])
+                source = "source_loc"
 
-        if isinstance(target, list): 
-            self.set_location("target_loc", target[0], target[1], target[2], target[3])
-            source = "target_loc"
+            self.pick_stack_plate(source)
+            self.place_plate_exchange()
 
-        self.pick_plate(source)
-        self.place_plate(target)
+        elif target:
+            target = eval(target)
+            if isinstance(target, list): 
+                self.set_location("target_loc", target[0], target[1], target[2], target[3])
+                source = "target_loc"
+
+            self.pick_plate_exhange() #TODO: Not completed yet
+            self.place_plate_stack() #TODO: Not completed yet
+
+        
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
     
