@@ -36,7 +36,7 @@ class PlateCrane():
         self.plate_above_height = 1000
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
-
+        
         self.robot_status = ""
         self.movement_state = "READY"
         self.connect_plate_crane()
@@ -147,7 +147,7 @@ class PlateCrane():
         return response_string, initial_command_msg
     
 
-    def send_command(self, command, timeout=0):
+    def send_command(self, command, timeout=0.):
         """Sends provided command over the serial port and stores data outputted. 
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -529,7 +529,7 @@ class PlateCrane():
 
         # self.deletepoint(R, Z, P, Y)
     
-    def move_location(self, loc, move_time = 4.5) -> None:
+    def move_location(self, loc, move_time = 4.7) -> None:
         """Move to preset locations located in load_labware function
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -598,7 +598,7 @@ class PlateCrane():
         """
         self.move_tower_neutral()
         self.move_arm_neutral()
-        self.move_gripper_neutral()
+        # self.move_gripper_neutral()
 
     def get_module_plate(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
@@ -626,8 +626,9 @@ class PlateCrane():
         self.move_single_axis("Z", source)
         self.jog("Z", - self.plate_above_height)
         self.gripper_close()
-        self.jog("Z",  self.plate_above_height)
-        self.jog("Z", height_jog_steps)
+        self.move_single_axis("Z", source)
+        # self.move_single_axis("Y", "Safe")
+
 
     def put_module_plate(self, target:list = None, height_jog_steps:int = None) -> None:
         """Summary
@@ -655,8 +656,8 @@ class PlateCrane():
         self.move_single_axis("Z", target)
         self.jog("Z", - self.plate_above_height)
         self.gripper_open()
-        self.jog("Z",  self.plate_above_height)
-        self.jog("Z", height_jog_steps)
+        self.move_single_axis("Z", target)
+        # self.move_single_axis("Y", "Safe")
 
     def move_module_entry(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
@@ -681,7 +682,7 @@ class PlateCrane():
         self.move_single_axis("P", source)
         self.jog("Z", -height_jog_steps)
     
-    def pick_module_plate(self, source:str) -> None:
+    def pick_module_plate(self, source:str, height_jog_steps: int) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -692,8 +693,6 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """
-
-        height_jog_steps = self.get_safe_height_jog_steps(source)
      
         self.move_joints_neutral()
         self.gripper_open()
@@ -702,9 +701,9 @@ class PlateCrane():
         self.get_module_plate(source, height_jog_steps)
 
         self.move_arm_neutral()
-        self.move_joints_neutral()
+        # self.move_joints_neutral()
 
-    def place_module_plate(self, target:str) -> None:
+    def place_module_plate(self, target:str, height_jog_steps:int) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -716,7 +715,6 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-        height_jog_steps = self.get_safe_height_jog_steps(target)
      
         self.move_joints_neutral()
 
@@ -724,7 +722,7 @@ class PlateCrane():
         self.put_module_plate(target, height_jog_steps)
 
         self.move_arm_neutral()
-        self.move_joints_neutral()
+        # self.move_joints_neutral()
 
     def pick_stack_plate(self, source:str) -> None:
         """Summary
@@ -869,10 +867,12 @@ class PlateCrane():
             target = "target_loc"
             print("Target: " + target)   
 
+        source_height_jog_steps = self.get_safe_height_jog_steps(source)
+        target_height_jog_steps = self.get_safe_height_jog_steps(target)
 
 
-        self.pick_module_plate(source)
-        self.place_module_plate(target)
+        self.pick_module_plate(source, source_height_jog_steps)
+        self.place_module_plate(target, target_height_jog_steps)
 
 
 if __name__ == "__main__":
@@ -880,11 +880,13 @@ if __name__ == "__main__":
     Runs given function.
     """
     s = PlateCrane("/dev/ttyUSB2")
-    source_loc = "Stack1"
-    target_loc = "Stack2"
-    # s.transfer(source_loc, target_loc)
+    source_loc = "SealerNest"
+    target_loc = "PeelerNest"
+    # s.get_location_joint_values(target_loc)
+    s.module_transfer(target_loc, source_loc)
+    # s.move_joints_neutral()
     # s.send_command("LOADPOINT TEMP2 210256, -1050, 491, 5730", timeout= 5)
-    s.pick_module_plate("SealerNest")
+    # s.pick_module_plate("SealerNest")
     # s.get_status()
     # s.get_position()
     # s.home()
@@ -933,4 +935,4 @@ if __name__ == "__main__":
 
     # s.home()
 
-#    Crash error outputs 21(R axis),14(z axis) 
+#    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name
