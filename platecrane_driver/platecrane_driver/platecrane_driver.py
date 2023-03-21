@@ -36,7 +36,8 @@ class PlateCrane():
         self.plate_above_height = 1000
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
-        
+        self.exchange_location = "LidNest2"
+
         self.robot_status = ""
         self.movement_state = "READY"
         self.connect_plate_crane()
@@ -637,7 +638,6 @@ class PlateCrane():
         self.jog("Z", - self.plate_above_height)
         self.gripper_close()
         self.move_single_axis("Z", source)
-        # self.move_single_axis("Y", "Safe")
 
 
     def put_module_plate(self, target:list = None, height_jog_steps:int = None) -> None:
@@ -667,7 +667,6 @@ class PlateCrane():
         self.jog("Z", - self.plate_above_height)
         self.gripper_open()
         self.move_single_axis("Z", target)
-        # self.move_single_axis("Y", "Safe")
 
     def move_module_entry(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
@@ -711,7 +710,6 @@ class PlateCrane():
         self.get_module_plate(source, height_jog_steps)
 
         self.move_arm_neutral()
-        # self.move_joints_neutral()
 
     def place_module_plate(self, target:str, height_jog_steps:int) -> None:
         """Summary
@@ -732,7 +730,6 @@ class PlateCrane():
         self.put_module_plate(target, height_jog_steps)
 
         self.move_arm_neutral()
-        # self.move_joints_neutral()
 
     def pick_stack_plate(self, source:str) -> None:
         """Summary
@@ -767,7 +764,7 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
         self.move_joints_neutral()
-        self.move_location("Exchange")
+        self.move_location(self.exchange_location)
         self.gripper_open()
         self.move_joints_neutral()
 
