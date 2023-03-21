@@ -8,27 +8,20 @@ from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
 
-    vendor_id = LaunchConfiguration('vendor_id')
-    product_id = LaunchConfiguration('product_id')
+    port = LaunchConfiguration('port')
 
-    declare_use_vendor_id_cmd = DeclareLaunchArgument(
-        name = 'vendor_id',
-        default_value = "0x7513",
-        description = 'Flag to accept vendor_id address')
-
-    declare_use_product_id_cmd = DeclareLaunchArgument(
-        name = 'product_id',
-        default_value = "0x0002",
-        description = 'Flag to accept product_id number')
+    declare_use_port_cmd = DeclareLaunchArgument(
+        name = 'port',
+        default_value = "/dev/ttyUSB2",
+        description = 'Flag to accept port number')
 
     platecrane_client = Node(
-            package='platecrane_module_client',
+            package='platecrane_client',
             namespace = 'std_ns',
             executable='platecrane_client',
             name='PlatecraneNode',
             parameters=[
-                {'vendor_id':vendor_id},
-                {'product_id':product_id}
+                {'port':port},
                 ],
             emulate_tty=True
     )
@@ -36,8 +29,7 @@ def generate_launch_description():
     
     launch_d = LaunchDescription()
 
-    launch_d.add_action(declare_use_vendor_id_cmd)
-    launch_d.add_action(declare_use_product_id_cmd)
+    launch_d.add_action(declare_use_port_cmd)
     launch_d.add_action(platecrane_client)
     
     return launch_d
