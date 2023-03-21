@@ -14,16 +14,16 @@ from time import sleep
 import threading
 import asyncio
 
-from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
+from platecrane_driver.platecrane_driver import PlateCrane # import PlateCrane driver
 
-class ScilopsClient(Node):
+class PlatecraneClient(Node):
     '''
-    The ScilopsClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
+    The PlatecraneClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
     based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
     '''
-    def __init__(self, TEMP_NODE_NAME = "ScilopsClientNode"):
+    def __init__(self, TEMP_NODE_NAME = "PlatecraneClientNode"):
         '''
-        The init function is neccesary for the ScilopsClient class to initialize all variables, parameters, and other functions.
+        The init function is neccesary for the PlatecraneClient class to initialize all variables, parameters, and other functions.
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
         '''
         super().__init__(TEMP_NODE_NAME)
@@ -32,20 +32,18 @@ class ScilopsClient(Node):
         self.action_flag = "READY"
 
         # Setting temporary default parameter values        
-        self.declare_parameter("vendor_id",0x7513)
-        self.declare_parameter("product_id",0x0002)
+        self.declare_parameter("port","/dev/ttyUSB2")
 
         # Receiving the real vendor_id and product_id from the launch parameters
-        self.vendor_id = self.get_parameter("vendor_id").get_parameter_value().integer_value
-        self.product_id = self.get_parameter("product_id").get_parameter_value().integer_value
-        self.get_logger().info("Received Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
+        self.port = self.get_parameter("port").get_parameter_value().string_value
+        self.get_logger().info("Received Port name: " + str(self.port))
 
         self.connect_robot()
 
-        self.sciclops.get_status() 
-        self.robot_status = self.sciclops.status
-        asyncio.run(self.sciclops.check_complete())
-        self.robot_movement_state = self.sciclops.movement_state
+        self.platecrane.get_status() 
+        self.robot_status = self.platecrane.status
+        asyncio.run(self.platecrane.check_complete())
+        self.robot_movement_state = self.platecrane.movement_state
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
         self.robot_home_iter = 0
@@ -83,21 +81,21 @@ class ScilopsClient(Node):
     def connect_robot(self):
         try:
             self.get_logger().info("Trying robot connection")
-            self.sciclops = SCICLOPS()
+            self.platecrane = PlateCrane()
 
         except Exception as error_msg:
-            self.state = "SCICLOPS CONNECTION ERROR"
-            self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
+            self.state = "PLATECRANE CONNECTION ERROR"
+            self.get_logger().error("------- PlateCrane Error message: " + str(error_msg) +  (" -------"))
 
         else:
-            self.get_logger().info("SCICLOPS online")
+            self.get_logger().info("PlateCrane online")
 
     def robot_state_refresher_callback(self):
         "Refreshes the robot states if robot cannot update the state parameters automatically because it is not running any jobs"
         try:
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
-                asyncio.run(self.sciclops.check_complete())
+                asyncio.run(self.platecrane.check_complete())
                 self.state_refresher_timer = 0 
             
             if self.past_movement_state == self.robot_movement_state:
@@ -115,21 +113,21 @@ class ScilopsClient(Node):
 
     def stateCallback(self):
         '''
-        Publishes the sciclops state to the 'state' topic. 
+        Publishes the platecrane state to the 'state' topic. 
         '''
         msg = String()
 
         try:
-            self.robot_status = self.sciclops.status
-            self.robot_movement_state = self.sciclops.movement_state
+            self.robot_status = self.platecrane.status
+            self.robot_movement_state = self.platecrane.movement_state
 
 
         except Exception as err:
-            self.get_logger().error("SCICLOPS IS NOT RESPONDING! ERROR: " + str(err))
-            self.state = "SCICLOPS CONNECTION ERROR"
+            self.get_logger().error("PLATECRANE IS NOT RESPONDING! ERROR: " + str(err))
+            self.state = "PLATECRANE CONNECTION ERROR"
 
 
-        if self.state != "SCICLOPS CONNECTION ERROR":
+        if self.state != "PLATECRANE CONNECTION ERROR":
 
             if self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
@@ -159,7 +157,7 @@ class ScilopsClient(Node):
                 if self.robot_home_iter == 0 :
                     self.robot_home_iter = 1
                     self.get_logger().warn("Resetting the robot")
-                    self.sciclops.reset()
+                    self.platecrane.reset()
                     sleep(25)
                     self.get_logger().warn("Homing the robot")
                     sleep(25)
@@ -221,7 +219,7 @@ class ScilopsClient(Node):
 
         if request.action_handle == 'status':
             try:
-                self.sciclops.get_status()
+                self.platecrane.get_status()
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Get status failed. Error:" + err
@@ -233,10 +231,10 @@ class ScilopsClient(Node):
             return response 
 
 
-        elif request.action_handle == 'home':            
+        elif request.action_handle == 'stack_stransfer':            
 
             try:
-                self.sciclops.home()  
+                self.platecrane.home()  
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Homing failed. Error:" + err
@@ -248,7 +246,7 @@ class ScilopsClient(Node):
             return response
 
 
-        elif request.action_handle=='get_plate':
+        elif request.action_handle=='module_trasnfer':
             # self.state = "BUSY"
             self.get_logger().info("Starting get plate")
             vars = eval(request.vars)
@@ -259,7 +257,7 @@ class ScilopsClient(Node):
             trash = vars.get('trash',False)
 
             try:
-                self.sciclops.get_plate(pos, lid, trash)
+                self.platecrane.get_plate(pos, lid, trash)
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Get plate failed. Error:" + err
@@ -273,7 +271,7 @@ class ScilopsClient(Node):
             return response
 
         else: 
-            msg = "UNKOWN ACTION REQUEST! Available actions: status, home, get_plate"
+            msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
             response.action_response = -1
             response.action_msg= msg
             self.get_logger().error('Error: ' + msg)
@@ -287,20 +285,20 @@ def main(args = None):
     rclpy.init(args=args)  # initialize Ros2 communication
 
     try:
-        sciclops_client = ScilopsClient()
+        platecrane_client = PlatecraneClient()
         executor = MultiThreadedExecutor()
-        executor.add_node(sciclops_client)
+        executor.add_node(platecrane_client)
 
         try:
-            sciclops_client.get_logger().info('Beginning client, shut down with CTRL-C')
+            platecrane_client.get_logger().info('Beginning client, shut down with CTRL-C')
             executor.spin()
         except KeyboardInterrupt:
-            sciclops_client.get_logger().info('Keyboard interrupt, shutting down.\n')
+            platecrane_client.get_logger().info('Keyboard interrupt, shutting down.\n')
         finally:
-            sciclops_client.sciclops.disconnect_robot()
-            sciclops_client.get_logger().warn("Robot connection is closed")
+            platecrane_client.platecrane.disconnect_robot()
+            platecrane_client.get_logger().warn("Robot connection is closed")
             executor.shutdown()
-            sciclops_client.destroy_node()
+            platecrane_client.destroy_node()
     finally:
         rclpy.shutdown()
 
