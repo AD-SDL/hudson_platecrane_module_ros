@@ -247,6 +247,16 @@ class PlateCrane():
             pass
 
         return self.robot_status
+    
+    def free_joints(self):
+
+        command = 'limp TRUE\r\n' 
+        out_msg =  self.send_command(command)
+    
+    def lock_joints(self):
+
+        command = 'limp FALSE\r\n' 
+        out_msg =  self.send_command(command)
 
     def get_location_list(self):
         """Checks status of plate_crane
@@ -885,7 +895,6 @@ if __name__ == "__main__":
     # s.get_location_joint_values(target_loc)
     # s.module_transfer(target_loc, source_loc)
     # s.move_joints_neutral()
-    # s.send_command("LOADPOINT TEMP2 210256, -1050, 491, 5730", timeout= 5)
     # s.pick_module_plate("SealerNest")
     # s.get_status()
     # s.get_position()
@@ -893,46 +902,16 @@ if __name__ == "__main__":
     # s.wait_robot_movement()
     # s.get_status()
     # s.get_position()
-    # s.send_command("GETPOINT Safe\r\n")  
     # s.get_location_joint_values("Safe")
-    # s.send_command("limp TRUE\r\n")
     # s.set_location()
     # s.get_location_list()
     # s.delete_location("TEMP_0")
     # s.get_location_list()
 
-    # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
     # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
     # s.send_command("move_abs Z")
     # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
     # s.send_command("MOVE Y 5000\r\n")  
-
-    # s.send_command("Move_Z Safe\r\n")  
-    # s.send_command("Move_Y Safe\r\n")    
-  
-    # s.send_command("MOVE Safe\r\n")
-    
-
-    # s.send_command("Move_Z Safe\r\n")    
-    # s.send_command("Move_Y Safe\r\n")    
-
-    # s.send_command("MOVE PeelerNest\r\n")
-    
-
-    # s.send_command("Move_Z Safe\r\n")    
-    # s.send_command("Move_Y Safe\r\n")    
-
-    # s.send_command("MOVE Stack1\r\n")
-    
-
-
-    # s.send_command("Move_R PeelerNest\r\n")
-    # s.send_command("Move_Z PeelerNest\r\n")
-    # s.send_command("Move_P PeelerNest\r\n")
-
-    # s.get_position()
-
-    # s.home()
 
 #    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name
