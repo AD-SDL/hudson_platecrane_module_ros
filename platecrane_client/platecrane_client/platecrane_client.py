@@ -204,7 +204,7 @@ class PlatecraneClient(Node):
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
         '''
-        if self.state == "SCICLOPS CONNECTION ERROR":
+        if self.state == "PLATECRANE CONNECTION ERROR":
             message = "Connection error, cannot accept a job!"
             self.get_logger().error(message)
             response.action_response = -1
@@ -217,53 +217,46 @@ class PlatecraneClient(Node):
             
         self.action_flag = "BUSY"
 
-        if request.action_handle == 'status':
-            try:
-                self.platecrane.get_status()
-            except Exception as err:
-                response.action_response = -1
-                response.action_msg= "Get status failed. Error:" + err
-            else:    
-                response.action_response = 0
-                response.action_msg= "Get status successfully completed"  
+        if request.action_handle == 'stack_transfer':            
 
-            self.state = "COMPLETED"
-            return response 
+            self.get_logger().info("Starting stack transfer")
+            vars = eval(request.vars)
+            self.get_logger().info(vars)
 
-
-        elif request.action_handle == 'stack_stransfer':            
+            source = vars.get('source', None)
+            target = vars.get('target', None)
 
             try:
-                self.platecrane.home()  
+                self.platecrane.stack_transfer(source, target)
             except Exception as err:
                 response.action_response = -1
-                response.action_msg= "Homing failed. Error:" + err
+                response.action_msg= "Stack transfer failed. Error:" + err
             else:    
                 response.action_response = 0
-                response.action_msg= "Homing successfully completed"  
-            
+                response.action_msg= "Stack trasnfer successfully completed"
+
+            self.get_logger().info('Finished Action: ' + request.action_handle)
             self.state = "COMPLETED"
+
             return response
 
+        elif request.action_handle=='module_transfer':
 
-        elif request.action_handle=='module_trasnfer':
-            # self.state = "BUSY"
-            self.get_logger().info("Starting get plate")
+            self.get_logger().info("Starting module transfer")
             vars = eval(request.vars)
-            print(vars)
+            self.get_logger().info(vars)
 
-            pos = vars.get('pos')
-            lid = vars.get('lid',False)
-            trash = vars.get('trash',False)
+            source = vars.get('source')
+            target = vars.get('target')
 
             try:
-                self.platecrane.get_plate(pos, lid, trash)
+                self.platecrane.module_transfer(source, target)
             except Exception as err:
                 response.action_response = -1
-                response.action_msg= "Get plate failed. Error:" + err
+                response.action_msg= "Module transfer failed. Error:" + err
             else:    
                 response.action_response = 0
-                response.action_msg= "Get plate successfully completed"
+                response.action_msg= "Module trasnfer successfully completed"
 
             self.get_logger().info('Finished Action: ' + request.action_handle)
             self.state = "COMPLETED"
