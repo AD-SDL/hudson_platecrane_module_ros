@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
-package_name = 'sciclops_module_client'
+package_name = 'platecrane_client'
 
 setup(
     name=package_name,
@@ -16,14 +16,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='decarabas',
-    maintainer_email='rpl@todo.todo',
+    maintainer='Doga Ozgulbas',
+    maintainer_email='dozgulbas@anl.gov',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sciclops_client = sciclops_module_client.sciclops_client:main',
+            'platecrane_client = platecrane_client.platecrane_client:main',
         ],
    },
 )
