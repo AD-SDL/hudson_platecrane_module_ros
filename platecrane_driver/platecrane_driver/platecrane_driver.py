@@ -36,6 +36,7 @@ class PlateCrane():
         self.plate_above_height = 1000
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
+        self.exchange_location = "LidNest2"
 
         self.robot_status = ""
         self.movement_state = "READY"
@@ -762,7 +763,7 @@ class PlateCrane():
         self.move_location("Exchange")
         self.gripper_open()
         self.move_joints_neutral()
-        
+
     def place_plate_stack_entry(self, target:str) -> None:
         """Summary
 
