@@ -153,17 +153,8 @@ class PlatecraneClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.get_logger().error("ROBOT IS NOT HOMED")
-                
-                if self.robot_home_iter == 0 :
-                    self.robot_home_iter = 1
-                    self.get_logger().warn("Resetting the robot")
-                    self.platecrane.reset()
-                    sleep(25)
-                    self.get_logger().warn("Homing the robot")
-                    sleep(25)
-                    self.get_logger().warn("Homing completed")
-                    self.robot_home_iter = 0    
-
+                self.platecrane.home()
+            
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
