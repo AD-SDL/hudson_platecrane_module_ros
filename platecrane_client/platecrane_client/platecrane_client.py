@@ -167,7 +167,7 @@ class PlatecraneClient(Node):
             msg.data = 'State: %s' % self.state
             self.statePub.publish(msg)
             self.get_logger().error(msg.data)
-            self.get_logger().warn("Trying to connect again! Vendor ID: " + str(self.vendor_id) + " Product ID: " + str(self.product_id))
+            self.get_logger().warn("Trying to connect again! Port: " + str(self.port))
             self.connect_robot()
 
     def descriptionCallback(self, request, response):
