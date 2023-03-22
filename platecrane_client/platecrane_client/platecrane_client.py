@@ -21,7 +21,7 @@ class PlatecraneClient(Node):
     The PlatecraneClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
     based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
     '''
-    def __init__(self, TEMP_NODE_NAME = "PlatecraneClientNode"):
+    def __init__(self, TEMP_NODE_NAME = "PlatecraneNode"):
         '''
         The init function is neccesary for the PlatecraneClient class to initialize all variables, parameters, and other functions.
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
