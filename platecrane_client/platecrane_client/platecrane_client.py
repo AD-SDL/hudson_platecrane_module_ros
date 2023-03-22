@@ -203,7 +203,7 @@ class PlatecraneClient(Node):
             return response
 
         while self.state != "READY":
-            self.get_logger().warn("Waiting for SCICLOPS to switch READY state...")
+            self.get_logger().warn("Waiting for PLATECRANE to switch READY state...")
             sleep(0.5)
             
         self.action_flag = "BUSY"
