@@ -231,7 +231,7 @@ class PlatecraneClient(Node):
 
             return response
 
-        elif request.action_handle=='module_transfer':
+        elif request.action_handle == 'module_transfer':
 
             self.get_logger().info("Starting module transfer")
             vars = eval(request.vars)
