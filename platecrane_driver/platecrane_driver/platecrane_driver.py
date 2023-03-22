@@ -29,7 +29,8 @@ class PlateCrane():
         self.host_path = host_path
         self.baud_rate = baud_rate
         self.connection = None 
-
+        self.secondory_connection = None
+        
         self.status = 0
         self.error = ""
         self.gripper_length = 0
@@ -40,6 +41,7 @@ class PlateCrane():
 
         self.robot_status = ""
         self.movement_state = "READY"
+        self.platecrane_current_position = None
         self.connect_plate_crane()
         self.initialize()
 
@@ -58,7 +60,7 @@ class PlateCrane():
         """
         try:
             self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-            self.connection_status = serial.Serial(self.host_path, self.baud_rate, timeout=1)
+            self.secondory_connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
         except:
             raise Exception("Could not establish connection")    
 
@@ -197,10 +199,11 @@ class PlateCrane():
         """
 
 
-        self.get_status()
-
-        if self.robot_status == "":
+        current_postion = self.get_position()
+        
+        if self.platecrane_current_position != current_postion:
             self.movement_state = "BUSY"
+            self.platecrane_current_position = current_postion
         else:
             self.movement_state = "READY"
         print(self.movement_state)
