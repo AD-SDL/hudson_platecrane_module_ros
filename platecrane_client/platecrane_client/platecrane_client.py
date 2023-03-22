@@ -19,7 +19,7 @@ from platecrane_driver.platecrane_driver import PlateCrane # import PlateCrane d
 class PlatecraneClient(Node):
     '''
     The PlatecraneClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
-    based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
+    based on the executed command and publishes the state of the platecrane and a description of the platecrane to the respective topics.
     '''
     def __init__(self, TEMP_NODE_NAME = "PlatecraneNode"):
         '''
@@ -37,20 +37,20 @@ class PlatecraneClient(Node):
         # Receiving the real vendor_id and product_id from the launch parameters
         self.port = self.get_parameter("port").get_parameter_value().string_value
         self.get_logger().info("Received Port name: " + str(self.port))
-
+        
+        self.platecrane = None
         self.connect_robot()
-
-        self.platecrane.get_status() 
-        self.robot_status = self.platecrane.status
-        asyncio.run(self.platecrane.check_complete())
-        self.robot_movement_state = self.platecrane.movement_state
+        
+        self.robot_status = None
+        self.robot_movement_state = None
+        
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
         self.robot_home_iter = 0
 
         self.description = {
             'name': node_name,
-            'type': 'sciclops_plate_stacker',
+            'type': 'platecrane_plate_stacker',
             'actions':
             {
                 'status':'',
