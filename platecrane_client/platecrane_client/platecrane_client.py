@@ -95,7 +95,7 @@ class PlatecraneClient(Node):
         try:
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
-                asyncio.run(self.platecrane.check_complete())
+                self
                 self.state_refresher_timer = 0 
             
             if self.past_movement_state == self.robot_movement_state:
@@ -129,11 +129,20 @@ class PlatecraneClient(Node):
 
         if self.state != "PLATECRANE CONNECTION ERROR":
 
-            if self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
-                self.state = "READY"
+            if self.robot_status == "ERROR":
+                self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
-                self.get_logger().info(msg.data)
+                self.get_logger().error(msg.data)
+                self.action_flag = "READY"
+                
+            elif self.robot_status == "0":
+                self.state = "ERROR"
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().error(msg.data)
+                self.get_logger().error("ROBOT IS NOT HOMED")
+                self.platecrane.home()
 
             elif self.state == "COMPLETED":
                 msg.data = 'State: %s' % self.state
@@ -147,20 +156,13 @@ class PlatecraneClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-            elif self.robot_status == "0":
-                self.state = "ERROR"
+
+            elif self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
+                self.state = "READY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
-                self.get_logger().error(msg.data)
-                self.get_logger().error("ROBOT IS NOT HOMED")
-                self.platecrane.home()
-            
-            elif self.robot_status == "ERROR":
-                self.state = "ERROR"
-                msg.data = 'State: %s' % self.state
-                self.statePub.publish(msg)
-                self.get_logger().error(msg.data)
-                self.action_flag = "READY"
+                self.get_logger().info(msg.data)
+
 
 
         else:
