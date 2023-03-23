@@ -29,16 +29,19 @@ class PlateCrane():
         self.host_path = host_path
         self.baud_rate = baud_rate
         self.connection = None 
-
+        self.secondory_connection = None
+        
         self.status = 0
         self.error = ""
         self.gripper_length = 0
         self.plate_above_height = 1000
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
-        
+        self.exchange_location = "LidNest2"
+
         self.robot_status = ""
         self.movement_state = "READY"
+        self.platecrane_current_position = None
         self.connect_plate_crane()
         self.initialize()
 
@@ -57,7 +60,7 @@ class PlateCrane():
         """
         try:
             self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-            self.connection_status = serial.Serial(self.host_path, self.baud_rate, timeout=1)
+            self.secondory_connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
         except:
             raise Exception("Could not establish connection")    
 
@@ -196,10 +199,11 @@ class PlateCrane():
         """
 
 
-        self.get_status()
-
-        if self.robot_status == "":
+        current_postion = self.get_position()
+        
+        if self.platecrane_current_position != current_postion:
             self.movement_state = "BUSY"
+            self.platecrane_current_position = current_postion
         else:
             self.movement_state = "READY"
         print(self.movement_state)
@@ -247,6 +251,16 @@ class PlateCrane():
             pass
 
         return self.robot_status
+    
+    def free_joints(self):
+
+        command = 'limp TRUE\r\n' 
+        out_msg =  self.send_command(command)
+    
+    def lock_joints(self):
+
+        command = 'limp FALSE\r\n' 
+        out_msg =  self.send_command(command)
 
     def get_location_list(self):
         """Checks status of plate_crane
@@ -627,7 +641,6 @@ class PlateCrane():
         self.jog("Z", - self.plate_above_height)
         self.gripper_close()
         self.move_single_axis("Z", source)
-        # self.move_single_axis("Y", "Safe")
 
 
     def put_module_plate(self, target:list = None, height_jog_steps:int = None) -> None:
@@ -657,7 +670,6 @@ class PlateCrane():
         self.jog("Z", - self.plate_above_height)
         self.gripper_open()
         self.move_single_axis("Z", target)
-        # self.move_single_axis("Y", "Safe")
 
     def move_module_entry(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
@@ -701,7 +713,6 @@ class PlateCrane():
         self.get_module_plate(source, height_jog_steps)
 
         self.move_arm_neutral()
-        # self.move_joints_neutral()
 
     def place_module_plate(self, target:str, height_jog_steps:int) -> None:
         """Summary
@@ -722,7 +733,6 @@ class PlateCrane():
         self.put_module_plate(target, height_jog_steps)
 
         self.move_arm_neutral()
-        # self.move_joints_neutral()
 
     def pick_stack_plate(self, source:str) -> None:
         """Summary
@@ -757,10 +767,10 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
         self.move_joints_neutral()
-        self.move_location("Exchange")
+        self.move_location(self.exchange_location)
         self.gripper_open()
         self.move_joints_neutral()
-        
+
     def place_plate_stack_entry(self, target:str) -> None:
         """Summary
 
@@ -882,9 +892,8 @@ if __name__ == "__main__":
     source_loc = "SealerNest"
     target_loc = "PeelerNest"
     # s.get_location_joint_values(target_loc)
-    s.module_transfer(target_loc, source_loc)
+    # s.module_transfer(target_loc, source_loc)
     # s.move_joints_neutral()
-    # s.send_command("LOADPOINT TEMP2 210256, -1050, 491, 5730", timeout= 5)
     # s.pick_module_plate("SealerNest")
     # s.get_status()
     # s.get_position()
@@ -892,46 +901,16 @@ if __name__ == "__main__":
     # s.wait_robot_movement()
     # s.get_status()
     # s.get_position()
-    # s.send_command("GETPOINT Safe\r\n")  
     # s.get_location_joint_values("Safe")
-    # s.send_command("limp TRUE\r\n")
     # s.set_location()
     # s.get_location_list()
     # s.delete_location("TEMP_0")
     # s.get_location_list()
 
-    # s.send_command("MOVE PeelerNest\r\n")
     # s.jog("Z", 60000)
     # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
     # s.send_command("move_abs Z")
     # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
     # s.send_command("MOVE Y 5000\r\n")  
-
-    # s.send_command("Move_Z Safe\r\n")  
-    # s.send_command("Move_Y Safe\r\n")    
-  
-    # s.send_command("MOVE Safe\r\n")
-    
-
-    # s.send_command("Move_Z Safe\r\n")    
-    # s.send_command("Move_Y Safe\r\n")    
-
-    # s.send_command("MOVE PeelerNest\r\n")
-    
-
-    # s.send_command("Move_Z Safe\r\n")    
-    # s.send_command("Move_Y Safe\r\n")    
-
-    # s.send_command("MOVE Stack1\r\n")
-    
-
-
-    # s.send_command("Move_R PeelerNest\r\n")
-    # s.send_command("Move_Z PeelerNest\r\n")
-    # s.send_command("Move_P PeelerNest\r\n")
-
-    # s.get_position()
-
-    # s.home()
 
 #    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name
