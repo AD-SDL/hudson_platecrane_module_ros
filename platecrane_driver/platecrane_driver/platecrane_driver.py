@@ -874,7 +874,6 @@ class PlateCrane():
         self.pick_module_plate(source, source_height_jog_steps)
         self.place_module_plate(target, target_height_jog_steps)
 
-
 if __name__ == "__main__":
     """
     Runs given function.
