@@ -796,7 +796,20 @@ class PlateCrane():
     def place_stack_plate() -> None:
         pass
 
-    def is_location_joint_values(self, location:str, name:str="temp"):
+    def is_location_joint_values(self, location:str, name:str="temp") -> str:
+        """
+        If the location was provided as joint values, transfer joint values into a saved location on the robot and return the location name.
+
+        :param location: Location to be checked if this is an already saved location on the robot database or a new location with 4 joint values 
+        :type location: string
+        :param name: Location name to be used to save a new location if the location parameter was provided as 4 joint values 
+        :type name: string
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: location_name = Returns the location name that is saved on robot database with location joint values
+        :rtype: str
+        """    
         try:       
             location = eval(location)
         except NameError as name_err:
@@ -831,10 +844,8 @@ class PlateCrane():
         
         source = self.is_location_joint_values(location = source, name = "source")
 
-
         if target:
             target = self.is_location_joint_values(location = target, name = "target")
-
 
         if source and not target:
 
