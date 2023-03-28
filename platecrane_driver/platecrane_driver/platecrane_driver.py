@@ -793,9 +793,24 @@ class PlateCrane():
 
     def pick_plate_exchange(self) -> None:
         pass
-    def place_plate_stack() -> None:
+    def place_stack_plate() -> None:
         pass
 
+    def is_location_joint_values(self, location:str, name:str="temp"):
+        try:       
+            location = eval(location)
+        except NameError as name_err:
+            # Location was given as a location name
+            print(name + ": " + location)   
+            location_name = location
+        else:
+            # Location was given as a joint values
+            location_name = name + "_loc"
+            self.set_location(location_name, location[0], location[1], location[2], location[3])
+            print(name + ": " + location_name)
+
+        return location_name
+    
     def stack_transfer(self, source:str = None, target:str = None) -> None:
         """
         Transfer a plate plate from plate stacker to exchange location
@@ -808,32 +823,27 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """    
-        if source and target:
-            raise Exception("Pass either source or target location. Transfer can either be done to the stack or from the stack")    
-        elif not source and not target:
-            raise Exception("No destination was provided. Pass either source or target location.")
-        
-        if source:
-            source = eval(source)
 
-            if isinstance(source, list): 
-                #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-                # Create a new location data 
-                # Move to this location
-                self.set_location("source_loc", source[0], source[1], source[2], source[3])
-                source = "source_loc"
+        if not source:
+            print("Please provide a source location")
+            # TODO: Raise an exception here
+            return
+        
+        source = self.is_location_joint_values(location = source, name = "source")
+
+
+        if target:
+            target = self.is_location_joint_values(location = target, name = "target")
+
+
+        if source and not target:
 
             self.pick_stack_plate(source)
             self.place_plate_exchange()
 
-        elif target:
-            target = eval(target)
-            if isinstance(target, list): 
-                self.set_location("target_loc", target[0], target[1], target[2], target[3])
-                source = "target_loc"
-
-            self.pick_plate_exchange() #TODO: Not completed yet
-            self.place_plate_stack() #TODO: Not completed yet
+        elif source and target:
+            self.pick_stack_plate(source)
+            self.place_stack_plate(target)
 
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
@@ -855,31 +865,11 @@ class PlateCrane():
         # Create a new location data 
         # Move to this location
 
-        try:       
-            source = eval(source)
-        except NameError as source_type_err:
-            # Location was given as a location name
-            print("Source: " + source)   
-        else:
-            # Location was given as a joint values
-            self.set_location("source_loc", source[0], source[1], source[2], source[3])
-            source = "source_loc"
-            print("Source: " + source)   
-
-        try:
-            target = eval(target)
-        except NameError as target_type_err:
-            # Location was given as a location name
-            print("Target: " + target)   
-        else:
-            # Location was given as a joint values
-            self.set_location("target_loc", target[0], target[1], target[2], target[3])
-            target = "target_loc"
-            print("Target: " + target)   
+        source = self.is_location_joint_values(location = source, name = "source")
+        target = self.is_location_joint_values(location = target, name = "target")
 
         source_height_jog_steps = self.get_safe_height_jog_steps(source)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
-
 
         self.pick_module_plate(source, source_height_jog_steps)
         self.place_module_plate(target, target_height_jog_steps)
