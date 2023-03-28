@@ -156,14 +156,11 @@ class PlatecraneClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-
             elif self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
-
-
 
         else:
             msg.data = 'State: %s' % self.state
