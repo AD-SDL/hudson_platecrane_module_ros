@@ -635,12 +635,12 @@ class PlateCrane():
 
         # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
         #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
-        
+
         self.move_single_axis("Y", source)
-        self.move_single_axis("Z", source)
-        self.jog("Z", - self.plate_above_height)
+        # self.move_single_axis("Z", source)
+        self.jog("Z", - 2*self.plate_above_height)
         self.gripper_close()
-        self.move_single_axis("Z", source)
+        self.jog("Z", 2*self.plate_above_height)
 
 
     def put_module_plate(self, target:list = None, height_jog_steps:int = None) -> None:
@@ -666,10 +666,10 @@ class PlateCrane():
         #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
 
         self.move_single_axis("Y", target)
-        self.move_single_axis("Z", target)
-        self.jog("Z", - self.plate_above_height)
+        # self.move_single_axis("Z", target)
+        self.jog("Z", - 2*self.plate_above_height)
         self.gripper_open()
-        self.move_single_axis("Z", target)
+        self.jog("Z", 2*self.plate_above_height)
 
     def move_module_entry(self, source:list = None, height_jog_steps:int = None) -> None:
         """Summary
