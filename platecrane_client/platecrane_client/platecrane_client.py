@@ -65,7 +65,7 @@ class PlatecraneClient(Node):
 
 
         state_pub_timer_period = 1 # seconds
-        state_refresher_timer_period = 5.3 # seconds
+        state_refresher_timer_period = 2 # seconds
 
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(state_pub_timer_period, self.stateCallback, callback_group = state_cb_group)
