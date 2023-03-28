@@ -96,7 +96,7 @@ class PlateCrane():
         """
 
         self.get_status()
-        if self.robot_status == 0:
+        if self.robot_status == "0":
             self.home()
 
     def home(self, timeout = 28):
@@ -117,38 +117,6 @@ class PlateCrane():
         # Moves axes to home position
         command = 'HOME\r\n' 
         out_msg = self.send_command(command ,timeout)
-
-
-        
-    def receive_command(self, time_wait):                         
-        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
-        
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-
-        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
-        response = ""
-        response_string = ""
-        initial_command_msg = ""
-
-        if self.connection.in_waiting != 0:           
-            response = self.connection.readlines()
-            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
-            if len(response) > 1:
-                for line_index in range(1, len(response)):
-                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
-            else:        
-                response_string = ""
-        return response_string, initial_command_msg
-    
 
     def send_command(self, command, timeout=0.):
         """Sends provided command over the serial port and stores data outputted. 
@@ -185,6 +153,40 @@ class PlateCrane():
         print(response_msg)
 
         return response_msg
+    
+    def receive_command(self, time_wait):                         
+        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
+        
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+
+        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
+        response = ""
+        response_string = ""
+        initial_command_msg = ""
+
+        if self.connection.in_waiting != 0:           
+            response = self.connection.readlines()
+            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
+            if len(response) > 1:
+                for line_index in range(1, len(response)):
+                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
+            else:        
+                response_string = ""
+        return response_string, initial_command_msg
+    
+    def get_error_output(self, output:str):
+        #Find the errors from error codes.
+        self.robot_error = "err"
+        pass
 
     def get_robot_movement_state(self):
         """Summary
@@ -239,18 +241,6 @@ class PlateCrane():
         command = 'STATUS\r\n' 
         self.robot_status =  self.send_command(command)
         
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
-            find_status= re.search(exp,self.robot_status)
-            self.status = find_status[1]
-        
-            print(self.status)
-        
-        except:
-            pass
-
-        return self.robot_status
     
     def free_joints(self):
 
