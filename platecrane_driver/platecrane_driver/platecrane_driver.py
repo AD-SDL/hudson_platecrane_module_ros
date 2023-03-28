@@ -755,45 +755,24 @@ class PlateCrane():
         self.gripper_close() 
         self.move_joints_neutral()
 
-    def place_stack_plate(self, target:str) -> None:
-        """Summary
+    def place_stack_plate(self, target:str = None) -> None:
+        """Place a stack plate either onto the exhange location or into a stack
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
+        :param target: Name of the target location. Defults to None if target is None, it will be set to exchange location.
+        :type target: str
         ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """
+        if not target:
+            target = self.exchange_location
 
         self.move_joints_neutral()
         self.move_location(target)
         self.gripper_open()
         self.move_joints_neutral()
 
-    def place_plate_stack_entry(self, target:str) -> None:
-        """Summary
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-        self.move_joints_neutral()
-        #TODO: Find the exhange location distance on Y axis from the given Stack number"
-        stack_joint_angles = self.get_location_joint_values(target)
-        stack_exchange_joint_angles = stack_joint_angles[0], self.stack_exchange_Z_height, stack_joint_angles[2], stack_joint_angles[3] - self.stack_exchange_Y_axis_steps
-        self.move_joint_angles(R = stack_exchange_joint_angles[0], Z = stack_exchange_joint_angles[1], P = stack_exchange_joint_angles[2], Y = stack_exchange_joint_angles[3])
-        self.gripper_open()
-        self.move_joints_neutral()
-        pass
-
-    def is_location_joint_values(self, location:str, name:str="temp") -> str:
+    def _is_location_joint_values(self, location:str, name:str="temp") -> str:
         """
         If the location was provided as joint values, transfer joint values into a saved location on the robot and return the location name. 
         If location parameter is a name of an already saved location, do nothing.
@@ -824,15 +803,16 @@ class PlateCrane():
     
     def stack_transfer(self, source:str = None, target:str = None) -> None:
         """
-        Transfer a plate plate from plate stacker to exchange location
+        Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
         ...
         :raises [ErrorType]: [ErrorDescription]
         ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """    
 
         if not source:
@@ -840,10 +820,10 @@ class PlateCrane():
             # TODO: Raise an exception here
             return
         
-        source = self.is_location_joint_values(location = source, name = "source")
+        source = self._is_location_joint_values(location = source, name = "source")
 
         if target:
-            target = self.is_location_joint_values(location = target, name = "target") 
+            target = self._is_location_joint_values(location = target, name = "target") 
             # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
 
         elif not target:
@@ -857,22 +837,23 @@ class PlateCrane():
     
     def module_transfer(self, source:str, target:str) -> None:
         """
-        Transfer a plate in between two modules
+        Transfer a plate in between two modules using source and target locations
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
         ...
         :raises [ErrorType]: [ErrorDescription]
         ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """ 
         #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
         # Create a new location data 
         # Move to this location
 
-        source = self.is_location_joint_values(location = source, name = "source")
-        target = self.is_location_joint_values(location = target, name = "target")
+        source = self._is_location_joint_values(location = source, name = "source")
+        target = self._is_location_joint_values(location = target, name = "target")
 
         source_height_jog_steps = self.get_safe_height_jog_steps(source)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
