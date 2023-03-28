@@ -95,7 +95,8 @@ class PlatecraneClient(Node):
         try:
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
-                self
+                self.platecrane.get_robot_movement_state()
+                self.platecrane.get_status()
                 self.state_refresher_timer = 0 
             
             if self.past_movement_state == self.robot_movement_state:
