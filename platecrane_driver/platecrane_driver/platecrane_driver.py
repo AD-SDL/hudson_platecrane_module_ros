@@ -755,7 +755,7 @@ class PlateCrane():
         self.gripper_close() 
         self.move_joints_neutral()
 
-    def place_plate_exchange(self) -> None:
+    def place_stack_plate(self, target:str) -> None:
         """Summary
 
         :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
@@ -766,8 +766,9 @@ class PlateCrane():
         :return: [ReturnDescription]
         :rtype: [ReturnType]
         """
+
         self.move_joints_neutral()
-        self.move_location(self.exchange_location)
+        self.move_location(target)
         self.gripper_open()
         self.move_joints_neutral()
 
@@ -790,15 +791,12 @@ class PlateCrane():
         self.move_joint_angles(R = stack_exchange_joint_angles[0], Z = stack_exchange_joint_angles[1], P = stack_exchange_joint_angles[2], Y = stack_exchange_joint_angles[3])
         self.gripper_open()
         self.move_joints_neutral()
-
-    def pick_plate_exchange(self) -> None:
-        pass
-    def place_stack_plate() -> None:
         pass
 
     def is_location_joint_values(self, location:str, name:str="temp") -> str:
         """
-        If the location was provided as joint values, transfer joint values into a saved location on the robot and return the location name.
+        If the location was provided as joint values, transfer joint values into a saved location on the robot and return the location name. 
+        If location parameter is a name of an already saved location, do nothing.
 
         :param location: Location to be checked if this is an already saved location on the robot database or a new location with 4 joint values 
         :type location: string
@@ -845,17 +843,14 @@ class PlateCrane():
         source = self.is_location_joint_values(location = source, name = "source")
 
         if target:
-            target = self.is_location_joint_values(location = target, name = "target")
+            target = self.is_location_joint_values(location = target, name = "target") 
+            # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
 
-        if source and not target:
+        elif not target:
+            target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
 
-            self.pick_stack_plate(source)
-            self.place_plate_exchange()
-
-        elif source and target:
-            self.pick_stack_plate(source)
-            self.place_stack_plate(target)
-
+        self.pick_stack_plate(source)
+        self.place_stack_plate(target)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
