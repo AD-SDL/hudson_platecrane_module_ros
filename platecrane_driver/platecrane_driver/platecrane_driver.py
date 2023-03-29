@@ -787,7 +787,7 @@ class PlateCrane():
 
         elif not target:
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
-            
+
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
 
         self.pick_stack_plate(source)
@@ -807,9 +807,6 @@ class PlateCrane():
         :raises [ErrorType]: [ErrorDescription]
         :return: None
         """ 
-        #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-        # Create a new location data 
-        # Move to this location
 
         source = self._is_location_joint_values(location = source, name = "source")
         target = self._is_location_joint_values(location = target, name = "target")
@@ -819,6 +816,26 @@ class PlateCrane():
 
         self.pick_module_plate(source, source_height_jog_steps)
         self.place_module_plate(target, target_height_jog_steps)
+
+    def transfer(self, source:str = None, target:str = None, stack_transfer:bool = False, module_transfer:bool = True):
+        """
+        Handles the transfer request 
+
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
+        :raises [ErrorType]: [ErrorDescription]
+        :return: None
+        """ 
+
+        if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
+            raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
+
+        if stack_transfer:
+            self.stack_transfer(source, target)
+        elif module_transfer:
+            self.module_transfer(source, target)
 
 if __name__ == "__main__":
     """
