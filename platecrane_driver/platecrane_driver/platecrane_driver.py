@@ -60,7 +60,7 @@ class PlateCrane():
         """
         try:
             self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-            self.secondory_connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
+            # self.secondory_connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
         except:
             raise Exception("Could not establish connection")    
 
@@ -96,7 +96,7 @@ class PlateCrane():
         """
 
         self.get_status()
-        if self.robot_status == 0:
+        if self.robot_status == "0":
             self.home()
 
     def home(self, timeout = 28):
@@ -117,38 +117,6 @@ class PlateCrane():
         # Moves axes to home position
         command = 'HOME\r\n' 
         out_msg = self.send_command(command ,timeout)
-
-
-        
-    def receive_command(self, time_wait):                         
-        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
-        
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-
-        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
-        response = ""
-        response_string = ""
-        initial_command_msg = ""
-
-        if self.connection.in_waiting != 0:           
-            response = self.connection.readlines()
-            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
-            if len(response) > 1:
-                for line_index in range(1, len(response)):
-                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
-            else:        
-                response_string = ""
-        return response_string, initial_command_msg
-    
 
     def send_command(self, command, timeout=0.):
         """Sends provided command over the serial port and stores data outputted. 
@@ -185,6 +153,40 @@ class PlateCrane():
         print(response_msg)
 
         return response_msg
+    
+    def receive_command(self, time_wait):                         
+        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
+        
+
+        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
+        :type [ParamName]: [ParamType](, optional)
+        ...
+        :raises [ErrorType]: [ErrorDescription]
+        ...
+        :return: [ReturnDescription]
+        :rtype: [ReturnType]
+        """
+
+
+        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
+        response = ""
+        response_string = ""
+        initial_command_msg = ""
+
+        if self.connection.in_waiting != 0:           
+            response = self.connection.readlines()
+            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
+            if len(response) > 1:
+                for line_index in range(1, len(response)):
+                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
+            else:        
+                response_string = ""
+        return response_string, initial_command_msg
+    
+    def get_error_output(self, output:str):
+        #Find the errors from error codes.
+        self.robot_error = "err"
+        pass
 
     def get_robot_movement_state(self):
         """Summary
@@ -239,18 +241,6 @@ class PlateCrane():
         command = 'STATUS\r\n' 
         self.robot_status =  self.send_command(command)
         
-        try:
-            # Checks if specified format is found in feedback
-            exp = r"0000 (.*\w)" # Format of feedback that indicates that the rest of the line is the status
-            find_status= re.search(exp,self.robot_status)
-            self.status = find_status[1]
-        
-            print(self.status)
-        
-        except:
-            pass
-
-        return self.robot_status
     
     def free_joints(self):
 
@@ -512,152 +502,125 @@ class PlateCrane():
 
         self.deletepoint("TEMP", R, Z, P, Y) 
 
-    def move_single_axis(self, axis:str, location:str) -> None:
+    def move_single_axis(self, axis:str, loc:str) -> None:
         """Moves on a single axis using an existing location on robot's database
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param axis: Axis name (R,Z,P,Y)
+        :type axis: str
+        :param loc: Name of the location. 
+        :type loc: str
+
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
+
+        # TODO:Handle the error raising within error_codes.py
+        if not loc:
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
 
         # self.loadpoint(R, Z, P, Y)
 
-        command = "MOVE_"+ axis.upper() + " " + location + "\r\n" 
+        command = "MOVE_"+ axis.upper() + " " + loc + "\r\n" 
 
-        try:
-            out_msg_move = self.send_command(command)
+        out_msg_move = self.send_command(command)
 
-            # Checks if specified format is found in feedback
-            # move_msg_index = out_msg_move.find("0000") # Format of feedback that indicates success message
-            # self.MOVEMSG = out_msg_move[move_msg_index+4:]
-        except Exception as err:
-            print(err)
-            self.robot_error = err
-        else:
-            self.move_status = "COMPLETED"
-            pass
+        self.move_status = "COMPLETED"
+            
 
         # self.deletepoint(R, Z, P, Y)
     
-    def move_location(self, loc, move_time = 4.7) -> None:
-        """Move to preset locations located in load_labware function
+    def move_location(self, loc: str = None, move_time:float = 4.7) -> None:
+        """Moves all joint to the given location.
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param loc: Name of the location. 
+        :type loc: str
+        :param move_time: Number of seconds that will take to complete this movement. Defults to 4.7 seconds which is the longest possible movement time.
+        :type move_time: float
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
 
+        # TODO:Handle the error raising within error_codes.py
+        if not loc:
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+        
         cmd = "MOVE "+ loc +"\r\n"
         self.send_command(cmd, timeout = move_time)
 
     def move_tower_neutral(self) -> None:
-        """Summary
+        """Moves the tower to neutral position
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """
-
 
         self.move_single_axis("Z", "Safe")
 
     def move_arm_neutral(self) -> None:
-        """Summary
+        """Moves the arm to neutral position
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """
         self.move_single_axis("Y", "Safe")
 
     def move_gripper_neutral(self) -> None:
-        """Summary
+        """Moves the gripper to neutral position
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """
         self.move_single_axis("P", "Safe")
 
     def move_joints_neutral(self) -> None:
-        """Summary
+        """Moves all joints neutral posiiton
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """
         self.move_tower_neutral()
         self.move_arm_neutral()
         # self.move_gripper_neutral()
 
-    def get_module_plate(self, source:list = None, height_jog_steps:int = None) -> None:
-        """Summary
+    def get_module_plate(self, source:list = None, height_jog_steps:int = 0) -> None:
+        """picks up the plate from a module location by moving each joint step by step
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param source: Name of the source location. 
+        :type source: str
+        :param height_jog_steps: Number of jogging steps that will be used to move the Z axis to the plate location 
+        :type height_jog_steps: int
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
 
         # TODO:Handle the error raising within error_codes.py
         if not source:
-            raise Exception("Source location was not given")
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(source)
 
         # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
         #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
-        
+
         self.move_single_axis("Y", source)
-        self.move_single_axis("Z", source)
-        self.jog("Z", - self.plate_above_height)
+        # self.move_single_axis("Z", source)
+        self.jog("Z", - 2*self.plate_above_height)
         self.gripper_close()
-        self.move_single_axis("Z", source)
+        self.jog("Z", 2*self.plate_above_height)
 
 
-    def put_module_plate(self, target:list = None, height_jog_steps:int = None) -> None:
-        """Summary
+    def put_module_plate(self, target:list = None, height_jog_steps:int = 0) -> None:
+        """Places the plate onto a module location by moving each joint step by step
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param target: Name of the target location. 
+        :type target: str
+        :param height_jog_steps: Number of jogging steps that will be used to move the Z axis to the plate location 
+        :type height_jog_steps: int
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
 
         # TODO:Handle the error raising within error_codes.py
         if not target:
-            raise Exception("Source location was not given")
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+        
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(target)    
@@ -666,26 +629,25 @@ class PlateCrane():
         #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
 
         self.move_single_axis("Y", target)
-        self.move_single_axis("Z", target)
-        self.jog("Z", - self.plate_above_height)
+        # self.move_single_axis("Z", target)
+        self.jog("Z", - 2*self.plate_above_height)
         self.gripper_open()
-        self.move_single_axis("Z", target)
+        self.jog("Z", 2*self.plate_above_height)
 
-    def move_module_entry(self, source:list = None, height_jog_steps:int = None) -> None:
-        """Summary
+    def move_module_entry(self, source:list = None, height_jog_steps:int = 0) -> None:
+        """Moves to the entry location of the location that is given. It moves the R,P and Z joints step by step to aviod collisions. 
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param source: Name of the source location. 
+        :type source: str
+        :param height_jog_steps: Number of jogging steps that will be used to move the Z axis to the plate location 
+        :type height_jog_steps: int
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
-
         # TODO:Handle the error raising within error_codes.py
+
         if not source:
-            raise Exception("Source location was not given")
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(source)
@@ -694,18 +656,19 @@ class PlateCrane():
         self.move_single_axis("P", source)
         self.jog("Z", -height_jog_steps)
     
-    def pick_module_plate(self, source:str, height_jog_steps: int) -> None:
-        """Summary
+    def pick_module_plate(self, source:str = None, height_jog_steps: int = 0) -> None:
+        """Pick a module plate from a module location.
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param source: Name of the source location. 
+        :type source: str
+        :param height_jog_steps: Number of jogging steps that will be used to move the Z axis to the plate location 
+        :type height_jog_steps: int
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
-     
+        if not source:
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+        
         self.move_joints_neutral()
         self.gripper_open()
 
@@ -714,18 +677,18 @@ class PlateCrane():
 
         self.move_arm_neutral()
 
-    def place_module_plate(self, target:str, height_jog_steps:int) -> None:
-        """Summary
+    def place_module_plate(self, target:str = None, height_jog_steps:int = 0) -> None:
+        """Place a module plate onto a module location.
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param target: Name of the target location. 
+        :type target: str
+        :param height_jog_steps: Number of jogging steps that will be used to move the Z axis to the plate location 
+        :type height_jog_steps: int
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
-
+        if not target:
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
      
         self.move_joints_neutral()
 
@@ -734,17 +697,17 @@ class PlateCrane():
 
         self.move_arm_neutral()
 
-    def pick_stack_plate(self, source:str) -> None:
-        """Summary
+    def pick_stack_plate(self, source:str = None) -> None:
+        """Pick a stack plate from stack location.
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param source: Name of the source location. 
+        :type source: str
+        :raises [PlateCraneLocationException]: [Error for None type locations]
+        :return: None
         """
+        #TODO: Create error exceptions for below case
+        if not source:
+            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
 
         self.gripper_close()
         self.move_joints_neutral()
@@ -755,131 +718,104 @@ class PlateCrane():
         self.gripper_close() 
         self.move_joints_neutral()
 
-    def place_plate_exchange(self) -> None:
-        """Summary
+    def place_stack_plate(self, target:str = None) -> None:
+        """Place a stack plate either onto the exhange location or into a stack
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :param target: Name of the target location. Defults to None if target is None, it will be set to exchange location.
+        :type target: str
+        :return: None
         """
+        if not target:
+            target = self.exchange_location
+
         self.move_joints_neutral()
-        self.move_location(self.exchange_location)
+        self.move_location(target)
         self.gripper_open()
         self.move_joints_neutral()
 
-    def place_plate_stack_entry(self, target:str) -> None:
-        """Summary
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+    def _is_location_joint_values(self, location:str, name:str="temp") -> str:
         """
+        If the location was provided as joint values, transfer joint values into a saved location on the robot and return the location name. 
+        If location parameter is a name of an already saved location, do nothing.
 
-        self.move_joints_neutral()
-        #TODO: Find the exhange location distance on Y axis from the given Stack number"
-        stack_joint_angles = self.get_location_joint_values(target)
-        stack_exchange_joint_angles = stack_joint_angles[0], self.stack_exchange_Z_height, stack_joint_angles[2], stack_joint_angles[3] - self.stack_exchange_Y_axis_steps
-        self.move_joint_angles(R = stack_exchange_joint_angles[0], Z = stack_exchange_joint_angles[1], P = stack_exchange_joint_angles[2], Y = stack_exchange_joint_angles[3])
-        self.gripper_open()
-        self.move_joints_neutral()
+        :param location: Location to be checked if this is an already saved location on the robot database or a new location with 4 joint values 
+        :type location: string
+        :param name: Location name to be used to save a new location if the location parameter was provided as 4 joint values 
+        :type name: string
+        :raises [ErrorType]: [ErrorDescription]
+        :return: location_name = Returns the location name that is saved on robot database with location joint values
+        :rtype: str
+        """    
+        try:       
+            location = eval(location)
+        except NameError as name_err:
+            # Location was given as a location name
+            print(name + ": " + location)   
+            location_name = location
+        else:
+            # Location was given as a joint values
+            location_name = name + "_loc"
+            self.set_location(location_name, location[0], location[1], location[2], location[3])
+            print(name + ": " + location_name)
 
-    def pick_plate_exchange(self) -> None:
-        pass
-    def place_plate_stack() -> None:
-        pass
-
+        return location_name
+    
     def stack_transfer(self, source:str = None, target:str = None) -> None:
         """
-        Transfer a plate plate from plate stacker to exchange location
+        Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
         :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """    
-        if source and target:
-            raise Exception("Pass either source or target location. Transfer can either be done to the stack or from the stack")    
-        elif not source and not target:
-            raise Exception("No destination was provided. Pass either source or target location.")
+
+        if not source:
+            print("Please provide a source location")
+            # TODO: Raise an exception here
+            return
         
-        if source:
-            source = eval(source)
+        source = self._is_location_joint_values(location = source, name = "source")
+        
+        if target:
+            target = self._is_location_joint_values(location = target, name = "target") 
 
-            if isinstance(source, list): 
-                #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
-                # Create a new location data 
-                # Move to this location
-                self.set_location("source_loc", source[0], source[1], source[2], source[3])
-                source = "source_loc"
+            # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
 
-            self.pick_stack_plate(source)
-            self.place_plate_exchange()
+        elif not target:
+            target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
+            
+        target_height_jog_steps = self.get_safe_height_jog_steps(target)
 
-        elif target:
-            target = eval(target)
-            if isinstance(target, list): 
-                self.set_location("target_loc", target[0], target[1], target[2], target[3])
-                source = "target_loc"
-
-            self.pick_plate_exchange() #TODO: Not completed yet
-            self.place_plate_stack() #TODO: Not completed yet
-
+        self.pick_stack_plate(source)
+        self.place_module_plate(target, target_height_jog_steps)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
     
     def module_transfer(self, source:str, target:str) -> None:
         """
-        Transfer a plate in between two modules
+        Transfer a plate in between two modules using source and target locations
 
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
         :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
+        :return: None
         """ 
         #Add an extra step to check if the locations were sent as names or joint angles. Then handle the transfer in two different ways 
         # Create a new location data 
         # Move to this location
 
-        try:       
-            source = eval(source)
-        except NameError as source_type_err:
-            # Location was given as a location name
-            print("Source: " + source)   
-        else:
-            # Location was given as a joint values
-            self.set_location("source_loc", source[0], source[1], source[2], source[3])
-            source = "source_loc"
-            print("Source: " + source)   
-
-        try:
-            target = eval(target)
-        except NameError as target_type_err:
-            # Location was given as a location name
-            print("Target: " + target)   
-        else:
-            # Location was given as a joint values
-            self.set_location("target_loc", target[0], target[1], target[2], target[3])
-            target = "target_loc"
-            print("Target: " + target)   
+        source = self._is_location_joint_values(location = source, name = "source")
+        target = self._is_location_joint_values(location = target, name = "target")
 
         source_height_jog_steps = self.get_safe_height_jog_steps(source)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
-
 
         self.pick_module_plate(source, source_height_jog_steps)
         self.place_module_plate(target, target_height_jog_steps)

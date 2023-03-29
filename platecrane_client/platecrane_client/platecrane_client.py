@@ -43,7 +43,7 @@ class PlatecraneClient(Node):
         
         self.robot_status = None
         self.robot_movement_state = None
-        
+        self.robot_error_status = None
         self.past_movement_state = "-1"
         self.state_refresher_timer = 0
         self.robot_home_iter = 0
@@ -65,7 +65,7 @@ class PlatecraneClient(Node):
 
 
         state_pub_timer_period = 1 # seconds
-        state_refresher_timer_period = 5.3 # seconds
+        state_refresher_timer_period = 2 # seconds
 
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(state_pub_timer_period, self.stateCallback, callback_group = state_cb_group)
@@ -95,7 +95,8 @@ class PlatecraneClient(Node):
         try:
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
-                self
+                self.platecrane.get_robot_movement_state()
+                self.platecrane.get_status()
                 self.state_refresher_timer = 0 
             
             if self.past_movement_state == self.robot_movement_state:
@@ -118,9 +119,9 @@ class PlatecraneClient(Node):
         msg = String()
 
         try:
-            self.robot_status = self.platecrane.status
+            self.robot_status = self.platecrane.robot_status
+            self.robot_error_status = self.platecrane.robot_error
             self.robot_movement_state = self.platecrane.movement_state
-
 
         except Exception as err:
             self.get_logger().error("PLATECRANE IS NOT RESPONDING! ERROR: " + str(err))
@@ -129,21 +130,22 @@ class PlatecraneClient(Node):
 
         if self.state != "PLATECRANE CONNECTION ERROR":
 
-            if self.robot_status == "ERROR":
+            if self.robot_status == "0":
+                self.state = "ERROR"
+                msg.data = 'State: %s' % self.state
+                self.statePub.publish(msg)
+                self.get_logger().error(msg.data)
+                self.action_flag = "READY"
+                self.get_logger().warn("Robot is not homed! Homing now!")
+                self.platecrane.home()
+
+            elif self.robot_error_status == "ERROR":
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
                 
-            elif self.robot_status == "0":
-                self.state = "ERROR"
-                msg.data = 'State: %s' % self.state
-                self.statePub.publish(msg)
-                self.get_logger().error(msg.data)
-                self.get_logger().error("ROBOT IS NOT HOMED")
-                self.platecrane.home()
-
             elif self.state == "COMPLETED":
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
@@ -156,14 +158,11 @@ class PlatecraneClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
-
             elif self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
-
-
 
         else:
             msg.data = 'State: %s' % self.state
