@@ -208,8 +208,44 @@ class PlatecraneClient(Node):
             sleep(0.5)
             
         self.action_flag = "BUSY"
+        self.get_logger().info(request)
+        vars = eval(request.vars)
+        self.get_logger().info(vars)
 
-        if request.action_handle == 'stack_transfer':            
+        source = vars.get('source')
+        self.get_logger().info("Source location: " + str(source))
+        target = vars.get('target')
+        self.get_logger().info("Target location: "+ str(target))
+        
+
+        if request.action_handle == 'transfer':
+            self.get_logger().info("Starting the transfer request")
+
+            stack_transfer = False
+            module_transfer = False
+
+            transfer_type = vars.get('transfer_type')
+            self.get_logger().info("Transfer Type: " + str(transfer_type))
+            if transfer_type.lower() == "stack_transfer":
+                stack_transfer = True
+            elif transfer_type.lower() == "module_transfer":
+                module_transfer = True
+
+            try:
+                self.platecrane.transfer(source, target, stack_transfer = stack_transfer, module_transfer = module_transfer)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Stack transfer failed. Error:" + err
+            else:    
+                response.action_response = 0
+                response.action_msg= "Stack trasnfer successfully completed"
+
+            self.get_logger().info('Finished Action: ' + request.action_handle)
+            self.state = "COMPLETED"
+
+            return response
+        
+        elif request.action_handle == 'stack_transfer':            
 
             self.get_logger().info("Starting stack transfer")
             vars = eval(request.vars)
