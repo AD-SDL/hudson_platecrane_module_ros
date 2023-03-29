@@ -779,16 +779,19 @@ class PlateCrane():
             return
         
         source = self._is_location_joint_values(location = source, name = "source")
-
+        
         if target:
             target = self._is_location_joint_values(location = target, name = "target") 
+
             # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
 
         elif not target:
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
+            
+        target_height_jog_steps = self.get_safe_height_jog_steps(target)
 
         self.pick_stack_plate(source)
-        self.place_stack_plate(target)
+        self.place_module_plate(target, target_height_jog_steps)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
