@@ -468,7 +468,7 @@ class PlateCrane():
         """
 
         command = 'JOG %s,%d\r\n' %(axis,distance) 
-        out_msg = self.send_command(command)
+        out_msg = self.send_command(command, timeout=0.5)
 
     def move_joint_angles(self, R:int, Z:int, P:int, Y:int) -> None:
         """Moves on a single axis, using an existing location on robot's database
@@ -502,7 +502,7 @@ class PlateCrane():
 
         self.deletepoint("TEMP", R, Z, P, Y) 
 
-    def move_single_axis(self, axis:str, loc:str) -> None:
+    def move_single_axis(self, axis:str, loc:str, delay_time = 0) -> None:
         """Moves on a single axis using an existing location on robot's database
 
         :param axis: Axis name (R,Z,P,Y)
@@ -522,7 +522,7 @@ class PlateCrane():
 
         command = "MOVE_"+ axis.upper() + " " + loc + "\r\n" 
 
-        out_msg_move = self.send_command(command)
+        out_msg_move = self.send_command(command, timeout=delay_time)
 
         self.move_status = "COMPLETED"
             
@@ -553,21 +553,21 @@ class PlateCrane():
         :return: None
         """
 
-        self.move_single_axis("Z", "Safe")
+        self.move_single_axis("Z", "Safe", delay_time = 1.5)
 
     def move_arm_neutral(self) -> None:
         """Moves the arm to neutral position
 
         :return: None
         """
-        self.move_single_axis("Y", "Safe")
+        self.move_single_axis("Y", "Safe", delay_time = 1)
 
     def move_gripper_neutral(self) -> None:
         """Moves the gripper to neutral position
 
         :return: None
         """
-        self.move_single_axis("P", "Safe")
+        self.move_single_axis("P", "Safe", delay_time = 0.3)
 
     def move_joints_neutral(self) -> None:
         """Moves all joints neutral posiiton
@@ -712,9 +712,9 @@ class PlateCrane():
         self.gripper_close()
         self.move_joints_neutral()
         self.move_location(source)
-        self.jog("Z", 10)
+        self.jog("Z", 500)
         self.gripper_open()
-        self.jog("Z", - self.plate_above_height)
+        self.jog("Z", - self.plate_above_height- 500)
         self.gripper_close() 
         self.move_joints_neutral()
 
@@ -788,9 +788,10 @@ class PlateCrane():
         elif not target:
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
 
-        target_height_jog_steps = self.get_safe_height_jog_steps(target)
 
         self.pick_stack_plate(source)
+        time.sleep(2)
+        target_height_jog_steps = self.get_safe_height_jog_steps(target)
         self.place_module_plate(target, target_height_jog_steps)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
@@ -807,7 +808,7 @@ class PlateCrane():
         :raises [ErrorType]: [ErrorDescription]
         :return: None
         """ 
-
+        self.move_joints_neutral()
         source = self._is_location_joint_values(location = source, name = "source")
         target = self._is_location_joint_values(location = target, name = "target")
 
@@ -842,8 +843,13 @@ if __name__ == "__main__":
     Runs given function.
     """
     s = PlateCrane("/dev/ttyUSB2")
+    stack = "Stack1"
     source_loc = "SealerNest"
     target_loc = "PeelerNest"
+
+    s.transfer(stack, source_loc, stack_transfer = True, module_transfer = False)
+    s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
+
     # s.get_location_joint_values(target_loc)
     # s.module_transfer(target_loc, source_loc)
     # s.move_joints_neutral()
@@ -866,4 +872,4 @@ if __name__ == "__main__":
     # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
     # s.send_command("MOVE Y 5000\r\n")  
 
-#    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name
+#    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name. 1400 (Z axis hits the plate)
