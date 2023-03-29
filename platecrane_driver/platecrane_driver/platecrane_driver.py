@@ -30,7 +30,8 @@ class PlateCrane():
         self.baud_rate = baud_rate
         self.connection = None 
         self.secondory_connection = None
-        
+        self.robot_error = "NO ERROR"
+
         self.status = 0
         self.error = ""
         self.gripper_length = 0
@@ -42,6 +43,7 @@ class PlateCrane():
         self.robot_status = ""
         self.movement_state = "READY"
         self.platecrane_current_position = None
+
         self.connect_plate_crane()
         self.initialize()
 
@@ -98,6 +100,7 @@ class PlateCrane():
         self.get_status()
         if self.robot_status == "0":
             self.home()
+        self.platecrane_current_position = self.get_position()
 
     def home(self, timeout = 28):
 
@@ -200,15 +203,16 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-
-        current_postion = self.get_position()
-        
-        if self.platecrane_current_position != current_postion:
-            self.movement_state = "BUSY"
-            self.platecrane_current_position = current_postion
-        else:
-            self.movement_state = "READY"
-        print(self.movement_state)
+        # current_postion = self.get_position()
+        # print(current_postion)
+        # print(self.platecrane_current_position)
+        # if self.platecrane_current_position != current_postion:
+        #     self.movement_state = "BUSY"
+        #     self.platecrane_current_position = current_postion
+        # else:
+        #     self.movement_state = "READY"
+        # print(self.movement_state)
+        self.movement_state = "READY"
 
     def wait_robot_movement(self):
         """Summary
