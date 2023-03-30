@@ -852,7 +852,7 @@ if __name__ == "__main__":
     source_loc = "SealerNest"
     target_loc = "PeelerNest"
 
-    s.transfer(source_loc, target_loc, stack_transfer = True, module_transfer = False, height_offset=300)
+    # s.transfer(source_loc, target_loc, stack_transfer = True, module_transfer = False, height_offset=300)
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
