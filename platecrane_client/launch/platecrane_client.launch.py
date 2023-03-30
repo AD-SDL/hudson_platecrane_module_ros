@@ -19,7 +19,7 @@ def generate_launch_description():
             package='platecrane_client',
             namespace = 'std_ns',
             executable='platecrane_client',
-            name='PlatecraneNode',
+            name='PlateCraneNode',
             parameters=[
                 {'port':port},
                 ],
