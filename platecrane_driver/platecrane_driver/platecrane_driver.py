@@ -505,7 +505,7 @@ class PlateCrane():
 
         self.deletepoint("TEMP", R, Z, P, Y) 
 
-    def move_single_axis(self, axis:str, loc:str, delay_time = 0) -> None:
+    def move_single_axis(self, axis:str, loc:str, delay_time = 1.5) -> None:
         """Moves on a single axis using an existing location on robot's database
 
         :param axis: Axis name (R,Z,P,Y)
@@ -715,6 +715,7 @@ class PlateCrane():
 
         self.gripper_close()
         self.move_joints_neutral()
+        self.move_single_axis("R",source)
         self.move_location(source)
         self.jog("Z", self.plate_detect_z_jog_steps)
         self.gripper_open()
@@ -734,9 +735,12 @@ class PlateCrane():
             target = self.exchange_location
 
         self.move_joints_neutral()
+        self.move_single_axis("R",target)
         self.move_location(target)
+        self.jog("Z", - self.plate_above_height + height_offset)
         self.gripper_open()
-        self.move_joints_neutral()
+        self.move_tower_neutral()
+        self.move_arm_neutral()
 
 
     def _is_location_joint_values(self, location:str, name:str="temp") -> str:
@@ -766,7 +770,7 @@ class PlateCrane():
 
         return location_name
     
-    def stack_transfer(self, source:str = None, target:str = None, height_offset:int = 0) -> None:
+    def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
         Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
 
@@ -792,12 +796,18 @@ class PlateCrane():
 
         elif not target:
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
+        
+        if source_type.lower() == "stack":
+            self.pick_stack_plate(source, height_offset)
+        elif source_type.lower() == "module":
+            self.pick_module_plate(source, height_offset)
 
-
-        self.pick_stack_plate(source, height_offset)
         # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
-        self.place_module_plate(target, target_height_jog_steps, height_offset)
+        if target_type == "stack":
+            self.place_stack_plate(target,height_offset)
+        elif target_type == "module":
+            self.place_module_plate(target, target_height_jog_steps, height_offset)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
@@ -823,7 +833,7 @@ class PlateCrane():
         self.pick_module_plate(source, source_height_jog_steps, height_offset)
         self.place_module_plate(target, target_height_jog_steps, height_offset)
 
-    def transfer(self, source:str = None, target:str = None, stack_transfer:bool = False, module_transfer:bool = True, height_offset:int = 0):
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0):
         """
         Handles the transfer request 
 
@@ -835,12 +845,12 @@ class PlateCrane():
         :return: None
         """ 
 
-        if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
-            raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
+        # if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
+        #     raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
 
-        if stack_transfer:
-            self.stack_transfer(source, target, height_offset)
-        elif module_transfer:
+        if source_type == "stack" or target_type == "stack":
+            self.stack_transfer(source, target, source_type, target_type, height_offset)
+        elif source_type == "module" and target_type == "module":
             self.module_transfer(source, target, height_offset)
         self.move_joints_neutral()
         self.move_location("Safe")
@@ -854,8 +864,8 @@ if __name__ == "__main__":
     stack = "Stack1"
     source_loc = "SealerNest"
     target_loc = "PeelerNest"
-
-    # s.transfer(source_loc, target_loc, stack_transfer = True, module_transfer = False, height_offset=300)
+    # s.place_stack_plate("Liconic.Nest")
+    s.transfer(source_loc, "Liconic.Nest", source_type = "stack", target_type = "stack", height_offset=0)
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
