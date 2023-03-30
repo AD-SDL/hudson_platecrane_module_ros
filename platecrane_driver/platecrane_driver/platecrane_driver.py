@@ -38,6 +38,7 @@ class PlateCrane():
         self.plate_above_height = 800
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
+        self.plate_detect_z_jog_steps = 500
         self.exchange_location = "LidNest2"
 
         self.robot_status = ""
@@ -716,9 +717,9 @@ class PlateCrane():
         self.gripper_close()
         self.move_joints_neutral()
         self.move_location(source)
-        self.jog("Z", 500)
+        self.jog("Z", self.plate_detect_z_jog_steps)
         self.gripper_open()
-        self.jog("Z", - self.plate_above_height- 500)
+        self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
         self.gripper_close() 
         self.move_joints_neutral()
 
@@ -851,7 +852,7 @@ if __name__ == "__main__":
     source_loc = "SealerNest"
     target_loc = "PeelerNest"
 
-    # s.transfer(stack, source_loc, stack_transfer = True, module_transfer = False)
+    s.transfer(source_loc, target_loc, stack_transfer = True, module_transfer = False, height_offset=300)
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
