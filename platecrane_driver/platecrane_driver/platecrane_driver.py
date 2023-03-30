@@ -35,7 +35,7 @@ class PlateCrane():
         self.status = 0
         self.error = ""
         self.gripper_length = 0
-        self.plate_above_height = 1000
+        self.plate_above_height = 800
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
         self.exchange_location = "LidNest2"
@@ -765,7 +765,7 @@ class PlateCrane():
 
         return location_name
     
-    def stack_transfer(self, source:str = None, target:str = None) -> None:
+    def stack_transfer(self, source:str = None, target:str = None, offset:int = 0) -> None:
         """
         Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
 
@@ -801,7 +801,7 @@ class PlateCrane():
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
     
-    def module_transfer(self, source:str, target:str) -> None:
+    def module_transfer(self, source:str, target:str, offset:int = 0) -> None:
         """
         Transfer a plate in between two modules using source and target locations
 
@@ -822,7 +822,7 @@ class PlateCrane():
         self.pick_module_plate(source, source_height_jog_steps)
         self.place_module_plate(target, target_height_jog_steps)
 
-    def transfer(self, source:str = None, target:str = None, stack_transfer:bool = False, module_transfer:bool = True):
+    def transfer(self, source:str = None, target:str = None, stack_transfer:bool = False, module_transfer:bool = True, offset:int = 0):
         """
         Handles the transfer request 
 
@@ -838,9 +838,9 @@ class PlateCrane():
             raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
 
         if stack_transfer:
-            self.stack_transfer(source, target)
+            self.stack_transfer(source, target, offset)
         elif module_transfer:
-            self.module_transfer(source, target)
+            self.module_transfer(source, target, offset)
 
 if __name__ == "__main__":
     """
@@ -851,8 +851,8 @@ if __name__ == "__main__":
     source_loc = "SealerNest"
     target_loc = "PeelerNest"
 
-    s.transfer(stack, source_loc, stack_transfer = True, module_transfer = False)
-    s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
+    # s.transfer(stack, source_loc, stack_transfer = True, module_transfer = False)
+    # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
     # s.module_transfer(target_loc, source_loc)
