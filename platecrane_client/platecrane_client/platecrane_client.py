@@ -146,7 +146,7 @@ class PlatecraneClient(Node):
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
                 
-            elif self.state == "COMPLETED":
+            elif self.state == "COMPLETED" and self.action_flag == "BUSY":
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
@@ -195,7 +195,8 @@ class PlatecraneClient(Node):
         '''
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
-        '''
+        '''        
+
         if self.state == "PLATECRANE CONNECTION ERROR":
             message = "Connection error, cannot accept a job!"
             self.get_logger().error(message)
@@ -208,9 +209,10 @@ class PlatecraneClient(Node):
             sleep(0.5)
             
         self.action_flag = "BUSY"
-        self.get_logger().info(request)
+        sleep(0.5)
+        
         vars = eval(request.vars)
-        self.get_logger().info(vars)
+        self.get_logger().info(str(vars))
 
         source = vars.get('source')
         self.get_logger().info("Source location: " + str(source))
@@ -226,6 +228,7 @@ class PlatecraneClient(Node):
 
             transfer_type = vars.get('transfer_type')
             self.get_logger().info("Transfer Type: " + str(transfer_type))
+
             if transfer_type.lower() == "stack_transfer":
                 stack_transfer = True
             elif transfer_type.lower() == "module_transfer":
@@ -248,11 +251,6 @@ class PlatecraneClient(Node):
         elif request.action_handle == 'stack_transfer':            
 
             self.get_logger().info("Starting stack transfer")
-            vars = eval(request.vars)
-            self.get_logger().info(vars)
-
-            source = vars.get('source', None)
-            target = vars.get('target', None)
 
             try:
                 self.platecrane.stack_transfer(source, target)
@@ -271,11 +269,6 @@ class PlatecraneClient(Node):
         elif request.action_handle == 'module_transfer':
 
             self.get_logger().info("Starting module transfer")
-            vars = eval(request.vars)
-            self.get_logger().info(vars)
-
-            source = vars.get('source')
-            target = vars.get('target')
 
             try:
                 self.platecrane.module_transfer(source, target)
