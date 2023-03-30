@@ -582,7 +582,7 @@ class PlateCrane():
         self.move_arm_neutral()
         # self.move_gripper_neutral()
 
-    def get_module_plate(self, source:list = None, height_jog_steps:int = 0) -> None:
+    def get_module_plate(self, source:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """picks up the plate from a module location by moving each joint step by step
 
         :param source: Name of the source location. 
@@ -605,12 +605,12 @@ class PlateCrane():
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
-        self.jog("Z", - 2*self.plate_above_height)
+        self.jog("Z", - 2*(self.plate_above_height - height_offset))
         self.gripper_close()
         self.jog("Z", 2*self.plate_above_height)
 
 
-    def put_module_plate(self, target:list = None, height_jog_steps:int = 0) -> None:
+    def put_module_plate(self, target:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """Places the plate onto a module location by moving each joint step by step
 
         :param target: Name of the target location. 
@@ -634,7 +634,7 @@ class PlateCrane():
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
-        self.jog("Z", - 2*self.plate_above_height)
+        self.jog("Z", - 2*(self.plate_above_height - height_offset))
         self.gripper_open()
         self.jog("Z", 2*self.plate_above_height)
 
@@ -660,7 +660,7 @@ class PlateCrane():
         self.move_single_axis("P", source)
         self.jog("Z", -height_jog_steps)
     
-    def pick_module_plate(self, source:str = None, height_jog_steps: int = 0) -> None:
+    def pick_module_plate(self, source:str = None, height_jog_steps: int = 0, height_offset:int = 0) -> None:
         """Pick a module plate from a module location.
 
         :param source: Name of the source location. 
@@ -677,11 +677,11 @@ class PlateCrane():
         self.gripper_open()
 
         self.move_module_entry(source, height_jog_steps)
-        self.get_module_plate(source, height_jog_steps)
+        self.get_module_plate(source, height_jog_steps, height_offset)
 
         self.move_arm_neutral()
 
-    def place_module_plate(self, target:str = None, height_jog_steps:int = 0) -> None:
+    def place_module_plate(self, target:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """Place a module plate onto a module location.
 
         :param target: Name of the target location. 
@@ -697,11 +697,11 @@ class PlateCrane():
         self.move_joints_neutral()
 
         self.move_module_entry(target, height_jog_steps)
-        self.put_module_plate(target, height_jog_steps)
+        self.put_module_plate(target, height_jog_steps, height_offset)
 
         self.move_arm_neutral()
 
-    def pick_stack_plate(self, source:str = None) -> None:
+    def pick_stack_plate(self, source:str = None, height_offset:int = 0) -> None:
         """Pick a stack plate from stack location.
 
         :param source: Name of the source location. 
@@ -722,7 +722,7 @@ class PlateCrane():
         self.gripper_close() 
         self.move_joints_neutral()
 
-    def place_stack_plate(self, target:str = None) -> None:
+    def place_stack_plate(self, target:str = None, height_offset:int = 0) -> None:
         """Place a stack plate either onto the exhange location or into a stack
 
         :param target: Name of the target location. Defults to None if target is None, it will be set to exchange location.
@@ -765,7 +765,7 @@ class PlateCrane():
 
         return location_name
     
-    def stack_transfer(self, source:str = None, target:str = None, offset:int = 0) -> None:
+    def stack_transfer(self, source:str = None, target:str = None, height_offset:int = 0) -> None:
         """
         Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
 
@@ -793,15 +793,15 @@ class PlateCrane():
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
 
 
-        self.pick_stack_plate(source)
-        time.sleep(2)
+        self.pick_stack_plate(source, height_offset)
+        # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
-        self.place_module_plate(target, target_height_jog_steps)
+        self.place_module_plate(target, target_height_jog_steps, height_offset)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
     
-    def module_transfer(self, source:str, target:str, offset:int = 0) -> None:
+    def module_transfer(self, source:str, target:str, height_offset:int = 0) -> None:
         """
         Transfer a plate in between two modules using source and target locations
 
@@ -819,10 +819,10 @@ class PlateCrane():
         source_height_jog_steps = self.get_safe_height_jog_steps(source)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
 
-        self.pick_module_plate(source, source_height_jog_steps)
-        self.place_module_plate(target, target_height_jog_steps)
+        self.pick_module_plate(source, source_height_jog_steps, height_offset)
+        self.place_module_plate(target, target_height_jog_steps, height_offset)
 
-    def transfer(self, source:str = None, target:str = None, stack_transfer:bool = False, module_transfer:bool = True, offset:int = 0):
+    def transfer(self, source:str = None, target:str = None, stack_transfer:bool = False, module_transfer:bool = True, height_offset:int = 0):
         """
         Handles the transfer request 
 
@@ -838,9 +838,9 @@ class PlateCrane():
             raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
 
         if stack_transfer:
-            self.stack_transfer(source, target, offset)
+            self.stack_transfer(source, target, height_offset)
         elif module_transfer:
-            self.module_transfer(source, target, offset)
+            self.module_transfer(source, target, height_offset)
 
 if __name__ == "__main__":
     """
