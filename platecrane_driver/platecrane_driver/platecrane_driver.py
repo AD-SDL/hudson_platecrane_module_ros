@@ -134,8 +134,6 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-
-
         try:
             self.connection.write(command.encode('utf-8'))
 
@@ -565,6 +563,7 @@ class PlateCrane():
 
         :return: None
         """
+        self.jog("Z",200)
         self.move_single_axis("Y", "Safe", delay_time = 1)
 
     def move_gripper_neutral(self) -> None:
@@ -579,8 +578,8 @@ class PlateCrane():
 
         :return: None
         """
-        self.move_tower_neutral()
         self.move_arm_neutral()
+        self.move_tower_neutral()
         # self.move_gripper_neutral()
 
     def get_module_plate(self, source:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
@@ -606,7 +605,7 @@ class PlateCrane():
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
-        self.jog("Z", - 2*(self.plate_above_height - height_offset))
+        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset))
         self.gripper_close()
         self.jog("Z", 2*self.plate_above_height)
 
@@ -635,7 +634,7 @@ class PlateCrane():
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
-        self.jog("Z", - 2*(self.plate_above_height - height_offset))
+        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset))
         self.gripper_open()
         self.jog("Z", 2*self.plate_above_height)
 
@@ -659,7 +658,7 @@ class PlateCrane():
 
         self.move_single_axis("R",source)
         self.move_single_axis("P", source)
-        self.jog("Z", -height_jog_steps)
+        self.jog("Z", -height_jog_steps+200)
     
     def pick_module_plate(self, source:str = None, height_jog_steps: int = 0, height_offset:int = 0) -> None:
         """Pick a module plate from a module location.
@@ -721,7 +720,8 @@ class PlateCrane():
         self.gripper_open()
         self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
         self.gripper_close() 
-        self.move_joints_neutral()
+        self.move_tower_neutral()
+        self.move_arm_neutral()
 
     def place_stack_plate(self, target:str = None, height_offset:int = 0) -> None:
         """Place a stack plate either onto the exhange location or into a stack
@@ -842,6 +842,9 @@ class PlateCrane():
             self.stack_transfer(source, target, height_offset)
         elif module_transfer:
             self.module_transfer(source, target, height_offset)
+        self.move_joints_neutral()
+        self.move_location("Safe")
+        time.sleep(2)
 
 if __name__ == "__main__":
     """
