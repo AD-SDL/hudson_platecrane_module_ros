@@ -223,11 +223,14 @@ class PlatecraneClient(Node):
         if request.action_handle == 'transfer':
             self.get_logger().info("Starting the transfer request")
 
-            stack_transfer = False
-            module_transfer = False
+            source_type = ""
+            target_type = "False"
 
-            transfer_type = vars.get('transfer_type')
-            self.get_logger().info("Transfer Type: " + str(transfer_type))
+            source_type = vars.get('source_type')
+            self.get_logger().info("Source Type: " + str(source_type))
+
+            target_type = vars.get('target_type')
+            self.get_logger().info("Target Type: " + str(target_type))
                 
             height_offset = vars.get('height_offset', None)
             self.get_logger().info("height_offset: " + str(height_offset))
@@ -235,14 +238,8 @@ class PlatecraneClient(Node):
             if not height_offset:
                 height_offset = 0
 
-            if transfer_type.lower() == "stack_transfer":
-                stack_transfer = True
-            elif transfer_type.lower() == "module_transfer":
-                module_transfer = True
-          
-
             try:
-                self.platecrane.transfer(source, target, stack_transfer = stack_transfer, module_transfer = module_transfer, height_offset = int(height_offset))
+                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset))
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Stack transfer failed. Error:" + err
