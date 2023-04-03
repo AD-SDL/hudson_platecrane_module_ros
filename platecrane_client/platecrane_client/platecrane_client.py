@@ -139,7 +139,7 @@ class PlatecraneClient(Node):
                 self.get_logger().warn("Robot is not homed! Homing now!")
                 self.platecrane.home()
 
-            elif self.robot_error_status == "ERROR":
+            elif self.robot_error_status == "ERROR" or (self.state == "ERROR" and self.action_flag == "BUSY"):
                 self.state = "ERROR"
                 msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
@@ -232,25 +232,24 @@ class PlatecraneClient(Node):
             target_type = vars.get('target_type')
             self.get_logger().info("Target Type: " + str(target_type))
                 
-            height_offset = vars.get('height_offset', None)
+            height_offset = vars.get('height_offset', 0)
             self.get_logger().info("Height Offset: " + str(height_offset))
 
-            if not height_offset:
-                height_offset = 0
 
-            try:
-                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset))
-            except Exception as err:
-                response.action_response = -1
-                response.action_msg= "Stack transfer failed. Error:" + str(err)
-                self.state = "ERROR"
-            else:    
-                response.action_response = 0
-                response.action_msg= "Stack transfer successfully completed"
-                self.state = "COMPLETED"
-            finally:
-                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
-                return response
+            # try:
+            self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset))
+            # except Exception as err:
+            response.action_response = -1
+            # response.action_msg= "Stack transfer failed. Error:" + str(err)
+            # self.get_logger().error(str(err))
+            self.state = "ERROR"
+            # else:    
+            #     response.action_response = 0
+            #     response.action_msg= "Stack transfer successfully completed"
+            #     self.state = "COMPLETED"
+            # finally:
+            #     self.get_logger().info('Finished Action: ' + request.action_handle.upper())
+            #     return response
         
         else: 
             msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
