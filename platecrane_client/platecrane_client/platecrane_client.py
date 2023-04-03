@@ -242,52 +242,16 @@ class PlatecraneClient(Node):
                 self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset))
             except Exception as err:
                 response.action_response = -1
-                response.action_msg= "Stack transfer failed. Error:" + err
+                response.action_msg= "Stack transfer failed. Error:" + str(err)
+                self.state = "ERROR"
             else:    
                 response.action_response = 0
                 response.action_msg= "Stack trasnfer successfully completed"
-
-            self.get_logger().info('Finished Action: ' + request.action_handle)
-            self.state = "COMPLETED"
-
-            return response
+                self.state = "COMPLETED"
+            finally:
+                self.get_logger().info('Finished Action: ' + request.action_handle)
+                return response
         
-        elif request.action_handle == 'stack_transfer':            
-
-            self.get_logger().info("Starting stack transfer")
-
-            try:
-                self.platecrane.stack_transfer(source, target)
-            except Exception as err:
-                response.action_response = -1
-                response.action_msg= "Stack transfer failed. Error:" + err
-            else:    
-                response.action_response = 0
-                response.action_msg= "Stack trasnfer successfully completed"
-
-            self.get_logger().info('Finished Action: ' + request.action_handle)
-            self.state = "COMPLETED"
-
-            return response
-
-        elif request.action_handle == 'module_transfer':
-
-            self.get_logger().info("Starting module transfer")
-
-            try:
-                self.platecrane.module_transfer(source, target)
-            except Exception as err:
-                response.action_response = -1
-                response.action_msg= "Module transfer failed. Error:" + err
-            else:    
-                response.action_response = 0
-                response.action_msg= "Module trasnfer successfully completed"
-
-            self.get_logger().info('Finished Action: ' + request.action_handle)
-            self.state = "COMPLETED"
-
-            return response
-
         else: 
             msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
             response.action_response = -1
