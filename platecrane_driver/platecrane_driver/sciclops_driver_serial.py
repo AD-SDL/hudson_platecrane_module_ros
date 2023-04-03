@@ -48,7 +48,7 @@ class SCICLOPS():
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
-        TODO:CREATE SERIAL CONNECT
+        # TODO:CREATE SERIAL CONNECT
         if host_path is None:
             raise Exception("Could not establish connection.")
 
@@ -58,7 +58,8 @@ class SCICLOPS():
 
     def disconnect_robot(self):
         try:
-            TODO:CREATE SERIAL DISCONNECT
+            # TODO:CREATE SERIAL DISCONNECT
+            pass
         except Exception as err:
             print(err)
         else:
@@ -233,7 +234,7 @@ class SCICLOPS():
         Sends provided command to Sciclops and stores data outputted by the sciclops.
         '''
 
-        TODO:CREATE SERIAL WRITE 
+        # TODO:CREATE SERIAL WRITE 
         self.host_path.write(4,command)
 
         response_buffer = "Write: "+ command
