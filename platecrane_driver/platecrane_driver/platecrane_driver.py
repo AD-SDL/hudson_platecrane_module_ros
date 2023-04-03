@@ -36,7 +36,7 @@ class PlateCrane():
         self.status = 0
         self.error = ""
         self.gripper_length = 0
-        self.plate_above_height = 800
+        self.plate_above_height = 700
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
         self.plate_detect_z_jog_steps = 500
@@ -472,7 +472,7 @@ class PlateCrane():
         """
 
         command = 'JOG %s,%d\r\n' %(axis,distance) 
-        out_msg = self.send_command(command, timeout=0.5)
+        out_msg = self.send_command(command, timeout=1.5)
 
     def move_joint_angles(self, R:int, Z:int, P:int, Y:int) -> None:
         """Moves on a single axis, using an existing location on robot's database
@@ -520,7 +520,7 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not loc:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
         # self.loadpoint(R, Z, P, Y)
 
@@ -546,7 +546,7 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not loc:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         cmd = "MOVE "+ loc +"\r\n"
         self.send_command(cmd, timeout = move_time)
@@ -564,7 +564,7 @@ class PlateCrane():
 
         :return: None
         """
-        self.jog("Z",200)
+        # self.jog("Z",200)
         self.move_single_axis("Y", "Safe", delay_time = 1)
 
     def move_gripper_neutral(self) -> None:
@@ -583,7 +583,7 @@ class PlateCrane():
         self.move_tower_neutral()
         # self.move_gripper_neutral()
 
-    def get_module_plate(self, source:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
+    def get_module_plate(self, source:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """picks up the plate from a module location by moving each joint step by step
 
         :param source: Name of the source location. 
@@ -596,9 +596,9 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
-        if not height_jog_steps:
+        if height_jog_steps == 0:
             height_jog_steps = self.get_safe_height_jog_steps(source)
 
         # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
@@ -606,12 +606,12 @@ class PlateCrane():
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
-        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset))
+        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset/2))
         self.gripper_close()
         self.jog("Z", 2*self.plate_above_height)
 
 
-    def put_module_plate(self, target:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
+    def put_module_plate(self, target:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """Places the plate onto a module location by moving each joint step by step
 
         :param target: Name of the target location. 
@@ -624,10 +624,10 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not target:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         
-        if not height_jog_steps:
+        if height_jog_steps == 0:
             height_jog_steps = self.get_safe_height_jog_steps(target)    
 
         # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
@@ -635,11 +635,11 @@ class PlateCrane():
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
-        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset))
+        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset/2))
         self.gripper_open()
         self.jog("Z", 2*self.plate_above_height)
 
-    def move_module_entry(self, source:list = None, height_jog_steps:int = 0) -> None:
+    def move_module_entry(self, source:str = None, height_jog_steps:int = 0) -> None:
         """Moves to the entry location of the location that is given. It moves the R,P and Z joints step by step to aviod collisions. 
 
         :param source: Name of the source location. 
@@ -652,7 +652,7 @@ class PlateCrane():
         # TODO:Handle the error raising within error_codes.py
 
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(source)
@@ -672,7 +672,7 @@ class PlateCrane():
         :return: None
         """
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         self.move_joints_neutral()
         self.gripper_open()
@@ -693,7 +693,7 @@ class PlateCrane():
         :return: None
         """
         if not target:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
      
         self.move_joints_neutral()
 
@@ -712,7 +712,7 @@ class PlateCrane():
         """
         #TODO: Create error exceptions for below case
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
         self.gripper_close()
         self.move_joints_neutral()
@@ -799,16 +799,16 @@ class PlateCrane():
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
         
         if source_type.lower() == "stack":
-            self.pick_stack_plate(source, height_offset)
+            self.pick_stack_plate(source, height_offset = height_offset)
         elif source_type.lower() == "module":
-            self.pick_module_plate(source, height_offset)
+            self.pick_module_plate(source, height_offset = height_offset)
 
         # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
-        if target_type == "stack":
-            self.place_stack_plate(target,height_offset)
-        elif target_type == "module":
-            self.place_module_plate(target, target_height_jog_steps, height_offset)
+        if target_type.lower() == "stack":
+            self.place_stack_plate(target, height_offset = height_offset)
+        elif target_type.lower() == "module":
+            self.place_module_plate(target, height_jog_steps = target_height_jog_steps, height_offset = height_offset)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
@@ -864,10 +864,10 @@ if __name__ == "__main__":
     """
     s = PlateCrane("/dev/ttyUSB2")
     stack = "Stack1"
-    source_loc = "SealerNest"
-    target_loc = "PeelerNest"
+    source_loc = "Hidex.Nest"
+    target_loc = "Hidex.Nest"
     # s.place_stack_plate("Liconic.Nest")
-    s.transfer(source_loc, "Liconic.Nest", source_type = "stack", target_type = "stack", height_offset=0)
+    s.transfer(source_loc, target_loc, source_type = "module", target_type = "stack", height_offset=360)
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
