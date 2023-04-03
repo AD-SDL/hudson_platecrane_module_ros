@@ -854,9 +854,9 @@ class PlateCrane():
         elif source_type == "module" and target_type == "module":
             self.module_transfer(source, target, height_offset)
         self.move_joints_neutral()
-        time.sleep(2)
+        # time.sleep(2)
         self.move_location("Safe")
-        time.sleep(10)
+        # time.sleep(10)
 
 if __name__ == "__main__":
     """
