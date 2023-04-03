@@ -246,10 +246,10 @@ class PlatecraneClient(Node):
                 self.state = "ERROR"
             else:    
                 response.action_response = 0
-                response.action_msg= "Stack trasnfer successfully completed"
+                response.action_msg= "Stack transfer successfully completed"
                 self.state = "COMPLETED"
             finally:
-                self.get_logger().info('Finished Action: ' + request.action_handle)
+                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
         
         else: 
