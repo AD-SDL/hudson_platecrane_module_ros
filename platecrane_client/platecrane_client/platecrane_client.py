@@ -105,9 +105,9 @@ class PlatecraneClient(Node):
                 self.past_movement_state = self.robot_movement_state
                 self.state_refresher_timer = 0 
 
-            if self.state_refresher_timer > 30: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
-                # self.get_logger().info("Refresh state, robot state is frozen...")
-                self.action_flag = "READY"
+            # if self.state_refresher_timer > 30: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
+            #     # self.get_logger().info("Refresh state, robot state is frozen...")
+            #     self.action_flag = "READY"
 
         except Exception as err:
             self.get_logger().error(str(err))
@@ -250,7 +250,7 @@ class PlatecraneClient(Node):
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle)
-                return response
+                # return response
         
         else: 
             msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
