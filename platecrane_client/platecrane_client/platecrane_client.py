@@ -233,7 +233,7 @@ class PlatecraneClient(Node):
             self.get_logger().info("Target Type: " + str(target_type))
                 
             height_offset = vars.get('height_offset', None)
-            self.get_logger().info("height_offset: " + str(height_offset))
+            self.get_logger().info("Height Offset: " + str(height_offset))
 
             if not height_offset:
                 height_offset = 0
@@ -250,7 +250,7 @@ class PlatecraneClient(Node):
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle)
-                # return response
+                return response
         
         else: 
             msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
