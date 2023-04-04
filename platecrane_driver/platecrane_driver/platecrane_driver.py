@@ -378,7 +378,7 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
         
-        command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(Z), str(P), str(Y), str(R)) # Command interpreted by Sciclops
+        command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(R), str(Z), str(P), str(Y)) 
         out_msg = self.send_command(command)
     
     def delete_location(self,location_name:str = None):
@@ -864,10 +864,14 @@ if __name__ == "__main__":
     """
     s = PlateCrane("/dev/ttyUSB2")
     stack = "Stack1"
-    source_loc = "Hidex.Nest"
-    target_loc = "Hidex.Nest"
+    source_loc = "Solo.Position4"
+    target_loc = "HidexNest2"
     # s.place_stack_plate("Liconic.Nest")
-    s.transfer(source_loc, target_loc, source_type = "module", target_type = "stack", height_offset=360)
+    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
+    # s.transfer(source_loc, target_loc, source_type = "module", target_type = "module", height_offset=360)
+    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
+    # s.get_location_joint_values("HidexNest2")
+    # s.get_location_list()
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
@@ -893,3 +897,6 @@ if __name__ == "__main__":
     # s.send_command("MOVE Y 5000\r\n")  
 
 #    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name. 1400 (Z axis hits the plate)
+# TODO: Slow the arm before hitting the plate in pick_stack_plate
+# TODO: Create a plate detect function within pick stack plate function
+# TODO: Maybe write another pick stack funtion to remove the plate detect movement
