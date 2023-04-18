@@ -1,13 +1,16 @@
-import asyncio
-from asyncio.unix_events import DefaultEventLoopPolicy
-from pickle import TRUE
-import time  
-import serial
-from serial import SerialException
 import logging
 import re
 import sys
-   
+import time  
+
+import asyncio
+from asyncio.unix_events import DefaultEventLoopPolicy
+from pickle import TRUE
+
+import serial
+from serial import SerialException
+
+import json
 
 class PlateCrane():
     """
@@ -46,8 +49,10 @@ class PlateCrane():
         self.movement_state = "READY"
         self.platecrane_current_position = None
 
-        self.connect_plate_crane()
-        self.initialize()
+        self.plates = json.load(open("plate_resources.json"))
+
+        # self.connect_plate_crane()
+        # self.initialize()
 
 
     def connect_plate_crane(self):
@@ -866,6 +871,7 @@ if __name__ == "__main__":
     stack = "Stack1"
     source_loc = "Solo.Position4"
     target_loc = "HidexNest2"
+    print(s.plates)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
     # s.transfer(source_loc, target_loc, source_type = "module", target_type = "module", height_offset=360)
