@@ -1,19 +1,19 @@
 {
     "96_well":{
         "height": 16.2562,
-        "grab_exchange": -30, // downward motion from Z = -356.5375
-        "grab_lid_exchange": -21, // downward motion from Z = -356.5375
-        "grab_tower": -18, // downward motion from 10 above top of plate
+        "grab_exchange": -30, 
+        "grab_lid_exchange": -21, 
+        "grab_tower": -18, 
         "grab_lid_tower": -13,
         "grab_lid_nest": -12
     },
     "pcr_plate":{
         "height": 15.2762,
-        "grab_exchange": -28, // from Z = -356.5375
-        "grab_lid_exchange": 0, // downward motion from Z = -356.5375, no lid
-        "grab_tower": -17, // downward motion from 10 above top of plate
-        "grab_lid_tower": 0, // no lid
-        "grab_lid_nest": 0 // no lid
+        "grab_exchange": -28, 
+        "grab_lid_exchange": 0, 
+        "grab_tower": -17, 
+        "grab_lid_tower": 0,
+        "grab_lid_nest": 0 
     }
     
 }
