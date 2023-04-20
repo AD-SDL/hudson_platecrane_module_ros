@@ -23,12 +23,10 @@ class SerialPort():
 
         self.status = 0
         self.error = ""
-        self.gripper_length = 0
-        self.robot_status = ""
-        self.movement_state = "READY"
-        self.connect_plate_crane()
+
+        self._connect_plate_crane()
     
-    def connect_plate_crane(self):
+    def __connect_plate_crane(self):
         '''
         Connect to serial port / If wrong port entered inform user 
         '''
@@ -38,7 +36,7 @@ class SerialPort():
         except:
             raise Exception("Could not establish connection")    
 
-    def disconnect_robot(self):
+    def __disconnect_robot(self):
         
         try:
             self.connection.close()
