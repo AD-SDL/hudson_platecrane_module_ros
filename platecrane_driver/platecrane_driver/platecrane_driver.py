@@ -839,8 +839,36 @@ class PlateCrane():
 
         self.pick_module_plate(source, source_height_jog_steps, height_offset)
         self.place_module_plate(target, target_height_jog_steps, height_offset)
+        
+    def get_new_plate_height(self, plate_type):
+        """
+        Gets the new plate height values for the given plate_type 
+        :param plate_type: Plate type.
+        :type source: str
+        :return: None
+        """ 
+        self.plate_above_height = self.plate_resources[plate_type]["plate_above_height"]
+        self.plate_lid_heigh = self.plate_resources[plate_type]["plate_lid_heigh"]
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0):
+    def get_stack_resource(self, ):
+        """
+        Gets the new plate height values for the given plate_type 
+        :param plate_type: Plate type.
+        :type source: str
+        :return: None
+        """ 
+        pass
+
+    def update_stack_resource(self):
+        """
+        Gets the new plate height values for the given plate_type 
+        :param plate_type: Plate type.
+        :type source: str
+        :return: None
+        """ 
+        pass
+
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0 ,  plate_type:str = None):
         """
         Handles the transfer request 
 
@@ -854,15 +882,18 @@ class PlateCrane():
 
         # if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
         #     raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
+        self.get_stack_resource()
+
+        if plate_type:
+            self.calculate_new_plate_height(self, plate_type)
 
         if source_type == "stack" or target_type == "stack":
             self.stack_transfer(source, target, source_type, target_type, height_offset)
         elif source_type == "module" and target_type == "module":
             self.module_transfer(source, target, height_offset)
         self.move_joints_neutral()
-        # time.sleep(2)
         self.move_location("Safe")
-        # time.sleep(10)
+        self.update_stack_resource() #
 
 if __name__ == "__main__":
     """
