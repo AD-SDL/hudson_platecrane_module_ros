@@ -33,11 +33,6 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-        # self.host_path = host_path
-        # self.baud_rate = baud_rate
-        # self.connection = None 
-        # self.secondory_connection = None
-
         self.__serial_port = SerialPort(host_path=host_path, baud_rate=baud_rate)
         self.robot_error = "NO ERROR"
         self.status = 0

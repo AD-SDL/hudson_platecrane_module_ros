@@ -24,7 +24,7 @@ class SerialPort():
         self.status = 0
         self.error = ""
 
-        self._connect_plate_crane()
+        self.__connect_plate_crane()
     
     def __connect_plate_crane(self):
         '''
