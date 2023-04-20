@@ -9,6 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
+from serial_port import SerialPort
 
 import json
 
@@ -17,6 +18,8 @@ class PlateCrane():
     Description: 
     Python interface that allows remote commands to be executed to the plate_crane. 
     """
+
+    __serial_port: SerialPort
     
     def __init__(self, host_path= "/dev/ttyUSB2", baud_rate=9600):
         """[Summary]
@@ -30,12 +33,13 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-        self.host_path = host_path
-        self.baud_rate = baud_rate
-        self.connection = None 
-        self.secondory_connection = None
-        self.robot_error = "NO ERROR"
+        # self.host_path = host_path
+        # self.baud_rate = baud_rate
+        # self.connection = None 
+        # self.secondory_connection = None
 
+        self.__serial_port = SerialPort(host_path=host_path, baud_rate=baud_rate)
+        self.robot_error = "NO ERROR"
         self.status = 0
         self.error = ""
         self.gripper_length = 0
