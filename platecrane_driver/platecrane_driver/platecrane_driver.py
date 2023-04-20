@@ -56,46 +56,8 @@ class PlateCrane():
         self.plate_resources = json.load(open("plate_resources.json"))
         self.stack_resources = json.load(open("stack_resources.json"))
 
-        # self.connect_plate_crane()
-        # self.initialize()
+        self.initialize()
 
-
-    def connect_plate_crane(self):
-        """
-        Connect to serial port / If wrong port entered inform user 
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        try:
-            self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-            # self.secondory_connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-        except:
-            raise Exception("Could not establish connection")    
-
-    def disconnect_robot(self):
-        """[Summary]
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        
-        try:
-            self.connection.close()
-        except Exception as err:
-            print(err)
-        else:
-            print("Robot is successfully disconnected")
 
     def initialize(self):
         """[Summary]
@@ -131,71 +93,8 @@ class PlateCrane():
 
         # Moves axes to home position
         command = 'HOME\r\n' 
-        out_msg = self.send_command(command ,timeout)
+        out_msg = self.__serial_port.send_command(command ,timeout)
 
-    def send_command(self, command, timeout=0.):
-        """Sends provided command over the serial port and stores data outputted. 
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-        try:
-            self.connection.write(command.encode('utf-8'))
-
-        except serial.SerialException as err:
-            print(err)
-            self.robot_error = err
-
-        response_msg = ""
-        initial_command_msg = ""
-
-        time.sleep(timeout)
-
-        while initial_command_msg == "" :
-            response_msg, initial_command_msg = self.receive_command(timeout)
-    
-        # Print the full output message including the initial command that was sent
-        
-        print(initial_command_msg) 
-        print(response_msg)
-
-        return response_msg
-    
-    def receive_command(self, time_wait):                         
-        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
-        
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-
-        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
-        response = ""
-        response_string = ""
-        initial_command_msg = ""
-
-        if self.connection.in_waiting != 0:           
-            response = self.connection.readlines()
-            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
-            if len(response) > 1:
-                for line_index in range(1, len(response)):
-                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
-            else:        
-                response_string = ""
-        return response_string, initial_command_msg
-    
     def get_error_output(self, output:str):
         #Find the errors from error codes.
         self.robot_error = "err"
@@ -253,18 +152,18 @@ class PlateCrane():
         """
 
         command = 'STATUS\r\n' 
-        self.robot_status =  self.send_command(command)
+        self.robot_status =  self.__serial_port.send_command(command)
         
     
     def free_joints(self):
 
         command = 'limp TRUE\r\n' 
-        out_msg =  self.send_command(command)
+        out_msg =  self.__serial_port.send_command(command)
     
     def lock_joints(self):
 
         command = 'limp FALSE\r\n' 
-        out_msg =  self.send_command(command)
+        out_msg =  self.__serial_port.send_command(command)
 
     def get_location_list(self):
         """Checks status of plate_crane
@@ -279,7 +178,7 @@ class PlateCrane():
         """
 
         command = 'LISTPOINTS\r\n' 
-        out_msg =  self.send_command(command)
+        out_msg =  self.__serial_port.send_command(command)
         
         try:
             # Checks if specified format is found in feedback
@@ -326,7 +225,7 @@ class PlateCrane():
 
         command = "GETPOINT " + location + "\r\n" 
 
-        joint_values =  list(self.send_command(command).split(" "))
+        joint_values =  list(self.__serial_port.send_command(command).split(" "))
         joint_values = [eval(x.strip(",")) for x in joint_values]
 
         return joint_values
@@ -350,7 +249,7 @@ class PlateCrane():
         """
 
         command = 'GETPOS\r\n' 
-        current_position = list(self.send_command(command).split(" "))
+        current_position = list(self.__serial_port.send_command(command).split(" "))
         current_position = [eval(x.strip(",")) for x in current_position]
 
         return current_position
@@ -389,7 +288,7 @@ class PlateCrane():
         """
         
         command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(R), str(Z), str(P), str(Y)) 
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
     
     def delete_location(self,location_name:str = None):
         """ Deletes a location from the robot's database
@@ -406,7 +305,7 @@ class PlateCrane():
             raise Exception("No location name provided")
         
         command = "DELETEPOINT %s\r\n" % (location_name) # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def gripper_open(self):
         """Opens gripper
@@ -421,7 +320,7 @@ class PlateCrane():
         """
 
         command = 'OPEN\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def gripper_close(self):
         """Closes gripper
@@ -437,7 +336,7 @@ class PlateCrane():
 
 
         command = 'CLOSE\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
     
     def check_open(self):
         """ Checks if gripper is open
@@ -452,7 +351,7 @@ class PlateCrane():
         """
 
         command = 'GETGRIPPERISOPEN\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def check_closed(self):
         """Checks if gripper is closed
@@ -467,7 +366,7 @@ class PlateCrane():
         """
 
         command = 'GETGRIPPERISCLOSED\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def jog(self, axis, distance) -> None:
         """Moves the specified axis the specified distance.
@@ -482,7 +381,7 @@ class PlateCrane():
         """
 
         command = 'JOG %s,%d\r\n' %(axis,distance) 
-        out_msg = self.send_command(command, timeout=1.5)
+        out_msg = self.__serial_port.send_command(command, timeout=1.5)
 
     def move_joint_angles(self, R:int, Z:int, P:int, Y:int) -> None:
         """Moves on a single axis, using an existing location on robot's database
@@ -499,10 +398,10 @@ class PlateCrane():
         self.set_location("TEMP", R, Z, P, Y)
 
         command = "MOVE TEMP\r\n" 
-        out_msg_move = self.send_command(command)
+        out_msg_move = self.__serial_port.send_command(command)
 
         try:
-            out_msg_move = self.send_command(command)
+            out_msg_move = self.__serial_port.send_command(command)
 
             # Checks if specified format is found in feedback
             # move_msg_index = out_msg_move.find("0000") # Format of feedback that indicates success message
@@ -536,7 +435,7 @@ class PlateCrane():
 
         command = "MOVE_"+ axis.upper() + " " + loc + "\r\n" 
 
-        out_msg_move = self.send_command(command, timeout=delay_time)
+        out_msg_move = self.__serial_port.send_command(command, timeout=delay_time)
 
         self.move_status = "COMPLETED"
             
@@ -559,7 +458,7 @@ class PlateCrane():
             raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         cmd = "MOVE "+ loc +"\r\n"
-        self.send_command(cmd, timeout = move_time)
+        self.__serial_port.send_command(cmd, timeout = move_time)
 
     def move_tower_neutral(self) -> None:
         """Moves the tower to neutral position
@@ -934,10 +833,10 @@ if __name__ == "__main__":
     # s.get_location_list()
 
     # s.jog("Z", 60000)
-    # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
-    # s.send_command("move_abs Z")
-    # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
-    # s.send_command("MOVE Y 5000\r\n")  
+    # s.__serial_port.send_command("Move 166756, -32015, -5882, 5460\r\n")
+    # s.__serial_port.send_command("move_abs Z")
+    # s.__serial_port.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
+    # s.__serial_port.send_command("MOVE Y 5000\r\n")  
 
 #    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name. 1400 (Z axis hits the plate)
 # TODO: Slow the arm before hitting the plate in pick_stack_plate
