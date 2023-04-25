@@ -612,13 +612,18 @@ class PlateCrane():
         if not source:
             raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
-        self.gripper_close()
         self.move_joints_neutral()
         self.move_single_axis("R",source)
-        self.move_location(source)
-        self.jog("Z", self.plate_detect_z_jog_steps)
-        self.gripper_open()
-        self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
+        if "stack" in source.lower():
+            self.gripper_close()
+            self.move_location(source)
+            self.jog("Z", self.plate_detect_z_jog_steps)
+            self.gripper_open()
+            self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
+        else:
+            self.gripper_open()
+            self.move_location(source)
+            self.jog("Z", -self.plate_above_height + height_offset)
         self.gripper_close() 
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -668,6 +673,11 @@ class PlateCrane():
 
         return location_name
     
+    def remove_lid(self):
+        pass
+    def replace_lid(self):
+        pass
+
     def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
         Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
