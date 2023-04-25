@@ -264,7 +264,7 @@ class PlateCrane():
         joint_values = self.get_location_joint_values(location)
         current_pos = self.get_position()
 
-        module_safe_height = joint_values[1] +  self.plate_above_height
+        module_safe_height = joint_values[1] + self.plate_above_height
 
         height_jog_steps = current_pos[1] - module_safe_height
 
@@ -502,11 +502,8 @@ class PlateCrane():
         if not source:
             raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
-        if height_jog_steps == 0:
-            height_jog_steps = self.get_safe_height_jog_steps(source)
-
-        # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
-        #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
+        # if height_jog_steps == 0:
+        #     height_jog_steps = self.get_safe_height_jog_steps(source)
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
@@ -531,11 +528,8 @@ class PlateCrane():
             raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         
-        if height_jog_steps == 0:
-            height_jog_steps = self.get_safe_height_jog_steps(target)    
-
-        # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
-        #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
+        # if height_jog_steps == 0:
+        #     height_jog_steps = self.get_safe_height_jog_steps(target)    
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
@@ -646,7 +640,6 @@ class PlateCrane():
         self.gripper_open()
         self.move_tower_neutral()
         self.move_arm_neutral()
-
 
     def _is_location_joint_values(self, location:str, name:str="temp") -> str:
         """
@@ -766,7 +759,7 @@ class PlateCrane():
         """ 
         pass
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0 ,  plate_type:str = None):
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None):
         """
         Handles the transfer request 
 
@@ -783,7 +776,7 @@ class PlateCrane():
         self.get_stack_resource()
 
         if plate_type:
-            self.calculate_new_plate_height(self, plate_type)
+            self.get_new_plate_height(self, plate_type)
 
         if source_type == "stack" or target_type == "stack":
             self.stack_transfer(source, target, source_type, target_type, height_offset)
