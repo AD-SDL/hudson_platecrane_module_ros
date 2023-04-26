@@ -39,6 +39,8 @@ class PlateCrane():
         self.error = ""
         self.gripper_length = 0
         self.plate_above_height = 700
+        self.plate_pick_steps = 700
+
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
         self.plate_detect_z_jog_steps = 500
@@ -507,9 +509,10 @@ class PlateCrane():
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
-        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset/2))
+        self.jog("Z", - (self.plate_pick_steps - height_offset))
+        # self.jog("Z", - self.)
         self.gripper_close()
-        self.jog("Z", 2*self.plate_above_height)
+        self.jog("Z", self.plate_pick_steps)
 
 
     def put_module_plate(self, target:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
@@ -533,9 +536,10 @@ class PlateCrane():
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
-        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset/2))
+        self.jog("Z", - (self.plate_pick_steps - height_offset))
+        # self.jog("Z", - self.plate_pick_steps)
         self.gripper_open()
-        self.jog("Z", 2*self.plate_above_height)
+        self.jog("Z", self.plate_pick_steps)
 
     def move_module_entry(self, source:str = None, height_jog_steps:int = 0) -> None:
         """Moves to the entry location of the location that is given. It moves the R,P and Z joints step by step to aviod collisions. 
@@ -557,7 +561,7 @@ class PlateCrane():
 
         self.move_single_axis("R",source)
         self.move_single_axis("P", source)
-        self.jog("Z", -height_jog_steps+200)
+        self.jog("Z", -height_jog_steps)
     
     def pick_module_plate(self, source:str = None, height_jog_steps: int = 0, height_offset:int = 0) -> None:
         """Pick a module plate from a module location.
@@ -749,7 +753,8 @@ class PlateCrane():
         :return: None
         """ 
         self.plate_above_height = self.plate_resources[plate_type]["plate_above_height"]
-        self.plate_lid_heigh = self.plate_resources[plate_type]["plate_lid_heigh"]
+        self.plate_lid_steps = self.plate_resources[plate_type]["plate_lid_steps"]
+        self.plate_pick_steps = self.plate_resources[plate_type]["plate_pick_steps"]
 
     def get_stack_resource(self, ):
         """
@@ -786,7 +791,7 @@ class PlateCrane():
         self.get_stack_resource()
 
         if plate_type:
-            self.get_new_plate_height(self, plate_type)
+            self.get_new_plate_height(plate_type)
 
         if source_type == "stack" or target_type == "stack":
             self.stack_transfer(source, target, source_type, target_type, height_offset)
@@ -801,14 +806,20 @@ if __name__ == "__main__":
     Runs given function.
     """
     s = PlateCrane("/dev/ttyUSB2")
-    stack = "Stack1"
-    source_loc = "Solo.Position4"
+    stack = "Stack4"
+    solo6 = "Solo.Position6"
+    solo4 = "Solo.Position4"
+    solo3 = "Solo.Position3"
     target_loc = "HidexNest2"
-    print(s.plate_resources["pcr_plate"])
+    exchange = "LidNest"
+    sealer = "SealerNest"
+
+    # print(s.plate_resources["pcr_plate"])
     # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    # s.transfer(source_loc, target_loc, source_type = "module", target_type = "module", height_offset=360)
+    s.transfer(solo4, solo3, source_type = "module", target_type = "module", plate_type="96_well")
+    # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
     # s.get_location_joint_values("HidexNest2")
     # s.get_location_list()
