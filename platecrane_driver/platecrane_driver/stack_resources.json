@@ -1,73 +1,47 @@
 {
-    "1": {
-      "name": "nest_96_wellplate_2ml_deep",
-      "used": 0,
+    "stack1": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "count": 3,
       "depleted": false,
-      "wells_used": []
+      "has_lid": true
     },
-    "2": {
-      "name": "nest_96_wellplate_2ml_deep",
-      "used": 0,
+    "stack2": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "count": 3,
       "depleted": false,
-      "wells_used": []
+      "has_lid": true
     },
-    "3": {
-      "name": "nest_96_wellplate_100ul_pcr_full_skirt",
-      "used": 0,
+    "stack3": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "count": 3,
       "depleted": false,
-      "wells_used": []
+      "has_lid": true
     },
-    "4": {
-      "name": "nest_96_wellplate_2ml_deep",
-      "used": 0,
+    "stack4": {
+      "labware": "opentrons_96_tiprack_20ul",
+      "count": 3,
       "depleted": false,
-      "wells_used": []
+      "has_lid": true
     },
-    "8": {
-      "name": "opentrons_96_tiprack_20ul",
-      "used": 0,
+    "stack5": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "count": 3,
       "depleted": false,
-      "wells_used": []
+      "has_lid": true
     },
-    "7": {
-      "name": "opentrons_96_tiprack_20ul",
-      "used": 0,
-      "depleted": false,
-      "wells_used": []
+    "lidnest1": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "occupied": false,
+      "is_lid": true
     },
-    "10": {
-      "name": "opentrons_96_tiprack_20ul",
-      "used": 0,
-      "depleted": false,
-      "wells_used": []
+    "lidnest2": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "occupied": false,
+      "is_lid": true
     },
-    "6": {
-      "name": "opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap",
-      "used": 2,
-      "depleted": false,
-      "wells_used": [
-        "A3",
-        "A1"
-      ]
-    },
-    "5": {
-      "name": "opentrons_10_tuberack_nest_4x50ml_6x15ml_conical",
-      "used": 0,
-      "depleted": false,
-      "wells_used": []
-    },
-    "11": {
-      "name": "opentrons_96_tiprack_20ul",
-      "used": 0,
-      "depleted": false,
-      "wells_used": []
-    },
-    "9": {
-      "name": "opentrons_96_tiprack_1000ul",
-      "used": 1,
-      "depleted": false,
-      "wells_used": [
-        "0"
-      ]
+    "lidnest3": {
+      "labware": "nest_96_wellplate_2ml_deep",
+      "occupied": false,
+      "is_lid": true
     }
   }
