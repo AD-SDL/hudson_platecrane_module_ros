@@ -39,8 +39,9 @@ class PlateCrane():
         self.error = ""
         self.gripper_length = 0
         self.plate_above_height = 700
-        self.plate_pick_steps = 700
-
+        self.plate_pick_steps = 1400
+        self.plate_lid_steps = 800
+        
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
         self.plate_detect_z_jog_steps = 500
