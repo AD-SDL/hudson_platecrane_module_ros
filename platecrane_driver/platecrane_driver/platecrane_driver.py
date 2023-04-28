@@ -677,10 +677,20 @@ class PlateCrane():
 
         return location_name
     
-    def remove_lid(self):
-        pass
-    def replace_lid(self):
-        pass
+    def remove_lid(self,source:str = None, target:str = "Stack2", plate_type:str = None) -> None:
+
+        if plate_type:
+            self.get_new_plate_height(plate_type)
+        self.plate_pick_steps = self.plate_lid_steps
+        self.transfer(source=source, target=target, source_type="module",target_type="stack")
+
+    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None) -> None:
+
+        if plate_type:
+            self.get_new_plate_height(plate_type)
+        self.plate_pick_steps = self.plate_lid_steps
+        self.transfer(source=source, target=target, source_type="stack",target_type="module")
+
 
     def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
@@ -774,7 +784,7 @@ class PlateCrane():
         """ 
         pass
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None):
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None) -> None:
         """
         Handles the transfer request 
 
@@ -797,6 +807,7 @@ class PlateCrane():
             self.stack_transfer(source, target, source_type, target_type, height_offset)
         elif source_type == "module" and target_type == "module":
             self.module_transfer(source, target, height_offset)
+
         self.move_joints_neutral()
         self.move_location("Safe")
         self.update_stack_resource() #
