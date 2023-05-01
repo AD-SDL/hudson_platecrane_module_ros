@@ -86,9 +86,13 @@ In terminal:
         * Home
         * Status
 
+## Updating the code
+   * cd into src folder
+   * git pull
+   * colcon build
+   * source install/setup.bash 
 
-
-## Authos and Maintainers
+## Authors and Maintainers
 * Sanjiv Parthasarathy
 * Rafael Vescovi
 * Eric Codrea
