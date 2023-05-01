@@ -218,7 +218,8 @@ class PlatecraneClient(Node):
         self.get_logger().info("Source location: " + str(source))
         target = vars.get('target')
         self.get_logger().info("Target location: "+ str(target))
-        
+        plate_type = vars.get('plate_type', "96_well")
+        self.get_logger().info("Plate type: "+ str(target))
 
         if request.action_handle == 'transfer':
             self.get_logger().info("Starting the transfer request")
@@ -237,22 +238,22 @@ class PlatecraneClient(Node):
 
 
             try:
-                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset))
+                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset), plate_type = plate_type)
             except Exception as err:
                 response.action_response = -1
-                response.action_msg= "Stack transfer failed. Error:" + str(err)
+                response.action_msg= "Transfer failed. Error:" + str(err)
                 self.get_logger().error(str(err))
                 self.state = "ERROR"
             else:    
                 response.action_response = 0
-                response.action_msg= "Stack transfer successfully completed"
+                response.action_msg= "Transfer successfully completed"
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
         
         else: 
-            msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
+            msg = "UNKOWN ACTION REQUEST! Available actions:transfer, remove_lid, replace_lid"
             response.action_response = -1
             response.action_msg= msg
             self.get_logger().error('Error: ' + msg)
