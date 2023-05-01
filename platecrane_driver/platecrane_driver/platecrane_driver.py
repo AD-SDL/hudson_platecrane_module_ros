@@ -1,18 +1,25 @@
-import asyncio
-from asyncio.unix_events import DefaultEventLoopPolicy
-from pickle import TRUE
-import time  
-import serial
 import logging
 import re
 import sys
-   
+import time  
+
+import asyncio
+from asyncio.unix_events import DefaultEventLoopPolicy
+from pickle import TRUE
+
+import serial
+from serial import SerialException
+from serial_port import SerialPort
+
+import json
 
 class PlateCrane():
     """
     Description: 
     Python interface that allows remote commands to be executed to the plate_crane. 
     """
+
+    __serial_port: SerialPort
     
     def __init__(self, host_path= "/dev/ttyUSB2", baud_rate=9600):
         """[Summary]
@@ -26,16 +33,15 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
 
-        self.host_path = host_path
-        self.baud_rate = baud_rate
-        self.connection = None 
-        self.secondory_connection = None
+        self.__serial_port = SerialPort(host_path=host_path, baud_rate=baud_rate)
         self.robot_error = "NO ERROR"
-
         self.status = 0
         self.error = ""
         self.gripper_length = 0
-        self.plate_above_height = 800
+        self.plate_above_height = 700
+        self.plate_pick_steps = 1400
+        self.plate_lid_steps = 800
+        
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
         self.plate_detect_z_jog_steps = 500
@@ -45,46 +51,11 @@ class PlateCrane():
         self.movement_state = "READY"
         self.platecrane_current_position = None
 
-        self.connect_plate_crane()
+        self.plate_resources = json.load(open("plate_resources.json"))
+        self.stack_resources = json.load(open("stack_resources.json"))
+
         self.initialize()
 
-
-    def connect_plate_crane(self):
-        """
-        Connect to serial port / If wrong port entered inform user 
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        try:
-            self.connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-            # self.secondory_connection = serial.Serial(self.host_path, self.baud_rate, timeout=1)
-        except:
-            raise Exception("Could not establish connection")    
-
-    def disconnect_robot(self):
-        """[Summary]
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-        
-        try:
-            self.connection.close()
-        except Exception as err:
-            print(err)
-        else:
-            print("Robot is successfully disconnected")
 
     def initialize(self):
         """[Summary]
@@ -120,71 +91,8 @@ class PlateCrane():
 
         # Moves axes to home position
         command = 'HOME\r\n' 
-        out_msg = self.send_command(command ,timeout)
+        out_msg = self.__serial_port.send_command(command ,timeout)
 
-    def send_command(self, command, timeout=0.):
-        """Sends provided command over the serial port and stores data outputted. 
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-        try:
-            self.connection.write(command.encode('utf-8'))
-
-        except serial.SerialException as err:
-            print(err)
-            self.robot_error = err
-
-        response_msg = ""
-        initial_command_msg = ""
-
-        time.sleep(timeout)
-
-        while initial_command_msg == "" :
-            response_msg, initial_command_msg = self.receive_command(timeout)
-    
-        # Print the full output message including the initial command that was sent
-        
-        print(initial_command_msg) 
-        print(response_msg)
-
-        return response_msg
-    
-    def receive_command(self, time_wait):                         
-        """Records the data outputted by the plate_crane and sets it to equal "" if no data is outputted in the provided time.
-        
-
-        :param [ParamName]: [ParamDescription], defaults to [DefaultParamVal]
-        :type [ParamName]: [ParamType](, optional)
-        ...
-        :raises [ErrorType]: [ErrorDescription]
-        ...
-        :return: [ReturnDescription]
-        :rtype: [ReturnType]
-        """
-
-
-        # response_string = self.connection.read_until(expected=b'\r').decode('utf-8')
-        response = ""
-        response_string = ""
-        initial_command_msg = ""
-
-        if self.connection.in_waiting != 0:           
-            response = self.connection.readlines()
-            initial_command_msg = response[0].decode('utf-8').strip("\r\n")
-            if len(response) > 1:
-                for line_index in range(1, len(response)):
-                    response_string +=  response[line_index].decode('utf-8').strip("\r\n")
-            else:        
-                response_string = ""
-        return response_string, initial_command_msg
-    
     def get_error_output(self, output:str):
         #Find the errors from error codes.
         self.robot_error = "err"
@@ -242,18 +150,18 @@ class PlateCrane():
         """
 
         command = 'STATUS\r\n' 
-        self.robot_status =  self.send_command(command)
+        self.robot_status =  self.__serial_port.send_command(command)
         
     
     def free_joints(self):
 
         command = 'limp TRUE\r\n' 
-        out_msg =  self.send_command(command)
+        out_msg =  self.__serial_port.send_command(command)
     
     def lock_joints(self):
 
         command = 'limp FALSE\r\n' 
-        out_msg =  self.send_command(command)
+        out_msg =  self.__serial_port.send_command(command)
 
     def get_location_list(self):
         """Checks status of plate_crane
@@ -268,7 +176,7 @@ class PlateCrane():
         """
 
         command = 'LISTPOINTS\r\n' 
-        out_msg =  self.send_command(command)
+        out_msg =  self.__serial_port.send_command(command)
         
         try:
             # Checks if specified format is found in feedback
@@ -315,7 +223,7 @@ class PlateCrane():
 
         command = "GETPOINT " + location + "\r\n" 
 
-        joint_values =  list(self.send_command(command).split(" "))
+        joint_values =  list(self.__serial_port.send_command(command).split(" "))
         joint_values = [eval(x.strip(",")) for x in joint_values]
 
         return joint_values
@@ -339,7 +247,7 @@ class PlateCrane():
         """
 
         command = 'GETPOS\r\n' 
-        current_position = list(self.send_command(command).split(" "))
+        current_position = list(self.__serial_port.send_command(command).split(" "))
         current_position = [eval(x.strip(",")) for x in current_position]
 
         return current_position
@@ -359,7 +267,7 @@ class PlateCrane():
         joint_values = self.get_location_joint_values(location)
         current_pos = self.get_position()
 
-        module_safe_height = joint_values[1] +  self.plate_above_height
+        module_safe_height = joint_values[1] + self.plate_above_height
 
         height_jog_steps = current_pos[1] - module_safe_height
 
@@ -377,8 +285,8 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
         
-        command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(Z), str(P), str(Y), str(R)) # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        command = "LOADPOINT %s, %s, %s, %s, %s\r\n" % (location_name, str(R), str(Z), str(P), str(Y)) 
+        out_msg = self.__serial_port.send_command(command)
     
     def delete_location(self,location_name:str = None):
         """ Deletes a location from the robot's database
@@ -395,7 +303,7 @@ class PlateCrane():
             raise Exception("No location name provided")
         
         command = "DELETEPOINT %s\r\n" % (location_name) # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def gripper_open(self):
         """Opens gripper
@@ -410,7 +318,7 @@ class PlateCrane():
         """
 
         command = 'OPEN\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def gripper_close(self):
         """Closes gripper
@@ -426,7 +334,7 @@ class PlateCrane():
 
 
         command = 'CLOSE\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
     
     def check_open(self):
         """ Checks if gripper is open
@@ -441,7 +349,7 @@ class PlateCrane():
         """
 
         command = 'GETGRIPPERISOPEN\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def check_closed(self):
         """Checks if gripper is closed
@@ -456,7 +364,7 @@ class PlateCrane():
         """
 
         command = 'GETGRIPPERISCLOSED\r\n' # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
     def jog(self, axis, distance) -> None:
         """Moves the specified axis the specified distance.
@@ -471,7 +379,7 @@ class PlateCrane():
         """
 
         command = 'JOG %s,%d\r\n' %(axis,distance) 
-        out_msg = self.send_command(command, timeout=0.5)
+        out_msg = self.__serial_port.send_command(command, timeout=1.5)
 
     def move_joint_angles(self, R:int, Z:int, P:int, Y:int) -> None:
         """Moves on a single axis, using an existing location on robot's database
@@ -488,10 +396,10 @@ class PlateCrane():
         self.set_location("TEMP", R, Z, P, Y)
 
         command = "MOVE TEMP\r\n" 
-        out_msg_move = self.send_command(command)
+        out_msg_move = self.__serial_port.send_command(command)
 
         try:
-            out_msg_move = self.send_command(command)
+            out_msg_move = self.__serial_port.send_command(command)
 
             # Checks if specified format is found in feedback
             # move_msg_index = out_msg_move.find("0000") # Format of feedback that indicates success message
@@ -519,13 +427,13 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not loc:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
         # self.loadpoint(R, Z, P, Y)
 
         command = "MOVE_"+ axis.upper() + " " + loc + "\r\n" 
 
-        out_msg_move = self.send_command(command, timeout=delay_time)
+        out_msg_move = self.__serial_port.send_command(command, timeout=delay_time)
 
         self.move_status = "COMPLETED"
             
@@ -545,10 +453,10 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not loc:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         cmd = "MOVE "+ loc +"\r\n"
-        self.send_command(cmd, timeout = move_time)
+        self.__serial_port.send_command(cmd, timeout = move_time)
 
     def move_tower_neutral(self) -> None:
         """Moves the tower to neutral position
@@ -563,7 +471,7 @@ class PlateCrane():
 
         :return: None
         """
-        self.jog("Z",200)
+        # self.jog("Z",200)
         self.move_single_axis("Y", "Safe", delay_time = 1)
 
     def move_gripper_neutral(self) -> None:
@@ -582,7 +490,7 @@ class PlateCrane():
         self.move_tower_neutral()
         # self.move_gripper_neutral()
 
-    def get_module_plate(self, source:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
+    def get_module_plate(self, source:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """picks up the plate from a module location by moving each joint step by step
 
         :param source: Name of the source location. 
@@ -595,22 +503,20 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
-        if not height_jog_steps:
-            height_jog_steps = self.get_safe_height_jog_steps(source)
-
-        # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
-        #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
+        # if height_jog_steps == 0:
+        #     height_jog_steps = self.get_safe_height_jog_steps(source)
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
-        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset))
+        self.jog("Z", - (self.plate_pick_steps - height_offset))
+        # self.jog("Z", - self.)
         self.gripper_close()
-        self.jog("Z", 2*self.plate_above_height)
+        self.jog("Z", self.plate_pick_steps)
 
 
-    def put_module_plate(self, target:list = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
+    def put_module_plate(self, target:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
         """Places the plate onto a module location by moving each joint step by step
 
         :param target: Name of the target location. 
@@ -623,22 +529,20 @@ class PlateCrane():
 
         # TODO:Handle the error raising within error_codes.py
         if not target:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         
-        if not height_jog_steps:
-            height_jog_steps = self.get_safe_height_jog_steps(target)    
-
-        # TODO: Decide if plate location height will be reconfigured to be the correct grabbing height or the current Z axis will be kept. 
-        #       Reconfiguring the Z axis values of the locations will remove two extra movement steps from this function.
+        # if height_jog_steps == 0:
+        #     height_jog_steps = self.get_safe_height_jog_steps(target)    
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
-        self.jog("Z", - 2*(self.plate_above_height+100 - height_offset))
+        self.jog("Z", - (self.plate_pick_steps - height_offset))
+        # self.jog("Z", - self.plate_pick_steps)
         self.gripper_open()
-        self.jog("Z", 2*self.plate_above_height)
+        self.jog("Z", self.plate_pick_steps)
 
-    def move_module_entry(self, source:list = None, height_jog_steps:int = 0) -> None:
+    def move_module_entry(self, source:str = None, height_jog_steps:int = 0) -> None:
         """Moves to the entry location of the location that is given. It moves the R,P and Z joints step by step to aviod collisions. 
 
         :param source: Name of the source location. 
@@ -651,14 +555,14 @@ class PlateCrane():
         # TODO:Handle the error raising within error_codes.py
 
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         if not height_jog_steps:
             height_jog_steps = self.get_safe_height_jog_steps(source)
 
         self.move_single_axis("R",source)
         self.move_single_axis("P", source)
-        self.jog("Z", -height_jog_steps+200)
+        self.jog("Z", -height_jog_steps)
     
     def pick_module_plate(self, source:str = None, height_jog_steps: int = 0, height_offset:int = 0) -> None:
         """Pick a module plate from a module location.
@@ -671,7 +575,7 @@ class PlateCrane():
         :return: None
         """
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
         
         self.move_joints_neutral()
         self.gripper_open()
@@ -692,7 +596,7 @@ class PlateCrane():
         :return: None
         """
         if not target:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
      
         self.move_joints_neutral()
 
@@ -711,15 +615,20 @@ class PlateCrane():
         """
         #TODO: Create error exceptions for below case
         if not source:
-            raise Exception("PlateCraneLocationException: 'None' type variable is not compatible as a location") 
+            raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
-        self.gripper_close()
         self.move_joints_neutral()
         self.move_single_axis("R",source)
-        self.move_location(source)
-        self.jog("Z", self.plate_detect_z_jog_steps)
-        self.gripper_open()
-        self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
+        if "stack" in source.lower():
+            self.gripper_close()
+            self.move_location(source)
+            self.jog("Z", self.plate_detect_z_jog_steps)
+            self.gripper_open()
+            self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
+        else:
+            self.gripper_open()
+            self.move_location(source)
+            self.jog("Z", -self.plate_above_height + height_offset)
         self.gripper_close() 
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -741,7 +650,6 @@ class PlateCrane():
         self.gripper_open()
         self.move_tower_neutral()
         self.move_arm_neutral()
-
 
     def _is_location_joint_values(self, location:str, name:str="temp") -> str:
         """
@@ -770,6 +678,21 @@ class PlateCrane():
 
         return location_name
     
+    def remove_lid(self,source:str = None, target:str = "Stack2", plate_type:str = None) -> None:
+
+        if plate_type:
+            self.get_new_plate_height(plate_type)
+        self.plate_pick_steps = self.plate_lid_steps
+        self.transfer(source=source, target=target, source_type="module",target_type="stack")
+
+    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None) -> None:
+
+        if plate_type:
+            self.get_new_plate_height(plate_type)
+        self.plate_pick_steps = self.plate_lid_steps
+        self.transfer(source=source, target=target, source_type="stack",target_type="module")
+
+
     def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
         Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
@@ -798,16 +721,16 @@ class PlateCrane():
             target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
         
         if source_type.lower() == "stack":
-            self.pick_stack_plate(source, height_offset)
+            self.pick_stack_plate(source, height_offset = height_offset)
         elif source_type.lower() == "module":
-            self.pick_module_plate(source, height_offset)
+            self.pick_module_plate(source, height_offset = height_offset)
 
         # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
-        if target_type == "stack":
-            self.place_stack_plate(target,height_offset)
-        elif target_type == "module":
-            self.place_module_plate(target, target_height_jog_steps, height_offset)
+        if target_type.lower() == "stack":
+            self.place_stack_plate(target, height_offset = height_offset)
+        elif target_type.lower() == "module":
+            self.place_module_plate(target, height_jog_steps = target_height_jog_steps, height_offset = height_offset)
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
@@ -832,8 +755,37 @@ class PlateCrane():
 
         self.pick_module_plate(source, source_height_jog_steps, height_offset)
         self.place_module_plate(target, target_height_jog_steps, height_offset)
+        
+    def get_new_plate_height(self, plate_type):
+        """
+        Gets the new plate height values for the given plate_type 
+        :param plate_type: Plate type.
+        :type source: str
+        :return: None
+        """ 
+        self.plate_above_height = self.plate_resources[plate_type]["plate_above_height"]
+        self.plate_lid_steps = self.plate_resources[plate_type]["plate_lid_steps"]
+        self.plate_pick_steps = self.plate_resources[plate_type]["plate_pick_steps"]
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0):
+    def get_stack_resource(self, ):
+        """
+        Gets the new plate height values for the given plate_type 
+        :param plate_type: Plate type.
+        :type source: str
+        :return: None
+        """ 
+        pass
+
+    def update_stack_resource(self):
+        """
+        Gets the new plate height values for the given plate_type 
+        :param plate_type: Plate type.
+        :type source: str
+        :return: None
+        """ 
+        pass
+
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None) -> None:
         """
         Handles the transfer request 
 
@@ -847,25 +799,42 @@ class PlateCrane():
 
         # if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
         #     raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
+        self.get_stack_resource()
+
+        if plate_type:
+            self.get_new_plate_height(plate_type)
 
         if source_type == "stack" or target_type == "stack":
             self.stack_transfer(source, target, source_type, target_type, height_offset)
         elif source_type == "module" and target_type == "module":
             self.module_transfer(source, target, height_offset)
+
         self.move_joints_neutral()
         self.move_location("Safe")
-        time.sleep(2)
+        self.update_stack_resource() #
 
 if __name__ == "__main__":
     """
     Runs given function.
     """
     s = PlateCrane("/dev/ttyUSB2")
-    stack = "Stack1"
-    source_loc = "SealerNest"
-    target_loc = "PeelerNest"
+    stack = "Stack4"
+    solo6 = "Solo.Position6"
+    solo4 = "Solo.Position4"
+    solo3 = "Solo.Position3"
+    target_loc = "HidexNest2"
+    exchange = "LidNest"
+    sealer = "SealerNest"
+
+    # print(s.plate_resources["pcr_plate"])
+    # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
-    s.transfer(source_loc, "Liconic.Nest", source_type = "stack", target_type = "stack", height_offset=0)
+    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
+    s.transfer(solo4, solo3, source_type = "module", target_type = "module", plate_type="96_well")
+    # s.lock_joints()
+    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
+    # s.get_location_joint_values("HidexNest2")
+    # s.get_location_list()
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
@@ -885,9 +854,12 @@ if __name__ == "__main__":
     # s.get_location_list()
 
     # s.jog("Z", 60000)
-    # s.send_command("Move 166756, -32015, -5882, 5460\r\n")
-    # s.send_command("move_abs Z")
-    # s.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
-    # s.send_command("MOVE Y 5000\r\n")  
+    # s.__serial_port.send_command("Move 166756, -32015, -5882, 5460\r\n")
+    # s.__serial_port.send_command("move_abs Z")
+    # s.__serial_port.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
+    # s.__serial_port.send_command("MOVE Y 5000\r\n")  
 
 #    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name. 1400 (Z axis hits the plate)
+# TODO: Slow the arm before hitting the plate in pick_stack_plate
+# TODO: Create a plate detect function within pick stack plate function
+# TODO: Maybe write another pick stack funtion to remove the plate detect movement
