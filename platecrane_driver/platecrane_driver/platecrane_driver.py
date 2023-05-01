@@ -678,20 +678,30 @@ class PlateCrane():
 
         return location_name
     
-    def remove_lid(self,source:str = None, target:str = "Stack2", plate_type:str = None) -> None:
+    def remove_lid(self,source:str = None, target:str = "Stack2", plate_type:str = None, height_offset:int = 0) -> None:
+
+        if plate_type:
+            self.get_new_plate_height(plate_type)
+        
+        self.plate_above_height = 0
+
+        source_loc = self.get_location_joint_values(source)
+        target_loc = self.get_location_joint_values(target)
+
+        remove_lid_source = "Temp_Lid_Source_Loc"
+        remove_lid_target = "Temp_Lid_Target_Loc"
+
+        self.set_location(remove_lid_source, source_loc[0], source_loc[1] - self.plate_lid_steps, source_loc[2], source_loc[3])
+        self.set_location(remove_lid_target, target_loc[0], target_loc[1] - self.plate_pick_steps, target_loc[2], target_loc[3])
+
+        self.transfer(source=remove_lid_source, target=remove_lid_target, source_type="stack",target_type="stack")
+
+    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None, height_offset:int = 0) -> None:
 
         if plate_type:
             self.get_new_plate_height(plate_type)
         self.plate_pick_steps = self.plate_lid_steps
-        self.transfer(source=source, target=target, source_type="module",target_type="stack")
-
-    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None) -> None:
-
-        if plate_type:
-            self.get_new_plate_height(plate_type)
-        self.plate_pick_steps = self.plate_lid_steps
-        self.transfer(source=source, target=target, source_type="stack",target_type="module")
-
+        self.transfer(source=source, target=target, source_type="stack",target_type="stack")
 
     def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
@@ -823,14 +833,15 @@ if __name__ == "__main__":
     solo4 = "Solo.Position4"
     solo3 = "Solo.Position3"
     target_loc = "HidexNest2"
-    exchange = "LidNest"
+    exchange = "LidNest3"
     sealer = "SealerNest"
 
     # print(s.plate_resources["pcr_plate"])
     # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    s.transfer(solo4, solo3, source_type = "module", target_type = "module", plate_type="96_well")
+    s.transfer(exchange, "Stack2", source_type = "stack", target_type = "stack", plate_type="96_well")
+    # s.remove_lid(source=exchange, plate_type="96_well")
     # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
     # s.get_location_joint_values("HidexNest2")
@@ -859,7 +870,7 @@ if __name__ == "__main__":
     # s.__serial_port.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
     # s.__serial_port.send_command("MOVE Y 5000\r\n")  
 
-#    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name. 1400 (Z axis hits the plate)
+#    Crash error outputs 21(R axis),14(z axis), 02 Wrong location name. 1400 (Z axis hits the plate), 00 success TODO: Need a response handler function
 # TODO: Slow the arm before hitting the plate in pick_stack_plate
 # TODO: Create a plate detect function within pick stack plate function
 # TODO: Maybe write another pick stack funtion to remove the plate detect movement
