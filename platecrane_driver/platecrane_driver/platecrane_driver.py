@@ -773,6 +773,8 @@ class PlateCrane():
         :type source: str
         :return: None
         """ 
+        if plate_type not in self.plate_resources.keys():
+            raise Exception("Unkown plate type")
         self.plate_above_height = self.plate_resources[plate_type]["plate_above_height"]
         self.plate_lid_steps = self.plate_resources[plate_type]["plate_lid_steps"]
         self.plate_pick_steps = self.plate_resources[plate_type]["plate_pick_steps"]
@@ -840,8 +842,8 @@ if __name__ == "__main__":
     # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    s.transfer(exchange, "Stack2", source_type = "stack", target_type = "stack", plate_type="96_well")
-    # s.remove_lid(source=exchange, plate_type="96_well")
+    # s.transfer(exchange, "Stack2", source_type = "stack", target_type = "stack", plate_type="96_well")
+    s.remove_lid(source=exchange, plate_type="96_well")
     # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
     # s.get_location_joint_values("HidexNest2")
