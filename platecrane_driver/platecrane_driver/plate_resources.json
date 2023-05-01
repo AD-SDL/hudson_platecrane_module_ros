@@ -8,7 +8,7 @@
         "grab_lid_nest": -12,
         "plate_above_height": 700,
         "plate_pick_steps": 1400,
-        "plate_lid_steps": 800
+        "plate_lid_steps": 100
     },
     "pcr_plate":{
         "height": 15.2762,
@@ -19,7 +19,7 @@
         "grab_lid_nest": 0,
         "plate_above_height":5000, 
         "plate_pick_steps": 5700,
-        "plate_lid_steps": 5100
+        "plate_lid_steps": 100
     },
     "tip_box":{
         "height": 15.2762,
