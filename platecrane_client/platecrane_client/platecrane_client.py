@@ -119,7 +119,7 @@ class PlatecraneClient(Node):
         msg = String()
 
         try:
-            self.robot_status = self.platecrane.robot_status
+            self.robot_status = self.platecrane.robot_status.strip()
             self.robot_error_status = self.platecrane.robot_error
             self.robot_movement_state = self.platecrane.movement_state
 
@@ -277,7 +277,7 @@ def main(args = None):
         except KeyboardInterrupt:
             platecrane_client.get_logger().info('Keyboard interrupt, shutting down.\n')
         finally:
-            platecrane_client.platecrane.disconnect_robot()
+            # platecrane_client.platecrane.__serial_port.__disconnect_robot()
             platecrane_client.get_logger().warn("Robot connection is closed")
             executor.shutdown()
             platecrane_client.destroy_node()
