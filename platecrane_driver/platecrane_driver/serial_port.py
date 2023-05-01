@@ -3,8 +3,8 @@ from threading import Lock
 
 from serial import PARITY_EVEN, Serial, SerialException
 
-from error_codes import SerialError
-from utils import lock_threading_lock
+# from error_codes import SerialError
+# from utils import lock_threading_lock
 
 import asyncio
 from asyncio.unix_events import DefaultEventLoopPolicy

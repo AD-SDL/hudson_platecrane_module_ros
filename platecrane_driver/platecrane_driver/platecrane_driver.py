@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from serial_port import SerialPort
+from platecrane_driver.serial_port import SerialPort
 
 import json
 
@@ -51,8 +51,8 @@ class PlateCrane():
         self.movement_state = "READY"
         self.platecrane_current_position = None
 
-        self.plate_resources = json.load(open("plate_resources.json"))
-        self.stack_resources = json.load(open("stack_resources.json"))
+        self.plate_resources = json.load(open("/home/rpl/wei_ws/src/platecrane_module/platecrane_driver/platecrane_driver/plate_resources.json"))
+        self.stack_resources = json.load(open("/home/rpl/wei_ws/src/platecrane_module/platecrane_driver/platecrane_driver/stack_resources.json"))
 
         self.initialize()
 
