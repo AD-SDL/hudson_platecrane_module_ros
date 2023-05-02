@@ -682,17 +682,10 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps
-        # self.plate_pick_steps = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
-        # self.plate_above_height = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
-
-        # source_loc = self.get_location_joint_values(source)
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps + 700
         target_loc = self.get_location_joint_values(target)
-
-        # remove_lid_source = "Temp_Lid_Source_Loc"
         remove_lid_target = "Temp_Lid_Target_Loc"
 
-        # self.set_location(remove_lid_source, source_loc[0], source_loc[1] - self.plate_lid_steps, source_loc[2], source_loc[3])
         self.set_location(remove_lid_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
         self.plate_pick_steps = self.plate_lid_steps
         self.transfer(source=source, target=remove_lid_target, source_type="stack",target_type="stack")
@@ -701,21 +694,15 @@ class PlateCrane():
 
         if plate_type:
             self.get_new_plate_height(plate_type)
-        
-        target_offset = self.plate_pick_steps - self.plate_above_height 
-        self.plate_pick_steps = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
-        self.plate_above_height = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
 
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps + 700
         source_loc = self.get_location_joint_values(source)
-        target_loc = self.get_location_joint_values(target)
-
-        remove_lid_source = "Temp_Lid_Source_Loc"
-        remove_lid_target = "Temp_Lid_Target_Loc"
+        remove_lid_source = "Temp_Lid_Source_loc"
 
         self.set_location(remove_lid_source, source_loc[0], source_loc[1] - target_offset, source_loc[2], source_loc[3])
-        self.set_location(remove_lid_target, target_loc[0], target_loc[1] - self.plate_lid_steps, target_loc[2], target_loc[3])
+        self.plate_pick_steps = self.plate_lid_steps
 
-        self.transfer(source=remove_lid_source, target=remove_lid_target, source_type="stack",target_type="stack")
+        self.transfer(source = remove_lid_source, target = target, source_type = "stack", target_type = "stack")
 
     def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
@@ -734,8 +721,8 @@ class PlateCrane():
             # TODO: Raise an exception here
             return
         
-        # source = self._is_location_joint_values(location = source, name = "source")
-        # target = self._is_location_joint_values(location = target, name = "target") 
+        source = self._is_location_joint_values(location = source, name = "source")
+        target = self._is_location_joint_values(location = target, name = "target") 
 
         if source_type.lower() == "stack":
             source_loc = self.get_location_joint_values(source)
@@ -744,7 +731,7 @@ class PlateCrane():
                 source_offset =  self.plate_above_height + height_offset
             else:
                 stack_source = "source_loc"
-                source_offset =   2*self.plate_above_height - self.plate_pick_steps + height_offset
+                source_offset = 2*self.plate_above_height - self.plate_pick_steps + height_offset
 
             self.set_location(stack_source, source_loc[0], source_loc[1] + source_offset, source_loc[2], source_loc[3])
             self.pick_stack_plate(stack_source, height_offset = height_offset)
@@ -860,10 +847,10 @@ if __name__ == "__main__":
     # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="tip_box_lid_on")
-    # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="tip_box_lid_on")
-    s.remove_lid(source=exchange, target="LidNest2", plate_type="tip_box_lid_on")
-    # s.replace_lid(target="LidNest2", source= exchange, plate_type="96_well")
+    s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
+    # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
+    s.remove_lid(source = exchange, target="LidNest2", plate_type="96_well")
+    s.replace_lid(target = exchange, source = "LidNest2", plate_type = "96_well")
     # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
     # s.get_location_joint_values("HidexNest2")
