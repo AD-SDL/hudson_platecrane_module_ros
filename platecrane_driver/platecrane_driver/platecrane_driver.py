@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from platecrane_driver.serial_port import SerialPort
+from serial_port import SerialPort
 
 import json
 
@@ -619,18 +619,17 @@ class PlateCrane():
 
         self.move_joints_neutral()
         self.move_single_axis("R",source)
-        # self.move_single_axis("Y",source)
 
         if "stack" in source.lower():
             self.gripper_close()
             self.move_location(source)
             self.jog("Z", self.plate_above_height)
             self.gripper_open()
-            self.jog("Z", -self.plate_pick_steps + height_offset)
+            self.jog("Z", - self.plate_pick_steps + height_offset)
         else:
             self.gripper_open()
             self.move_location(source)
-            self.jog("Z", -self.plate_pick_steps + height_offset)
+            # self.jog("Z", -self.plate_pick_steps + height_offset)
         self.gripper_close() 
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -642,13 +641,11 @@ class PlateCrane():
         :type target: str
         :return: None
         """
-        if not target:
-            target = self.exchange_location
 
         self.move_joints_neutral()
         self.move_single_axis("R",target)
         self.move_location(target)
-        self.jog("Z", + (self.plate_above_height - self.plate_pick_steps) + height_offset)
+        # self.jog("Z", height_offset)
         self.gripper_open()
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -685,20 +682,20 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = self.plate_pick_steps - self.plate_above_height 
-        self.plate_pick_steps = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
-        self.plate_above_height = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps
+        # self.plate_pick_steps = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
+        # self.plate_above_height = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
 
-        source_loc = self.get_location_joint_values(source)
+        # source_loc = self.get_location_joint_values(source)
         target_loc = self.get_location_joint_values(target)
 
-        remove_lid_source = "Temp_Lid_Source_Loc"
+        # remove_lid_source = "Temp_Lid_Source_Loc"
         remove_lid_target = "Temp_Lid_Target_Loc"
 
-        self.set_location(remove_lid_source, source_loc[0], source_loc[1] - self.plate_lid_steps, source_loc[2], source_loc[3])
+        # self.set_location(remove_lid_source, source_loc[0], source_loc[1] - self.plate_lid_steps, source_loc[2], source_loc[3])
         self.set_location(remove_lid_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
-
-        self.transfer(source=remove_lid_source, target=remove_lid_target, source_type="stack",target_type="stack")
+        self.plate_pick_steps = self.plate_lid_steps
+        self.transfer(source=source, target=remove_lid_target, source_type="stack",target_type="stack")
 
     def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None, height_offset:int = 0) -> None:
 
@@ -737,14 +734,19 @@ class PlateCrane():
             # TODO: Raise an exception here
             return
         
-        source = self._is_location_joint_values(location = source, name = "source")
-        target = self._is_location_joint_values(location = target, name = "target") 
+        # source = self._is_location_joint_values(location = source, name = "source")
+        # target = self._is_location_joint_values(location = target, name = "target") 
 
         if source_type.lower() == "stack":
             source_loc = self.get_location_joint_values(source)
-            source_offset = self.plate_pick_steps - self.plate_above_height + height_offset
-            stack_source = "stack_source_loc"
-            self.set_location(stack_source, source_loc[0], source_loc[1] - source_offset, source_loc[2], source_loc[3])
+            if "stack" in source.lower():
+                stack_source = "stack_source_loc"
+                source_offset =  self.plate_above_height + height_offset
+            else:
+                stack_source = "source_loc"
+                source_offset =   2*self.plate_above_height - self.plate_pick_steps + height_offset
+
+            self.set_location(stack_source, source_loc[0], source_loc[1] + source_offset, source_loc[2], source_loc[3])
             self.pick_stack_plate(stack_source, height_offset = height_offset)
 
         elif source_type.lower() == "module":
@@ -752,11 +754,11 @@ class PlateCrane():
 
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
         if target_type.lower() == "stack":
-            target_loc = self.get_location_joint_values(source)
-            target_offset = self.plate_pick_steps - self.plate_above_height + height_offset
-            stack_target = "stack_target_loc"
-            self.set_location(stack_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
-            self.place_stack_plate(target, height_offset = height_offset)
+            target_loc = self.get_location_joint_values(target)
+            target_offset =  2*self.plate_above_height - self.plate_pick_steps + height_offset
+            stack_target = "target_loc"
+            self.set_location(stack_target, target_loc[0], target_loc[1] + target_offset, target_loc[2], target_loc[3])
+            self.place_stack_plate(stack_target, height_offset = height_offset)
 
         elif target_type.lower() == "module":
             self.place_module_plate(target, height_jog_steps = target_height_jog_steps, height_offset = height_offset)
@@ -858,11 +860,12 @@ if __name__ == "__main__":
     # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
-    # s.remove_lid(source=exchange, plate_type="pcr_plate")
-    # s.replace_lid(target=exchange, plate_type="96_well")
+    # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="tip_box_lid_on")
+    # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="tip_box_lid_on")
+    # s.remove_lid(source=exchange, target="LidNest2", plate_type="tip_box_lid_on")
+    # s.replace_lid(target="LidNest2", source= exchange, plate_type="96_well")
     # s.lock_joints()
-    s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
+    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
     # s.get_location_joint_values("HidexNest2")
     # s.get_location_list()
     # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
@@ -889,7 +892,7 @@ if __name__ == "__main__":
     # s.__serial_port.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
     # s.__serial_port.send_command("MOVE Y 5000\r\n")  
 
-#    Crash error outputs 21(R axis),14(z axis), 02 Wrong location name. 1400 (Z axis hits the plate), 00 success TODO: Need a response handler function
+#    Crash error outputs 21(R axis),14(z axis), 02 Wrong location name. 1400 (Z axis hits the plate), 00 success TODO: Need a response handler function. Unkown error messages T1, ATS, TU these are about connection issues (multiple access?)
 # TODO: Slow the arm before hitting the plate in pick_stack_plate
 # TODO: Create a plate detect function within pick stack plate function
 # TODO: Maybe write another pick stack funtion to remove the plate detect movement
