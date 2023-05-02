@@ -757,7 +757,7 @@ class PlateCrane():
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
         if target_type.lower() == "stack":
             target_loc = self.get_location_joint_values(source)
-            target_offset = 
+            target_offset = self.plate_pick_steps - self.plate_above_height + height_offset
             stack_target = "stack_target_loc"
             self.set_location(stack_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
             self.place_stack_plate(target, height_offset = height_offset)
@@ -767,7 +767,6 @@ class PlateCrane():
         
         #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
 
-    
     def module_transfer(self, source:str, target:str, height_offset:int = 0) -> None:
         """
         Transfer a plate in between two modules using source and target locations
