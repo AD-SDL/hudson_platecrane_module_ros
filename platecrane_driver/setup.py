@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
-package_name = 'sciclops_driver'
+package_name = 'platecrane_driver'
 install_requires = ['pyusb']
 
 setup(
-    name='sciclops_driver',
+    name='platecrane_driver',
     version='0.0.2',
     packages=find_packages(),
     data_files=[
@@ -15,9 +15,9 @@ setup(
     install_requires=install_requires,
     zip_safe=True,
     python_requires=">=3.8",
-    maintainer='Rafael Vescovi and Abe Stoka',
+    maintainer='Rafael Vescovi, Abe Stoka and Doga Ozgulbas',
     maintainer_email='ravescovi@anl.gov',
-    description='Driver for the Sciclops',
+    description='Driver for the Platecrane and Sciclops',
     url='https://github.com/AD-SDL/sciclops_module.git', 
     license='MIT License',
     entry_points={},
