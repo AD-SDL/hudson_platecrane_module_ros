@@ -7,7 +7,7 @@
         "grab_lid_tower": -13,
         "grab_lid_nest": -12,
         "plate_above_height": 800,
-        "plate_pick_steps": 1400,
+        "plate_pick_steps": 2500,
         "plate_lid_steps": 100
     },
     "pcr_plate":{
