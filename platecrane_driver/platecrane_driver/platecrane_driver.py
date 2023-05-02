@@ -862,7 +862,7 @@ if __name__ == "__main__":
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
     # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="tip_box_lid_on")
     # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="tip_box_lid_on")
-    # s.remove_lid(source=exchange, target="LidNest2", plate_type="tip_box_lid_on")
+    s.remove_lid(source=exchange, target="LidNest2", plate_type="tip_box_lid_on")
     # s.replace_lid(target="LidNest2", source= exchange, plate_type="96_well")
     # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
