@@ -224,14 +224,15 @@ class PlatecraneClient(Node):
         if request.action_handle == 'transfer':
             self.get_logger().info("Starting the transfer request")
 
-            source_type = ""
-            target_type = "False"
-
-            source_type = vars.get('source_type')
+            source_type = vars.get('source_type', None)
             self.get_logger().info("Source Type: " + str(source_type))
 
-            target_type = vars.get('target_type')
+            target_type = vars.get('target_type', None)
             self.get_logger().info("Target Type: " + str(target_type))
+
+            if not source_type or not target_type:
+                self.get_logger().error("Please provide source and target transfer types!")
+                self.state = "ERROR"
                 
             height_offset = vars.get('height_offset', 0)
             self.get_logger().info("Height Offset: " + str(height_offset))
@@ -251,7 +252,38 @@ class PlatecraneClient(Node):
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
-        
+        elif request.action_handle == "remove_lid":
+
+            try:
+                self.platecrane.remove_lid(source = source, target = target, plate_type = plate_type)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Transfer failed. Error:" + str(err)
+                self.get_logger().error(str(err))
+                self.state = "ERROR"
+            else:    
+                response.action_response = 0
+                response.action_msg= "Transfer successfully completed"
+                self.state = "COMPLETED"
+            finally:
+                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
+                return response
+            
+        elif request.action_handle == "replace_lid":
+            try:
+                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset), plate_type = plate_type)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Transfer failed. Error:" + str(err)
+                self.get_logger().error(str(err))
+                self.state = "ERROR"
+            else:    
+                response.action_response = 0
+                response.action_msg= "Transfer successfully completed"
+                self.state = "COMPLETED"
+            finally:
+                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
+                return response
         else: 
             msg = "UNKOWN ACTION REQUEST! Available actions:transfer, remove_lid, replace_lid"
             response.action_response = -1
