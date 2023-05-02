@@ -738,10 +738,7 @@ class PlateCrane():
             return
         
         source = self._is_location_joint_values(location = source, name = "source")
-        
         target = self._is_location_joint_values(location = target, name = "target") 
-
-            # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
 
         if source_type.lower() == "stack":
             source_loc = self.get_location_joint_values(source)
@@ -753,7 +750,6 @@ class PlateCrane():
         elif source_type.lower() == "module":
             self.pick_module_plate(source, height_offset = height_offset)
 
-        # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
         if target_type.lower() == "stack":
             target_loc = self.get_location_joint_values(source)
@@ -765,8 +761,6 @@ class PlateCrane():
         elif target_type.lower() == "module":
             self.place_module_plate(target, height_jog_steps = target_height_jog_steps, height_offset = height_offset)
         
-        #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
-
     def module_transfer(self, source:str, target:str, height_offset:int = 0) -> None:
         """
         Transfer a plate in between two modules using source and target locations
