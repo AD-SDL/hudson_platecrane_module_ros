@@ -292,8 +292,6 @@ class PlatecraneClient(Node):
             self.state = "ERROR"
             return response
 
-
-
 def main(args = None):
 
     rclpy.init(args=args)  # initialize Ros2 communication
