@@ -767,23 +767,99 @@ class PlateCrane():
         self.plate_lid_steps = self.plate_resources[plate_type]["plate_lid_steps"]
         self.plate_pick_steps = self.plate_resources[plate_type]["plate_pick_steps"]
 
-    def get_stack_resource(self, ):
+    def check_stack_resource(self, source, target, plate_type) -> bool:
         """
-        Gets the new plate height values for the given plate_type 
+        checks resource json file to make sure that the desired transfer can be completed
         :param plate_type: Plate type.
         :type source: str
-        :return: None
+        :return: bool
         """ 
-        pass
+        # import and update current stack resources
+        self.stack_resources = json.load(open("stack_resources.json"))
+        # check if source is a valid key in the dictionary
+        if source in self.stack_resources:
+            # verify plate type is the same one in the source stack
+            if plate_type == self.stack_resources[source]["labware"]:
+                #check if resource is depleted
+                if self.stack_resources[source]["depleted"] == True:
+                    print('ERROR: ' + str(source) + ' is depleted, please refill')
+                    return False
+            else:
+                print('ERROR: placing labware ' + str(plate_type) + ' into stack meant for ' + str(self.stack_resources[source]["labware"]))
+                return False
 
-    def update_stack_resource(self):
+        else:
+            print('ERROR: ' + str(source) + ' not a valid location in stack_resources')
+            return False
+        
+        # check if target is a valid key in the dictionary
+        if target in self.stack_resources:
+            # verify plate type is the same as ones in target stack
+            if plate_type == self.stack_resources[target]["labware"]:
+                # determine if stack/nest is full
+                if "Lidnest" in str(target):
+                    if self.stack_resources[target]["count"] >= 1:
+                        print("ERROR: Lid nest " + str(target) + " is already occupied")
+                        return False
+                elif "Stack" in str(target):
+                    # is labware a 96 well plate?
+                    if str(plate_type) == "nest_96_wellplate_200ul_flat":
+                        if self.stack_resources[target]["count"] >= 22:#TODO: check
+                            print("ERROR: position " + str(target) + " is full")
+                            return False
+                    # is labware a deepwell plate?
+                    elif str(plate_type) == "nest_96_wellplate_2ml_deep":
+                        if self.stack_resources[target]["count"] >= 10:#TODO: check
+                            print("ERROR: position " + str(target) + " is full")
+                            return False
+                    # is labware a tip box?
+                    elif "tip_rack" in str(plate_type):
+                        if self.stack_resources[target]["count"] >= 8:#TODO: check
+                            print("ERROR: position " + str(target) + " is full")
+                            return False
+                    # is labware a pcr plate?
+                    elif str(plate_type) == "nest_96_wellplate_100ul_pcr_full_skirt":
+                        if self.stack_resources[target]["count"] >= 22:#TODO: check
+                            print("ERROR: position " + str(target) + " is full")
+                            return False
+                    else:
+                        pass
+                        #TODO add more types of labware as they come
+            else:
+                print('ERROR: placing labware ' + str(plate_type) + ' into stack meant for ' + str(self.stack_resources[source]["labware"]))
+                return False
+        else:
+            print('ERROR: ' + str(target) + ' not a valid location in stack_resources')
+            return False
+        return True
+
+    def update_stack_resource(self, source, target, plate_type):
         """
-        Gets the new plate height values for the given plate_type 
+        updates resource json file after transfer is completed
         :param plate_type: Plate type.
         :type source: str
         :return: None
         """ 
-        pass
+        #TODO: better error logging
+
+        # import and update current stack resources
+        self.stack_resources = json.load(open("stack_resources.json"))
+
+        if source in self.stack_resources:
+            self.stack_resources[source]["count"] -= 1
+                        # if one left change to depleted
+            if self.stack_resources[source]["count"] == 0:
+                self.stack_resources[source]["depleted"] = True
+                #TODO: maybe communicate somehow that stack is depleted?
+
+        if target in self.stack_resources:
+            self.stack_resources[target]["count"] += 1
+            if self.stack_resources[source]["depleted"] == True:
+                self.stack_resources[source]["depleted"] = False
+        
+        # import and update current stack resources
+        with open('stack_resources.json', 'w') as f:
+            json.dump(self.stack_resources, f)
 
     def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None) -> None:
         """
@@ -799,19 +875,23 @@ class PlateCrane():
 
         # if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
         #     raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
-        self.get_stack_resource()
+        # self.get_stack_resource()
 
         if plate_type:
             self.get_new_plate_height(plate_type)
 
         if source_type == "stack" or target_type == "stack":
-            self.stack_transfer(source, target, source_type, target_type, height_offset)
+            if self.check_stack_resource(source, target, plate_type) == True:
+                self.stack_transfer(source, target, source_type, target_type, height_offset)
+                self.update_stack_resource(source, target, plate_type)
+            else:
+                pass #TODO: pass error here
         elif source_type == "module" and target_type == "module":
             self.module_transfer(source, target, height_offset)
 
         self.move_joints_neutral()
         self.move_location("Safe")
-        self.update_stack_resource() #
+        # self.update_stack_resource() #
 
 if __name__ == "__main__":
     """

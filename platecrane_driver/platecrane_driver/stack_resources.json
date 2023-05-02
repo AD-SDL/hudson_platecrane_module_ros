@@ -1,47 +1,50 @@
 {
-    "stack1": {
+    "Stack1": {
       "labware": "nest_96_wellplate_2ml_deep",
       "count": 3,
       "depleted": false,
       "has_lid": true
     },
-    "stack2": {
+    "Stack2": {
       "labware": "nest_96_wellplate_2ml_deep",
       "count": 3,
       "depleted": false,
       "has_lid": true
     },
-    "stack3": {
+    "Stack3": {
       "labware": "nest_96_wellplate_2ml_deep",
       "count": 3,
       "depleted": false,
       "has_lid": true
     },
-    "stack4": {
-      "labware": "opentrons_96_tiprack_20ul",
+    "Stack4": {
+      "labware": "tip_rack_50",
       "count": 3,
       "depleted": false,
       "has_lid": true
     },
-    "stack5": {
+    "Stack5": {
       "labware": "nest_96_wellplate_2ml_deep",
       "count": 3,
       "depleted": false,
       "has_lid": true
     },
-    "lidnest1": {
+    "Lidnest1": {
       "labware": "nest_96_wellplate_2ml_deep",
-      "occupied": false,
-      "is_lid": true
+      "count": 1,
+      "depleted": false,
+      "has_lid": true
     },
-    "lidnest2": {
+    "Lidnest2": {
       "labware": "nest_96_wellplate_2ml_deep",
-      "occupied": false,
-      "is_lid": true
+      "count": 0,
+      "depleted": true,
+      "has_lid": true
     },
-    "lidnest3": {
+    "Lidnest3": {
       "labware": "nest_96_wellplate_2ml_deep",
-      "occupied": false,
-      "is_lid": true
+      "count": 0,
+      "depleted": true,
+      "has_lid": true
     }
   }
