@@ -619,6 +619,8 @@ class PlateCrane():
 
         self.move_joints_neutral()
         self.move_single_axis("R",source)
+        # self.move_single_axis("Y",source)
+
         if "stack" in source.lower():
             self.gripper_close()
             self.move_location(source)
@@ -683,7 +685,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        self.target_offset = self.plate_pick_steps - self.plate_above_height 
+        target_offset = self.plate_pick_steps - self.plate_above_height 
         self.plate_pick_steps = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
         self.plate_above_height = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
 
@@ -694,7 +696,7 @@ class PlateCrane():
         remove_lid_target = "Temp_Lid_Target_Loc"
 
         self.set_location(remove_lid_source, source_loc[0], source_loc[1] - self.plate_lid_steps, source_loc[2], source_loc[3])
-        self.set_location(remove_lid_target, target_loc[0], target_loc[1] - self.target_offset, target_loc[2], target_loc[3])
+        self.set_location(remove_lid_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
 
         self.transfer(source=remove_lid_source, target=remove_lid_target, source_type="stack",target_type="stack")
 
@@ -703,7 +705,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
         
-        self.target_offset = self.plate_pick_steps - self.plate_above_height 
+        target_offset = self.plate_pick_steps - self.plate_above_height 
         self.plate_pick_steps = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
         self.plate_above_height = 0 #Setting this zero to ignore an extra Z movement later in the stack stransfer process
 
@@ -713,7 +715,7 @@ class PlateCrane():
         remove_lid_source = "Temp_Lid_Source_Loc"
         remove_lid_target = "Temp_Lid_Target_Loc"
 
-        self.set_location(remove_lid_source, source_loc[0], source_loc[1] - self.target_offset, source_loc[2], source_loc[3])
+        self.set_location(remove_lid_source, source_loc[0], source_loc[1] - target_offset, source_loc[2], source_loc[3])
         self.set_location(remove_lid_target, target_loc[0], target_loc[1] - self.plate_lid_steps, target_loc[2], target_loc[3])
 
         self.transfer(source=remove_lid_source, target=remove_lid_target, source_type="stack",target_type="stack")
@@ -730,30 +732,36 @@ class PlateCrane():
         :return: None
         """    
 
-        if not source:
+        if not source or not target:
             print("Please provide a source location")
             # TODO: Raise an exception here
             return
         
         source = self._is_location_joint_values(location = source, name = "source")
         
-        if target:
-            target = self._is_location_joint_values(location = target, name = "target") 
+        target = self._is_location_joint_values(location = target, name = "target") 
 
             # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
 
-        elif not target:
-            target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
-        
         if source_type.lower() == "stack":
-            self.pick_stack_plate(source, height_offset = height_offset)
+            source_loc = self.get_location_joint_values(source)
+            source_offset = self.plate_pick_steps - self.plate_above_height + height_offset
+            stack_source = "stack_source_loc"
+            self.set_location(stack_source, source_loc[0], source_loc[1] - source_offset, source_loc[2], source_loc[3])
+            self.pick_stack_plate(stack_source, height_offset = height_offset)
+
         elif source_type.lower() == "module":
             self.pick_module_plate(source, height_offset = height_offset)
 
         # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
         if target_type.lower() == "stack":
+            target_loc = self.get_location_joint_values(source)
+            target_offset = 
+            stack_target = "stack_target_loc"
+            self.set_location(stack_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
             self.place_stack_plate(target, height_offset = height_offset)
+
         elif target_type.lower() == "module":
             self.place_module_plate(target, height_jog_steps = target_height_jog_steps, height_offset = height_offset)
         
