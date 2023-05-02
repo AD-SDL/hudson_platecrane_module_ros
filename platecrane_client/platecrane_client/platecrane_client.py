@@ -237,25 +237,8 @@ class PlatecraneClient(Node):
             height_offset = vars.get('height_offset', 0)
             self.get_logger().info("Height Offset: " + str(height_offset))
 
-
             try:
                 self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset), plate_type = plate_type)
-            except Exception as err:
-                response.action_response = -1
-                response.action_msg= "Transfer failed. Error:" + str(err)
-                self.get_logger().error(str(err))
-                self.state = "ERROR"
-            else:    
-                response.action_response = 0
-                response.action_msg= "Transfer successfully completed"
-                self.state = "COMPLETED"
-            finally:
-                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
-                return response
-        elif request.action_handle == "remove_lid":
-
-            try:
-                self.platecrane.remove_lid(source = source, target = target, plate_type = plate_type)
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Transfer failed. Error:" + str(err)
@@ -269,17 +252,34 @@ class PlatecraneClient(Node):
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
             
-        elif request.action_handle == "replace_lid":
+        elif request.action_handle == "remove_lid":
+
             try:
-                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset), plate_type = plate_type)
+                self.platecrane.remove_lid(source = source, target = target, plate_type = plate_type)
             except Exception as err:
                 response.action_response = -1
-                response.action_msg= "Transfer failed. Error:" + str(err)
+                response.action_msg= "Remove lid failed. Error:" + str(err)
                 self.get_logger().error(str(err))
                 self.state = "ERROR"
             else:    
                 response.action_response = 0
-                response.action_msg= "Transfer successfully completed"
+                response.action_msg= "Remove lid successfully completed"
+                self.state = "COMPLETED"
+            finally:
+                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
+                return response
+            
+        elif request.action_handle == "replace_lid":
+            try:
+                self.platecrane.replace_lid(source = source, target = target, plate_type = plate_type)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Replace lid failed. Error:" + str(err)
+                self.get_logger().error(str(err))
+                self.state = "ERROR"
+            else:    
+                response.action_response = 0
+                response.action_msg= "Replace lid  successfully completed"
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
