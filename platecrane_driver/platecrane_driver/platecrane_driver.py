@@ -678,7 +678,7 @@ class PlateCrane():
 
         return location_name
     
-    def remove_lid(self,source:str = None, target:str = "Stack2", plate_type:str = None, height_offset:int = 0) -> None:
+    def remove_lid(self, source:str = None, target:str = "Stack2", plate_type:str = None, height_offset:int = 0) -> None:
 
         if plate_type:
             self.get_new_plate_height(plate_type)
