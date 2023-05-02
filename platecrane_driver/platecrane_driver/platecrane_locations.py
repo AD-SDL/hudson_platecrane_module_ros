@@ -1,4 +1,4 @@
-plate_crane_locations = {
+platecrane_locations = {
     "Safe": "117902 2349 -5882 0",
     "Stack1": "166756 -32015 -5882 5460",
     "Stack2": "149127 -31887 -5882 5460",
