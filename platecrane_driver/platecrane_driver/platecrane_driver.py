@@ -682,7 +682,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps + 700
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps 
         target_loc = self.get_location_joint_values(target)
         remove_lid_target = "Temp_Lid_Target_Loc"
 
@@ -695,7 +695,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps + 700
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps 
         source_loc = self.get_location_joint_values(source)
         remove_lid_source = "Temp_Lid_Source_loc"
 
@@ -847,15 +847,16 @@ if __name__ == "__main__":
     # print(s.stack_resources)
     # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
+    s.transfer(solo4, solo4, source_type = "stack", target_type = "module", plate_type="96_well")
+
+    # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
     # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
-    s.remove_lid(source = exchange, target="LidNest2", plate_type="96_well")
-    s.replace_lid(target = exchange, source = "LidNest2", plate_type = "96_well")
+    # s.remove_lid(source = exchange, target="LidNest2", plate_type="96_well")
+    # s.replace_lid(target = exchange, source = "LidNest2", plate_type = "96_well")
     # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
     # s.get_location_joint_values("HidexNest2")
     # s.get_location_list()
-    # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
     # s.get_location_joint_values(target_loc)
     # s.module_transfer(target_loc, source_loc)
