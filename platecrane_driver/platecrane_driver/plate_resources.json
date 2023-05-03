@@ -30,7 +30,7 @@
         "grab_lid_tower": 0,
         "grab_lid_nest": 0,
         "plate_above_height":5000, 
-        "plate_pick_steps_module": 5200,
+        "plate_pick_steps_module": 2300,
         "plate_pick_steps_stack": 7100,
         "plate_lid_steps": 6200
     },
@@ -42,9 +42,9 @@
         "grab_lid_tower": 0,
         "grab_lid_nest": 0,
         "plate_above_height":5000, 
-        "plate_pick_steps_module": 5400,
-        "plate_pick_steps_stack": 7600,
-        "plate_lid_steps": 5200
+        "plate_pick_steps_module": 3000,
+        "plate_pick_steps_stack": 7900,
+        "plate_lid_steps": 0
     }
     
 }
