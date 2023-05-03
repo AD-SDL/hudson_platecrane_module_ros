@@ -682,7 +682,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack 
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + 700
         target_loc = self.get_location_joint_values(target)
         remove_lid_target = "Temp_Lid_Target_Loc"
 
@@ -695,7 +695,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack 
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + 700
         source_loc = self.get_location_joint_values(source)
         remove_lid_source = "Temp_Lid_Source_loc"
 
@@ -844,13 +844,16 @@ if __name__ == "__main__":
     exchange = "LidNest3"
     sealer = "SealerNest"
 
-    # print(s.plate_resources["pcr_plate"])
-    # print(s.stack_resources)
-    # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    # s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type="96_well")
-    # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
-    s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type="96_well")
+
+    s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
+    s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
+
+    # s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
+    # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
+    # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
+    # s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
+    # s.transfer(solo4,"Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
 
     # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
     # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
@@ -859,29 +862,7 @@ if __name__ == "__main__":
     # s.lock_joints()
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
     # s.get_location_joint_values("HidexNest2")
-    # s.get_location_list()
-
-    # s.get_location_joint_values(target_loc)
-    # s.module_transfer(target_loc, source_loc)
-    # s.move_joints_neutral()
-    # s.pick_module_plate("SealerNest")
-    # s.get_status()
-    # s.get_position()
-    # s.home()
-    # s.wait_robot_movement()
-    # s.get_status()
-    # s.get_position()
-    # s.get_location_joint_values("Safe")
-    # s.set_location()
-    # s.get_location_list()
-    # s.delete_location("TEMP_0")
-    # s.get_location_list()
-
-    # s.jog("Z", 60000)
-    # s.__serial_port.send_command("Move 166756, -32015, -5882, 5460\r\n")
-    # s.__serial_port.send_command("move_abs Z")
-    # s.__serial_port.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
-    # s.__serial_port.send_command("MOVE Y 5000\r\n")  
+   
 
 #    Crash error outputs 21(R axis),14(z axis), 02 Wrong location name. 1400 (Z axis hits the plate), 00 success TODO: Need a response handler function. Unkown error messages T1, ATS, TU these are about connection issues (multiple access?)
 # TODO: Slow the arm before hitting the plate in pick_stack_plate
