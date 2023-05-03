@@ -40,9 +40,10 @@ class PlateCrane():
         self.gripper_length = 0
         self.plate_above_height = 700
         self.plate_pick_steps_stack = 1600
-        plate_pick_steps_module = 1400
+        self.plate_pick_steps_module = 1400
         self.plate_lid_steps = 800
-        
+        self.lid_height = 1400
+
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
         self.exchange_location = "LidNest2"
@@ -682,7 +683,7 @@ class PlateCrane():
         if plate_type:
             self.get_new_plate_height(plate_type)
 
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + 700
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + self.lid_height #Finding the correct target hight when only transferring the plate lid 
         target_loc = self.get_location_joint_values(target)
         remove_lid_target = "Temp_Lid_Target_Loc"
 
@@ -694,8 +695,7 @@ class PlateCrane():
 
         if plate_type:
             self.get_new_plate_height(plate_type)
-
-        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + 700
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + self.lid_height  #Finding the correct target hight when only transferring the plate lid 
         source_loc = self.get_location_joint_values(source)
         remove_lid_source = "Temp_Lid_Source_loc"
 
@@ -784,6 +784,7 @@ class PlateCrane():
         self.plate_lid_steps = self.plate_resources[plate_type]["plate_lid_steps"]
         self.plate_pick_steps_stack = self.plate_resources[plate_type]["plate_pick_steps_stack"]
         self.plate_pick_steps_module = self.plate_resources[plate_type]["plate_pick_steps_module"]
+        self.lid_height = self.plate_resources[plate_type]["lid_height"]
 
     def get_stack_resource(self, ):
         """
@@ -847,15 +848,15 @@ if __name__ == "__main__":
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
 
     s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
-    s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
+    # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
 
-    # s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
-    # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
-    # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
-    # s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
-    # s.transfer(solo4,"Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
+    s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
+    s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
+    s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
+    s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
+    s.transfer(solo4, "Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
+    s.transfer(solo6, "Stack2", source_type = "module", target_type = "stack", plate_type = "tip_box_lid_on")
 
-    # s.transfer("Stack2", exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
     # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
     # s.remove_lid(source = exchange, target="LidNest2", plate_type="96_well")
     # s.replace_lid(target = exchange, source = "LidNest2", plate_type = "96_well")
