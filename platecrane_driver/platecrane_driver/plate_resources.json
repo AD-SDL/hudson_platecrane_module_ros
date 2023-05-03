@@ -1,46 +1,22 @@
 {
     "96_well":{
-        "height": 16.2562,
-        "grab_exchange": -30, 
-        "grab_lid_exchange": -21, 
-        "grab_tower": -18, 
-        "grab_lid_tower": -13,
-        "grab_lid_nest": -12,
         "plate_above_height": 800,
         "plate_pick_steps_module": 1600,
         "plate_pick_steps_stack": 2400,
         "plate_lid_steps": 1400
     },
     "pcr_plate":{
-        "height": 15.2762,
-        "grab_exchange": -28, 
-        "grab_lid_exchange": 0, 
-        "grab_tower": -17, 
-        "grab_lid_tower": 0,
-        "grab_lid_nest": 0,
         "plate_above_height":5000, 
         "plate_pick_steps": 5700,
         "plate_lid_steps": 100
     },
     "tip_box_lid_on":{
-        "height": 15.2762,
-        "grab_exchange": -28, 
-        "grab_lid_exchange": 0, 
-        "grab_tower": -17, 
-        "grab_lid_tower": 0,
-        "grab_lid_nest": 0,
         "plate_above_height":5000, 
         "plate_pick_steps_module": 2300,
         "plate_pick_steps_stack": 7100,
         "plate_lid_steps": 6200
     },
     "tip_box_lid_off":{
-        "height": 15.2762,
-        "grab_exchange": -28, 
-        "grab_lid_exchange": 0, 
-        "grab_tower": -17, 
-        "grab_lid_tower": 0,
-        "grab_lid_nest": 0,
         "plate_above_height":5000, 
         "plate_pick_steps_module": 3000,
         "plate_pick_steps_stack": 7900,
