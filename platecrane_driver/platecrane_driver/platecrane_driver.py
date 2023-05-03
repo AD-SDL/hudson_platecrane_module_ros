@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from serial_port import SerialPort
+from platecrane_driver.serial_port import SerialPort
 
 import json
 
@@ -847,23 +847,15 @@ if __name__ == "__main__":
 
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
 
-    s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
+    # s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
     # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
+    # s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
+    # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
+    # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
+    # s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
+    # s.transfer(solo4, "Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
+    # s.transfer(solo6, "Stack2", source_type = "module", target_type = "stack", plate_type = "tip_box_lid_on")
 
-    s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
-    s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
-    s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
-    s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
-    s.transfer(solo4, "Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
-    s.transfer(solo6, "Stack2", source_type = "module", target_type = "stack", plate_type = "tip_box_lid_on")
-
-    # s.transfer(exchange, exchange, source_type = "stack", target_type = "stack", plate_type="96_well")
-    # s.remove_lid(source = exchange, target="LidNest2", plate_type="96_well")
-    # s.replace_lid(target = exchange, source = "LidNest2", plate_type = "96_well")
-    # s.lock_joints()
-    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2329.5) 
-    # s.get_location_joint_values("HidexNest2")
-   
 
 #    Crash error outputs 21(R axis),14(z axis), 02 Wrong location name. 1400 (Z axis hits the plate), 00 success TODO: Need a response handler function. Unkown error messages T1, ATS, TU these are about connection issues (multiple access?)
 # TODO: Slow the arm before hitting the plate in pick_stack_plate
