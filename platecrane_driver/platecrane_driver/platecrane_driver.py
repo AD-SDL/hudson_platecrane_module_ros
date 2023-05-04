@@ -614,7 +614,6 @@ class PlateCrane():
         :raises [PlateCraneLocationException]: [Error for None type locations]
         :return: None
         """
-        #TODO: Create error exceptions for below case
         if not source:
             raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
@@ -646,7 +645,6 @@ class PlateCrane():
         self.move_joints_neutral()
         self.move_single_axis("R",target)
         self.move_location(target)
-        # self.jog("Z", height_offset)
         self.gripper_open()
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -703,7 +701,7 @@ class PlateCrane():
 
     def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = "96_well", height_offset:int = 0) -> None:
         """
-        Replace the lid back on to the plate
+        Replace the lid back to the plate
 
         :param source: Source location, provided as either a location name or 4 joint values.
         :type source: str
@@ -826,7 +824,7 @@ class PlateCrane():
         """ 
         pass
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = "96_well") -> None:
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "stack", height_offset:int = 0,  plate_type:str = "96_well") -> None:
         """
         Handles the transfer request 
 
@@ -840,8 +838,6 @@ class PlateCrane():
         :return: None
         """ 
 
-        # if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
-        #     raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
         self.get_stack_resource()
 
         if plate_type:
