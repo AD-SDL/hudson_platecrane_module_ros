@@ -703,7 +703,7 @@ class PlateCrane():
 
     def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = "96_well", height_offset:int = 0) -> None:
         """
-        Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
+        Replace the lid back on to the plate
 
         :param source: Source location, provided as either a location name or 4 joint values.
         :type source: str
