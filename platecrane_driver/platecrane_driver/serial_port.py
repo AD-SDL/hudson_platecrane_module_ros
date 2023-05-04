@@ -70,6 +70,11 @@ class SerialPort():
         print(initial_command_msg) 
         print(response_msg)
 
+        error_codes = {"21":"R axis error", "14":"z axis error", "02": "Invalid location", "1400": "Z axis crash", "T1": "Serial connection issue", "ATS": "Serial connection issue", "TU": "Serial connection issue"} #TODO: Import the full list from error_codes.py
+
+        if response_msg in error_codes.keys():
+            self.find_error(response_msg)
+
         return response_msg
     
     def receive_command(self, time_wait):                         
@@ -92,3 +97,7 @@ class SerialPort():
                 response_string = ""
         return response_string, initial_command_msg
     
+    def response_handler(self, response):
+        pass
+    def find_error(self, error_output):
+        pass
