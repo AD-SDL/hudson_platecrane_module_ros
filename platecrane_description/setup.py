@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
-package_name = 'sciclops_description'
+package_name = 'platecrane_description'
 
 setup(
     name=package_name,
@@ -27,7 +27,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sciclops_description_client = sciclops_description.sciclops_description_client:main'
+            'platecrane_description_client = platecrane_description.platecrane_description_client:main'
         ],
     },
 )
