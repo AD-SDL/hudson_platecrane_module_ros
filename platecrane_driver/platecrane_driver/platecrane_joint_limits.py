@@ -1,4 +1,4 @@
-plate_crane_joint_limits = {
+platecrane_joint_limits = {
     "R": [-1200,10200],
     "Z": [-13600,300],
     "P": [-1500,30500],

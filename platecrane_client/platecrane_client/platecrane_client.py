@@ -119,7 +119,7 @@ class PlatecraneClient(Node):
         msg = String()
 
         try:
-            self.robot_status = self.platecrane.robot_status
+            self.robot_status = self.platecrane.robot_status.strip()
             self.robot_error_status = self.platecrane.robot_error
             self.robot_movement_state = self.platecrane.movement_state
 
@@ -218,48 +218,79 @@ class PlatecraneClient(Node):
         self.get_logger().info("Source location: " + str(source))
         target = vars.get('target')
         self.get_logger().info("Target location: "+ str(target))
-        
+        plate_type = vars.get('plate_type', "96_well")
+        self.get_logger().info("Plate type: "+ str(target))
 
         if request.action_handle == 'transfer':
             self.get_logger().info("Starting the transfer request")
 
-            source_type = ""
-            target_type = "False"
-
-            source_type = vars.get('source_type')
+            source_type = vars.get('source_type', None)
             self.get_logger().info("Source Type: " + str(source_type))
 
-            target_type = vars.get('target_type')
+            target_type = vars.get('target_type', None)
             self.get_logger().info("Target Type: " + str(target_type))
+
+            if not source_type or not target_type:
+                self.get_logger().error("Please provide source and target transfer types!")
+                self.state = "ERROR"
                 
             height_offset = vars.get('height_offset', 0)
             self.get_logger().info("Height Offset: " + str(height_offset))
 
-
             try:
-                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset))
+                self.platecrane.transfer(source, target, source_type = source_type.lower(), target_type = target_type.lower(), height_offset = int(height_offset), plate_type = plate_type)
             except Exception as err:
                 response.action_response = -1
-                response.action_msg= "Stack transfer failed. Error:" + str(err)
+                response.action_msg= "Transfer failed. Error:" + str(err)
                 self.get_logger().error(str(err))
                 self.state = "ERROR"
             else:    
                 response.action_response = 0
-                response.action_msg= "Stack transfer successfully completed"
+                response.action_msg= "Transfer successfully completed"
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
-        
+            
+        elif request.action_handle == "remove_lid":
+
+            try:
+                self.platecrane.remove_lid(source = source, target = target, plate_type = plate_type)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Remove lid failed. Error:" + str(err)
+                self.get_logger().error(str(err))
+                self.state = "ERROR"
+            else:    
+                response.action_response = 0
+                response.action_msg= "Remove lid successfully completed"
+                self.state = "COMPLETED"
+            finally:
+                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
+                return response
+            
+        elif request.action_handle == "replace_lid":
+            try:
+                self.platecrane.replace_lid(source = source, target = target, plate_type = plate_type)
+            except Exception as err:
+                response.action_response = -1
+                response.action_msg= "Replace lid failed. Error:" + str(err)
+                self.get_logger().error(str(err))
+                self.state = "ERROR"
+            else:    
+                response.action_response = 0
+                response.action_msg= "Replace lid  successfully completed"
+                self.state = "COMPLETED"
+            finally:
+                self.get_logger().info('Finished Action: ' + request.action_handle.upper())
+                return response
         else: 
-            msg = "UNKOWN ACTION REQUEST! Available actions: stack_transfer, module_transfer"
+            msg = "UNKOWN ACTION REQUEST! Available actions:transfer, remove_lid, replace_lid"
             response.action_response = -1
             response.action_msg= msg
             self.get_logger().error('Error: ' + msg)
             self.state = "ERROR"
             return response
-
-
 
 def main(args = None):
 
@@ -276,7 +307,7 @@ def main(args = None):
         except KeyboardInterrupt:
             platecrane_client.get_logger().info('Keyboard interrupt, shutting down.\n')
         finally:
-            platecrane_client.platecrane.disconnect_robot()
+            # platecrane_client.platecrane.__serial_port.__disconnect_robot()
             platecrane_client.get_logger().warn("Robot connection is closed")
             executor.shutdown()
             platecrane_client.destroy_node()

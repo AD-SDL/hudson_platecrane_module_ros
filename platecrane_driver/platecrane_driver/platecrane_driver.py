@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from serial_port import SerialPort
+from platecrane_driver.serial_port import SerialPort
 
 import json
 
@@ -39,20 +39,21 @@ class PlateCrane():
         self.error = ""
         self.gripper_length = 0
         self.plate_above_height = 700
-        self.plate_pick_steps = 1400
+        self.plate_pick_steps_stack = 1600
+        self.plate_pick_steps_module = 1400
         self.plate_lid_steps = 800
-        
+        self.lid_height = 1400
+
         self.stack_exchange_Z_height = -31887
         self.stack_exchange_Y_axis_steps = 200 #TODO: Find the correct number of steps to move Y axis from the stack to the exchange location
-        self.plate_detect_z_jog_steps = 500
         self.exchange_location = "LidNest2"
 
         self.robot_status = ""
         self.movement_state = "READY"
         self.platecrane_current_position = None
 
-        self.plate_resources = json.load(open("plate_resources.json"))
-        self.stack_resources = json.load(open("stack_resources.json"))
+        self.plate_resources = json.load(open("/home/rpl/wei_ws/src/platecrane_module/platecrane_driver/platecrane_driver/plate_resources.json"))
+        self.stack_resources = json.load(open("/home/rpl/wei_ws/src/platecrane_module/platecrane_driver/platecrane_driver/stack_resources.json"))
 
         self.initialize()
 
@@ -510,10 +511,10 @@ class PlateCrane():
 
         self.move_single_axis("Y", source)
         # self.move_single_axis("Z", source)
-        self.jog("Z", - (self.plate_pick_steps - height_offset))
+        self.jog("Z", - (self.plate_pick_steps_module - height_offset))
         # self.jog("Z", - self.)
         self.gripper_close()
-        self.jog("Z", self.plate_pick_steps)
+        self.jog("Z", self.plate_pick_steps_module)
 
 
     def put_module_plate(self, target:str = None, height_jog_steps:int = 0, height_offset:int = 0) -> None:
@@ -537,10 +538,10 @@ class PlateCrane():
 
         self.move_single_axis("Y", target)
         # self.move_single_axis("Z", target)
-        self.jog("Z", - (self.plate_pick_steps - height_offset))
-        # self.jog("Z", - self.plate_pick_steps)
+        self.jog("Z", - (self.plate_pick_steps_module - height_offset))
+        # self.jog("Z", - self.plate_pick_steps_module)
         self.gripper_open()
-        self.jog("Z", self.plate_pick_steps)
+        self.jog("Z", self.plate_pick_steps_module)
 
     def move_module_entry(self, source:str = None, height_jog_steps:int = 0) -> None:
         """Moves to the entry location of the location that is given. It moves the R,P and Z joints step by step to aviod collisions. 
@@ -613,22 +614,22 @@ class PlateCrane():
         :raises [PlateCraneLocationException]: [Error for None type locations]
         :return: None
         """
-        #TODO: Create error exceptions for below case
         if not source:
             raise Exception("PlateCraneLocationException: NoneType variable is not compatible as a location") 
 
         self.move_joints_neutral()
         self.move_single_axis("R",source)
+
         if "stack" in source.lower():
             self.gripper_close()
             self.move_location(source)
-            self.jog("Z", self.plate_detect_z_jog_steps)
+            self.jog("Z", self.plate_above_height)
             self.gripper_open()
-            self.jog("Z", - self.plate_above_height + height_offset - self.plate_detect_z_jog_steps)
+            self.jog("Z", - self.plate_pick_steps_stack + height_offset)
         else:
             self.gripper_open()
             self.move_location(source)
-            self.jog("Z", -self.plate_above_height + height_offset)
+            # self.jog("Z", -self.plate_pick_steps_stack + height_offset)
         self.gripper_close() 
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -640,13 +641,10 @@ class PlateCrane():
         :type target: str
         :return: None
         """
-        if not target:
-            target = self.exchange_location
 
         self.move_joints_neutral()
         self.move_single_axis("R",target)
         self.move_location(target)
-        self.jog("Z", - self.plate_above_height + height_offset)
         self.gripper_open()
         self.move_tower_neutral()
         self.move_arm_neutral()
@@ -678,20 +676,53 @@ class PlateCrane():
 
         return location_name
     
-    def remove_lid(self,source:str = None, target:str = "Stack2", plate_type:str = None) -> None:
+    def remove_lid(self, source:str = None, target:str = "Stack2", plate_type:str = "96_well", height_offset:int = 0) -> None:
+        """
+        Remove the plate lid
 
-        if plate_type:
-            self.get_new_plate_height(plate_type)
-        self.plate_pick_steps = self.plate_lid_steps
-        self.transfer(source=source, target=target, source_type="module",target_type="stack")
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
+        :param plate_type: Type of the plate
+        :type plate_type: str
+        :raises [ErrorType]: [ErrorDescription]
+        :return: None
+        """    
+        self.get_new_plate_height(plate_type)
 
-    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None) -> None:
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + self.lid_height #Finding the correct target hight when only transferring the plate lid 
+        target_loc = self.get_location_joint_values(target)
+        remove_lid_target = "Temp_Lid_Target_Loc"
 
-        if plate_type:
-            self.get_new_plate_height(plate_type)
-        self.plate_pick_steps = self.plate_lid_steps
-        self.transfer(source=source, target=target, source_type="stack",target_type="module")
+        self.set_location(remove_lid_target, target_loc[0], target_loc[1] - target_offset, target_loc[2], target_loc[3])
+        self.plate_pick_steps_stack = self.plate_lid_steps
+        self.transfer(source=source, target=remove_lid_target, source_type="stack",target_type="stack")
 
+    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = "96_well", height_offset:int = 0) -> None:
+        """
+        Replace the lid back to the plate
+
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
+        :param plate_type: Type of the plate
+        :type plate_type: str
+        :raises [ErrorType]: [ErrorDescription]
+        :return: None
+        """    
+
+        self.get_new_plate_height(plate_type)
+
+        target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + self.lid_height  #Finding the correct target hight when only transferring the plate lid 
+        source_loc = self.get_location_joint_values(source)
+        remove_lid_source = "Temp_Lid_Source_loc"
+
+        self.set_location(remove_lid_source, source_loc[0], source_loc[1] - target_offset, source_loc[2], source_loc[3])
+        self.plate_pick_steps_stack = self.plate_lid_steps
+
+        self.transfer(source = remove_lid_source, target = target, source_type = "stack", target_type = "stack")
 
     def stack_transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0) -> None:
         """
@@ -705,36 +736,40 @@ class PlateCrane():
         :return: None
         """    
 
-        if not source:
+        if not source or not target:
             print("Please provide a source location")
             # TODO: Raise an exception here
             return
         
         source = self._is_location_joint_values(location = source, name = "source")
-        
-        if target:
-            target = self._is_location_joint_values(location = target, name = "target") 
+        target = self._is_location_joint_values(location = target, name = "target") 
 
-            # If target was provided, stack transfer can be used to pick and place plate in between stacks or stack entry locations
-
-        elif not target:
-            target = self.exchange_location # Assumes getting a new plate from the plate stack and placing onto the exchange spot
-        
         if source_type.lower() == "stack":
-            self.pick_stack_plate(source, height_offset = height_offset)
+            source_loc = self.get_location_joint_values(source)
+            if "stack" in source.lower():
+                stack_source = "stack_source_loc"
+                source_offset =  self.plate_above_height + height_offset
+            else:
+                stack_source = "source_loc"
+                source_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + height_offset
+
+            self.set_location(stack_source, source_loc[0], source_loc[1] + source_offset, source_loc[2], source_loc[3])
+            self.pick_stack_plate(stack_source, height_offset = height_offset)
+
         elif source_type.lower() == "module":
             self.pick_module_plate(source, height_offset = height_offset)
 
-        # time.sleep(2)
         target_height_jog_steps = self.get_safe_height_jog_steps(target)
         if target_type.lower() == "stack":
-            self.place_stack_plate(target, height_offset = height_offset)
+            target_loc = self.get_location_joint_values(target)
+            target_offset =  2*self.plate_above_height - self.plate_pick_steps_stack + height_offset
+            stack_target = "target_loc"
+            self.set_location(stack_target, target_loc[0], target_loc[1] + target_offset, target_loc[2], target_loc[3])
+            self.place_stack_plate(stack_target, height_offset = height_offset)
+
         elif target_type.lower() == "module":
             self.place_module_plate(target, height_jog_steps = target_height_jog_steps, height_offset = height_offset)
         
-        #BUG: Output messages of multiple commands mix up with eachother. Fix the wait times in between the command executions"
-
-    
     def module_transfer(self, source:str, target:str, height_offset:int = 0) -> None:
         """
         Transfer a plate in between two modules using source and target locations
@@ -763,9 +798,13 @@ class PlateCrane():
         :type source: str
         :return: None
         """ 
+        if plate_type not in self.plate_resources.keys():
+            raise Exception("Unkown plate type")
         self.plate_above_height = self.plate_resources[plate_type]["plate_above_height"]
         self.plate_lid_steps = self.plate_resources[plate_type]["plate_lid_steps"]
-        self.plate_pick_steps = self.plate_resources[plate_type]["plate_pick_steps"]
+        self.plate_pick_steps_stack = self.plate_resources[plate_type]["plate_pick_steps_stack"]
+        self.plate_pick_steps_module = self.plate_resources[plate_type]["plate_pick_steps_module"]
+        self.lid_height = self.plate_resources[plate_type]["lid_height"]
 
     def get_stack_resource(self, ):
         """
@@ -785,7 +824,7 @@ class PlateCrane():
         """ 
         pass
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None) -> None:
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "stack", height_offset:int = 0,  plate_type:str = "96_well") -> None:
         """
         Handles the transfer request 
 
@@ -793,12 +832,12 @@ class PlateCrane():
         :type source: str
         :param target: Target location, provided as either a location name or 4 joint values.
         :type target: str
+        :param plate_type: Type of the plate
+        :type plate_type: str
         :raises [ErrorType]: [ErrorDescription]
         :return: None
         """ 
 
-        # if (not stack_transfer and not module_transfer) or (stack_transfer and module_transfer):
-        #     raise Exception("Transfer type needs to be specified! Use either stack transfer or module transfer.")
         self.get_stack_resource()
 
         if plate_type:
@@ -823,43 +862,22 @@ if __name__ == "__main__":
     solo4 = "Solo.Position4"
     solo3 = "Solo.Position3"
     target_loc = "HidexNest2"
-    exchange = "LidNest"
+    exchange = "LidNest3"
     sealer = "SealerNest"
 
-    # print(s.plate_resources["pcr_plate"])
-    # print(s.stack_resources)
-    # s.place_stack_plate("Liconic.Nest")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    s.transfer(solo4, solo3, source_type = "module", target_type = "module", plate_type="96_well")
-    # s.lock_joints()
-    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
-    # s.get_location_joint_values("HidexNest2")
-    # s.get_location_list()
-    # s.transfer(source_loc, target_loc, stack_transfer = False, module_transfer = True)
 
-    # s.get_location_joint_values(target_loc)
-    # s.module_transfer(target_loc, source_loc)
-    # s.move_joints_neutral()
-    # s.pick_module_plate("SealerNest")
-    # s.get_status()
-    # s.get_position()
-    # s.home()
-    # s.wait_robot_movement()
-    # s.get_status()
-    # s.get_position()
-    # s.get_location_joint_values("Safe")
-    # s.set_location()
-    # s.get_location_list()
-    # s.delete_location("TEMP_0")
-    # s.get_location_list()
+    # s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
+    # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
+    # s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
+    # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
+    # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
+    # s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
+    # s.transfer(solo4, "Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
+    # s.transfer(solo6, "Stack2", source_type = "module", target_type = "stack", plate_type = "tip_box_lid_on")
 
-    # s.jog("Z", 60000)
-    # s.__serial_port.send_command("Move 166756, -32015, -5882, 5460\r\n")
-    # s.__serial_port.send_command("move_abs Z")
-    # s.__serial_port.send_command("MOVE TEMP 117902 2349 -5882 0\r\n")  
-    # s.__serial_port.send_command("MOVE Y 5000\r\n")  
 
-#    Crash error outputs 21(R axis),14(z axis), 0002 Wrong location name. 1400 (Z axis hits the plate)
+#    Crash error outputs 21(R axis),14(z axis), 02 Wrong location name. 1400 (Z axis hits the plate), 00 success TODO: Need a response handler function. Unkown error messages T1, ATS, TU these are about connection issues (multiple access?)
 # TODO: Slow the arm before hitting the plate in pick_stack_plate
 # TODO: Create a plate detect function within pick stack plate function
 # TODO: Maybe write another pick stack funtion to remove the plate detect movement
