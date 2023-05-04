@@ -678,10 +678,20 @@ class PlateCrane():
 
         return location_name
     
-    def remove_lid(self, source:str = None, target:str = "Stack2", plate_type:str = None, height_offset:int = 0) -> None:
+    def remove_lid(self, source:str = None, target:str = "Stack2", plate_type:str = "96_well", height_offset:int = 0) -> None:
+        """
+        Remove the plate lid
 
-        if plate_type:
-            self.get_new_plate_height(plate_type)
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
+        :param plate_type: Type of the plate
+        :type plate_type: str
+        :raises [ErrorType]: [ErrorDescription]
+        :return: None
+        """    
+        self.get_new_plate_height(plate_type)
 
         target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + self.lid_height #Finding the correct target hight when only transferring the plate lid 
         target_loc = self.get_location_joint_values(target)
@@ -691,10 +701,22 @@ class PlateCrane():
         self.plate_pick_steps_stack = self.plate_lid_steps
         self.transfer(source=source, target=remove_lid_target, source_type="stack",target_type="stack")
 
-    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = None, height_offset:int = 0) -> None:
+    def replace_lid(self,source:str = "Stack2", target:str = None, plate_type:str = "96_well", height_offset:int = 0) -> None:
+        """
+        Transfer a plate plate from a plate stack to the exchange location or make a transfer in between stacks and stack entry locations
 
-        if plate_type:
-            self.get_new_plate_height(plate_type)
+        :param source: Source location, provided as either a location name or 4 joint values.
+        :type source: str
+        :param target: Target location, provided as either a location name or 4 joint values.
+        :type target: str
+        :param plate_type: Type of the plate
+        :type plate_type: str
+        :raises [ErrorType]: [ErrorDescription]
+        :return: None
+        """    
+
+        self.get_new_plate_height(plate_type)
+
         target_offset = 2*self.plate_above_height - self.plate_pick_steps_stack + self.lid_height  #Finding the correct target hight when only transferring the plate lid 
         source_loc = self.get_location_joint_values(source)
         remove_lid_source = "Temp_Lid_Source_loc"
@@ -804,7 +826,7 @@ class PlateCrane():
         """ 
         pass
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = None) -> None:
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "module", height_offset:int = 0,  plate_type:str = "96_well") -> None:
         """
         Handles the transfer request 
 
@@ -812,6 +834,8 @@ class PlateCrane():
         :type source: str
         :param target: Target location, provided as either a location name or 4 joint values.
         :type target: str
+        :param plate_type: Type of the plate
+        :type plate_type: str
         :raises [ErrorType]: [ErrorDescription]
         :return: None
         """ 
