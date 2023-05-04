@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot name="Plate_Exchange_Module" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+ <!-- Materials -->
+  <xacro:include filename="$(find sciclops_description)/urdf/materials.xacro" />
+  
+  <!-- Module Carts -->
+  <xacro:include filename="$(find sciclops_description)/urdf/module_cart_1.urdf.xacro" />
+  <xacro:Module_Cart_1 prefix="module_carts/"/>
+
+  <!-- Plate Exchange Deck -->
+  <xacro:include filename="$(find sciclops_description)/urdf/plate_exchange.xacro" />
+  <xacro:plate_exchange_deck prefix="exchange_deck/"/>
+  
+  <joint name="Exchange_Deck_Base" type="fixed">
+    <parent link="module_carts/cart_1"/>
+    <child link="exchange_deck/plate_exchange"/>
+    <axis xyz="0 0 0"/>
+    <origin xyz="-0.09 -0.4 1.05" rpy="0 0 1.6"/> 
+    <limit effort="1000.0" lower="0" upper="0" velocity="0.5"/>
+  </joint>
+  
+</robot>
