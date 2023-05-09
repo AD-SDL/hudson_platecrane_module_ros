@@ -1142,12 +1142,21 @@ if __name__ == "__main__":
     s = SCICLOPS()
     # s.get_error()
     # s.get_status()
-    # s.reset()
-    # s.home()
-    print("STATUS MSG: ", s.status)
+    # for i in range(1):
+    #     # s.jog("R", -1000)
+    #     # s.reset()
+    # #     sleep(5)
+    #     # s.home()
+    #     # s.send_command("")
+    # #     sleep(5)
+    #     s.get_plate("tower4")
+    # #     sleep(25)
+    # print("STATUS MSG: ", s.status)
     # s.check_closed()
     # print(s.CURRENT_POS)
-
+    s.reset()
+    # s.home()
+    # s.get_plate("tower1")
     # dummy_sciclops.check_plate()
 
 #Finished commands
