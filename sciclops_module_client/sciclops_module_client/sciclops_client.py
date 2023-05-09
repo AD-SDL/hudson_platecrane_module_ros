@@ -98,7 +98,6 @@ class ScilopsClient(Node):
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
                 asyncio.run(self.sciclops.check_complete())
-                # self.get_logger().info("Refresh state")
                 self.state_refresher_timer = 0 
             
             if self.past_movement_state == self.robot_movement_state:
