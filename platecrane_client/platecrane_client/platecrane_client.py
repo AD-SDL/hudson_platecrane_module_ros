@@ -14,7 +14,7 @@ from time import sleep
 import threading
 import asyncio
 
-from platecrane_driver.platecrane_driver import PlateCrane # import PlateCrane driver
+from platecrane_driver.platecrane_driver import PlateCrane 
 
 class PlatecraneClient(Node):
     '''
