@@ -1,8 +1,8 @@
 {
     "96_well":{
-        "plate_above_height": 800,
-        "plate_pick_steps_module": 1500,
-        "plate_pick_steps_stack": 2400,
+        "plate_above_height": 1500,
+        "plate_pick_steps_module": 3000,
+        "plate_pick_steps_stack": 4500,
         "plate_lid_steps": 1400,
         "lid_height": 1400
     },
@@ -23,9 +23,11 @@
     },
     "tip_box_lid_off":{
         "plate_above_height":5000, 
-        "plate_pick_steps_module": 3000,
+        "plate_pick_steps_module": 3100,
         "plate_pick_steps_stack": 7900,
-        "plate_lid_steps": 0
+        "plate_lid_steps": 0,
+        "lid_height": 0
+
     }
     
 }
