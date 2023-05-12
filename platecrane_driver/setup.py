@@ -20,5 +20,8 @@ setup(
     description='Driver for the Platecrane and Sciclops',
     url='https://github.com/AD-SDL/sciclops_module.git', 
     license='MIT License',
-    entry_points={},
+    entry_points={'console_scripts': [
+             'platecrane_driver = platecrane_driver.platecrane_driver:main_null',
+             'sciclops_driver = platecrane_driver.sciclops_driver:main_null',
+        ]},
 )

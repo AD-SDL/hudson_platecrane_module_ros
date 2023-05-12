@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>platecrane</name>
+  <name>platecrane_driver</name>
   <version>0.0.0</version>
   <description>Platecrane Driver for Platecrane and Sciclops robots </description>
   <maintainer email="ravescovi@anl.gov">Rafael Vescovi and Doga Ozgulbas</maintainer>

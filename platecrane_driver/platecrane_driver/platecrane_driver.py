@@ -824,7 +824,7 @@ class PlateCrane():
         """ 
         pass
 
-    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "stack", height_offset:int = 0,  plate_type:str = "96_well") -> None:
+    def transfer(self, source:str = None, target:str = None, source_type:str = "stack", target_type:str = "stack", height_offset:int = 0,  plate_type:str = None) -> None:
         """
         Handles the transfer request 
 
@@ -864,16 +864,17 @@ if __name__ == "__main__":
     target_loc = "HidexNest2"
     exchange = "LidNest3"
     sealer = "SealerNest"
-
+    # s.get_location_list()
+    # s.get_location_joint_values("HidexNest2")
     # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
 
-    # s.transfer("Stack1", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
+    # s.transfer("Stack5", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
     # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
-    # s.transfer("Stack2", solo6, source_type = "stack", target_type = "module", plate_type = "tip_box_lid_on")
+    # s.transfer("Stack4", solo3, source_type = "stack", target_type = "stack", plate_type = "tip_box_lid_off")
     # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
     # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
     # s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
-    # s.transfer(solo4, "Stack1", source_type = "module", target_type = "stack", plate_type = "96_well")
+    # s.transfer(solo4, "Stack5", source_type = "module", target_type = "stack", plate_type = "96_well")
     # s.transfer(solo6, "Stack2", source_type = "module", target_type = "stack", plate_type = "tip_box_lid_on")
 
 
