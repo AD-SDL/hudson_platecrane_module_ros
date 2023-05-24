@@ -866,7 +866,7 @@ if __name__ == "__main__":
     sealer = "SealerNest"
     # s.get_location_list()
     # s.get_location_joint_values("HidexNest2")
-    # s.set_location("HidexNest2", R=210015,Z=-30145,P=490,Y=2331) 
+    # s.set_location("HidexNest2", R=210015,Z=-30400,P=490,Y=2323) 
 
     # s.transfer("Stack5", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
     # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
