@@ -225,7 +225,7 @@ class PlateCrane():
         command = "GETPOINT " + location + "\r\n" 
 
         joint_values =  list(self.__serial_port.send_command(command).split(" "))
-        joint_values = [eval(x.strip(",")) for x in joint_values]
+        joint_values = [json.loads(x.strip(",")) for x in joint_values]
 
         return joint_values
 
@@ -249,7 +249,7 @@ class PlateCrane():
 
         command = 'GETPOS\r\n' 
         current_position = list(self.__serial_port.send_command(command).split(" "))
-        current_position = [eval(x.strip(",")) for x in current_position]
+        current_position = [json.loads(x.strip(",")) for x in current_position]
 
         return current_position
     
@@ -663,7 +663,7 @@ class PlateCrane():
         :rtype: str
         """    
         try:       
-            location = eval(location)
+            location = json.loads(location)
         except NameError as name_err:
             # Location was given as a location name
             print(name + ": " + location)   
