@@ -251,7 +251,7 @@ class ScilopsClient(Node):
         elif request.action_handle=='get_plate':
             # self.state = "BUSY"
             self.get_logger().info("Starting get plate")
-            vars = eval(request.vars)
+            vars = json.loads(request.vars)
             print(vars)
 
             pos = vars.get('pos')

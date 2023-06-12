@@ -211,7 +211,7 @@ class PlatecraneClient(Node):
         self.action_flag = "BUSY"
         sleep(1)
         
-        vars = eval(request.vars)
+        vars = json.loads(request.vars)
         self.get_logger().info(str(vars))
 
         source = vars.get('source')
