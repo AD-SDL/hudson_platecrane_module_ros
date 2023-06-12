@@ -14,7 +14,7 @@ from time import sleep
 import threading
 import asyncio
 
-from sciclops_driver.sciclops_driver import SCICLOPS # import sciclops driver
+from platecrane_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
 class ScilopsClient(Node):
     '''
