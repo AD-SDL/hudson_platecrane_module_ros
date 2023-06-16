@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from platecrane_driver.serial_port import SerialPort
+from serial_port import SerialPort
 
 import json
 
@@ -225,7 +225,7 @@ class PlateCrane():
         command = "GETPOINT " + location + "\r\n" 
 
         joint_values =  list(self.__serial_port.send_command(command).split(" "))
-        joint_values = [json.loads(x.strip(",")) for x in joint_values]
+        joint_values = [eval(x.strip(",")) for x in joint_values]
 
         return joint_values
 
@@ -249,7 +249,7 @@ class PlateCrane():
 
         command = 'GETPOS\r\n' 
         current_position = list(self.__serial_port.send_command(command).split(" "))
-        current_position = [json.loads(x.strip(",")) for x in current_position]
+        current_position = [eval(x.strip(",")) for x in current_position]
 
         return current_position
     
@@ -663,7 +663,7 @@ class PlateCrane():
         :rtype: str
         """    
         try:       
-            location = json.loads(location)
+            location = eval(location)
         except NameError as name_err:
             # Location was given as a location name
             print(name + ": " + location)   
@@ -857,7 +857,8 @@ if __name__ == "__main__":
     Runs given function.
     """
     s = PlateCrane("/dev/ttyUSB2")
-    stack = "Stack4"
+    stack4 = "Stack4"
+    stack5 = "Stack5"
     solo6 = "Solo.Position6"
     solo4 = "Solo.Position4"
     solo3 = "Solo.Position3"
@@ -868,13 +869,15 @@ if __name__ == "__main__":
     # s.get_location_joint_values("HidexNest2")
     # s.set_location("HidexNest2", R=210015,Z=-30400,P=490,Y=2323) 
 
-    # s.transfer("Stack5", solo4, source_type = "stack", target_type = "module", plate_type = "96_well")
+    s.transfer(stack5, solo4, source_type = "stack", target_type = "module", plate_type = "96_deep_well")
+    s.transfer(solo4, stack5, source_type = "module", target_type = "stack", plate_type = "96_deep_well")
+
     # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
     # s.transfer("Stack4", solo3, source_type = "stack", target_type = "stack", plate_type = "tip_box_lid_off")
     # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
     # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
     # s.replace_lid(source = "LidNest2", target = solo4, plate_type = "96_well")
-    # s.transfer(solo4, "Stack5", source_type = "module", target_type = "stack", plate_type = "96_well")
+    # s.transfer(solo4, stack5, source_type = "module", target_type = "stack", plate_type = "96_well")
     # s.transfer(solo6, "Stack2", source_type = "module", target_type = "stack", plate_type = "tip_box_lid_on")
 
 
