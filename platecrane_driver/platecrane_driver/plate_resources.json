@@ -1,6 +1,12 @@
 {
     "96_well":{
-
+        "plate_above_height": 800,
+        "plate_pick_steps_module": 1500,
+        "plate_pick_steps_stack": 2400,
+        "plate_lid_steps": 1400,
+        "lid_height": 1400
+    },
+    "96_deep_well":{
         "plate_above_height": 800,
         "plate_pick_steps_module": 1500,
         "plate_pick_steps_stack": 2400,
