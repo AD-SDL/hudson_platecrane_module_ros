@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from platecrane_driver.serial_port import SerialPort
+from serial_port import SerialPort
 
 import json
 
@@ -863,16 +863,27 @@ if __name__ == "__main__":
     solo4 = "Solo.Position4"
     solo3 = "Solo.Position3"
     target_loc = "HidexNest2"
-    exchange = "LidNest3"
+    lidnest3 = "LidNest3"
     sealer = "SealerNest"
     # s.get_location_list()
+    # s.set_location("LidNest2",R=131719,Z=-31001,P=-5890,Y=-315)
+    # s.transfer(source="LidNest1",target="LidNest2",source_type="stack",target_type="stack", plate_type="96_well")
+
+    # s.transfer(source="LidNest2",target="LidNest3",source_type="stack",target_type="stack", plate_type="96_well")
+    # s.pick_stack_plate("LidNest2")
+    # s.free_joints()
+    # s.lock_joints()
+
+    # s.set_location("LidNest3",R=99817,Z=-31001,P=-5890,Y=-315)
+    
+
     # s.get_location_joint_values("HidexNest2")
     # s.set_location("HidexNest2", R=210015,Z=-30400,P=490,Y=2323) 
 
     # s.transfer(stack5, solo4, source_type = "stack", target_type = "module", plate_type = "96_deep_well")
     # s.transfer(solo4, stack5, source_type = "module", target_type = "stack", plate_type = "96_deep_well")
 
-    # s.remove_lid(source = solo4, target="LidNest2", plate_type="96_well")
+    # s.remove_lid(source = "LidNest1", target="LidNest2", plate_type="96_well")
     # s.transfer("Stack4", solo3, source_type = "stack", target_type = "stack", plate_type = "tip_box_lid_off")
     # s.remove_lid(source = solo6, target="LidNest3", plate_type="tip_box_lid_on")
     # s.replace_lid(source = "LidNest3", target = solo6, plate_type = "tip_box_lid_on")
