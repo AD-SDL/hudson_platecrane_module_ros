@@ -10,9 +10,11 @@ from std_msgs.msg import String
 from wei_services.srv import WeiDescription 
 from wei_services.srv import WeiActions   
 
+import ast 
 from time import sleep
 import threading
 import asyncio
+import json
 
 from platecrane_driver.platecrane_driver import PlateCrane 
 
@@ -132,7 +134,7 @@ class PlatecraneClient(Node):
 
             if self.robot_status == "0":
                 self.state = "ERROR"
-                msg.data = 'State: %s' % self.state
+                msg.data = 'Statesss: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
@@ -141,26 +143,26 @@ class PlatecraneClient(Node):
 
             elif self.robot_error_status == "ERROR" or (self.state == "ERROR" and self.action_flag == "BUSY"):
                 self.state = "ERROR"
-                msg.data = 'State: %s' % self.state
+                msg.data = 'Statesss: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
                 
             elif self.state == "COMPLETED" and self.action_flag == "BUSY":
-                msg.data = 'State: %s' % self.state
+                msg.data = 'Statessss: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
                 self.action_flag = "READY"
 
             elif self.robot_movement_state == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
-                msg.data = 'State: %s' % self.state
+                msg.data = 'Statesss: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
             elif self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
-                msg.data = 'State: %s' % self.state
+                msg.data = 'Statesssss: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
@@ -196,7 +198,6 @@ class PlatecraneClient(Node):
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
         '''        
-
         if self.state == "PLATECRANE CONNECTION ERROR":
             message = "Connection error, cannot accept a job!"
             self.get_logger().error(message)
@@ -211,7 +212,8 @@ class PlatecraneClient(Node):
         self.action_flag = "BUSY"
         sleep(1)
         
-        vars = json.loads(request.vars)
+        self.get_logger().info(str(request.vars))
+        vars = ast.literal_eval(request.vars) #json.loads(str(request.vars))
         self.get_logger().info(str(vars))
 
         source = vars.get('source')
