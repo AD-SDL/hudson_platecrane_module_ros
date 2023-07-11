@@ -349,7 +349,7 @@ class PlateCrane():
         :rtype: [ReturnType]
         """
         command = 'SETSPEED %d\r\n' % speed # Command interpreted by Sciclops
-        out_msg = self.send_command(command)
+        out_msg = self.__serial_port.send_command(command)
 
 
     def check_open(self):
@@ -880,7 +880,7 @@ if __name__ == "__main__":
     target_loc = "HidexNest2"
     lidnest3 = "LidNest3"
     sealer = "SealerNest"
-    s.set_speed(5)
+    # s.set_speed(5)
     # s.get_location_list()
     # s.set_location("LidNest2",R=131719,Z=-31001,P=-5890,Y=-315)
     # s.transfer(source="LidNest1",target="LidNest2",source_type="stack",target_type="stack", plate_type="96_well")
