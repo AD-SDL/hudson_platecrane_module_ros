@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from serial_port import SerialPort
+from platecrane_driver.serial_port import SerialPort
 
 import json
 
