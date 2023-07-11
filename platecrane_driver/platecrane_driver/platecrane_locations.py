@@ -17,7 +17,7 @@ platecrane_locations = {
     "RapidPick.Destination": "275183 -30960 -5995 931",
     "RapidPick.Destination2": "293181 -30927 -5355 1383",
     "Solo.Position2": "-8570 -25921 -9865 1224",
-    "Solo.Position3": "20085 -26481 -8850 5236",
+    "Solo.Position3": "20085 -35000 -8850 5236",
     "Solo.Position6": "48425 -27211 -7818 2793",
     "MotorolaScanner.Reader": "224262 -30041 -7281 2793",
     "TorreyPinesRIC20.Nest": "-8570 -25921 -9865 1224",
