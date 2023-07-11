@@ -9,7 +9,7 @@ from pickle import TRUE
 
 import serial
 from serial import SerialException
-from platecrane_driver.serial_port import SerialPort
+from serial_port import SerialPort
 
 import json
 
@@ -881,9 +881,9 @@ if __name__ == "__main__":
     lidnest3 = "LidNest3"
     sealer = "SealerNest"
     s.set_speed(5)
-    # s.get_location_list()
-    # s.set_location("LidNest2",R=131719,Z=-31001,P=-5890,Y=-315)
-    # s.transfer(source="LidNest1",target="LidNest2",source_type="stack",target_type="stack", plate_type="96_well")
+    s.get_location_list()
+    s.set_location("Solo.Position3",R=20085,Z=-35000,P=-8850,Y=5236)
+    s.transfer(source=solo3,target="Stack4",source_type="stack",target_type="stack", plate_type="tip_box_lid_off")
 
     # s.transfer(source="LidNest2",target="LidNest3",source_type="stack",target_type="stack", plate_type="96_well")
     # s.pick_stack_plate("LidNest2")
