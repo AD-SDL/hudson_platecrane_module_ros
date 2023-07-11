@@ -134,7 +134,7 @@ class PlatecraneClient(Node):
 
             if self.robot_status == "0":
                 self.state = "ERROR"
-                msg.data = 'Statesss: %s' % self.state
+                msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
@@ -143,26 +143,26 @@ class PlatecraneClient(Node):
 
             elif self.robot_error_status == "ERROR" or (self.state == "ERROR" and self.action_flag == "BUSY"):
                 self.state = "ERROR"
-                msg.data = 'Statesss: %s' % self.state
+                msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
                 
             elif self.state == "COMPLETED" and self.action_flag == "BUSY":
-                msg.data = 'Statessss: %s' % self.state
+                msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
                 self.action_flag = "READY"
 
             elif self.robot_movement_state == "BUSY" or self.action_flag == "BUSY":
                 self.state = "BUSY"
-                msg.data = 'Statesss: %s' % self.state
+                msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
             elif self.robot_status == "1" and self.robot_movement_state == "READY" and self.action_flag == "READY":
                 self.state = "READY"
-                msg.data = 'Statesssss: %s' % self.state
+                msg.data = 'State: %s' % self.state
                 self.statePub.publish(msg)
                 self.get_logger().info(msg.data)
 
