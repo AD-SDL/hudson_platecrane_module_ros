@@ -1,3 +1,5 @@
+# NOTE: THIS IS JUST FOR REFERENCE AND IT IS NOT INTEGRATED WITH THE DRIVER
+
 platecrane_locations = {
     "Safe": "117902 2349 -5882 0",
     "Stack1": "166756 -32015 -5882 5460",
