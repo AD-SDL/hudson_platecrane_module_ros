@@ -638,6 +638,7 @@ class PlateCrane():
         if "stack" in source.lower():
             self.gripper_close()
             self.move_location(source)
+            self.set_speed(5)
             self.jog("Z", self.plate_above_height)
             self.gripper_open()
             self.jog("Z", - self.plate_pick_steps_stack + height_offset)
@@ -646,6 +647,7 @@ class PlateCrane():
             self.move_location(source)
             # self.jog("Z", -self.plate_pick_steps_stack + height_offset)
         self.gripper_close() 
+        self.set_speed(100)
         self.move_tower_neutral()
         self.move_arm_neutral()
 
