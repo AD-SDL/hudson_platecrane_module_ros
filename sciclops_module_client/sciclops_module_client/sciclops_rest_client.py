@@ -74,11 +74,11 @@ async def lifespan(app: FastAPI):
             pass #self.get_logger().info("Trying robot connection")
             sciclops = SCICLOPS()
 
-        except Exception as error_msg:
+    except Exception as error_msg:
             state = "SCICLOPS CONNECTION ERROR"
             pass #self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
 
-        else:
+    else:
             pass #self.get_logger().info("SCICLOPS online")
 
 
