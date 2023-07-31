@@ -1,9 +1,5 @@
 #! /usr/bin/env python3
 
-import rclpy                 # import Rospy
-from rclpy.node import Node  # import Rospy Node
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
 from std_msgs.msg import String
 
@@ -16,24 +12,10 @@ import asyncio
 
 from platecrane_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
-
-#! /usr/bin/env python3
-
-import rclpy                 # import Rospy
-from rclpy.node import Node  # import Rospy Node
-from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
-from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
-
-from std_msgs.msg import String
-from std_srvs.srv import Empty
-
 from time import sleep
 import json
 
 from threading import Thread
-
-from wei_services.srv import WeiDescription 
-from wei_services.srv import WeiActions 
 
 from pf400_driver.errors import ConnectionException, CommandException
 from pf400_driver.pf400_driver import PF400
