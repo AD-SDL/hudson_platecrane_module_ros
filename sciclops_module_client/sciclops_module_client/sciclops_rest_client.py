@@ -1,10 +1,7 @@
 #! /usr/bin/env python3
 
 
-from std_msgs.msg import String
 
-from wei_services.srv import WeiDescription 
-from wei_services.srv import WeiActions   
 
 from time import sleep
 import threading
@@ -16,11 +13,6 @@ from time import sleep
 import json
 
 from threading import Thread
-
-from pf400_driver.errors import ConnectionException, CommandException
-from pf400_driver.pf400_driver import PF400
-# from pf400_driver.errors import ConnectionException, CommandException
-from pf400_driver.pf400_camera_driver import PF400_CAMERA
 
 
 """The server that takes incoming WEI flow requests from the experiment application"""
