@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
 
     else:
             print("SCICLOPS online")
-    state = "READY"
+    state = "IDLE"
     yield
     pass
 app = FastAPI(lifespan=lifespan, )
@@ -89,8 +89,8 @@ def do_action(
             response["action_msg"] = message
             return response
 
-   # while state != "READY":
-            pass #self.get_logger().warn("Waiting for SCICLOPS to switch READY state...")
+   # while state != "IDLE":
+            pass #self.get_logger().warn("Waiting for SCICLOPS to switch IDLE state...")
             sleep(0.5)
 
     state  = "BUSY"
@@ -105,7 +105,7 @@ def do_action(
                     response["action_response"] = 0
                     response["action_msg"]= "Get status successfully completed"  
 
-                state = "READY"
+                state = "IDLE"
                 return response 
 
 
@@ -120,7 +120,7 @@ def do_action(
                     response["action_response"] = 0
                     response["action_msg"]= "Homing successfully completed"  
                 
-                state = "READY"
+                state = "IDLE"
                 return response
 
 
@@ -144,7 +144,7 @@ def do_action(
                     response["action_msg"]= "Get plate successfully completed"
 
                 pass #self.get_logger().info('Finished Action: ' + action_handle)
-                state = "READY"
+                state = "IDLE"
 
                 return response
 
