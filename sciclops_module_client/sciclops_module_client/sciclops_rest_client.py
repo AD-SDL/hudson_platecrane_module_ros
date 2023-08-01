@@ -50,18 +50,19 @@ async def lifespan(app: FastAPI):
 
     except Exception as error_msg:
             state = "SCICLOPS CONNECTION ERROR"
-            pass #self.get_logger().error("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
+            print("------- SCICLOPS Error message: " + str(error_msg) +  (" -------"))
 
     else:
-            pass #self.get_logger().info("SCICLOPS online")
-
-
+            print("SCICLOPS online")
+    state = "READY"
+    yield
+    pass
 app = FastAPI(lifespan=lifespan, )
 
 @app.get("/state")
-async def state():
-    global sealer
-    return JSONResponse(content={"State": sealer.get_status() })
+def get_state():
+    global sealer, state
+    return JSONResponse(content={"State": state})
 
 @app.get("/description")
 async def description():
@@ -74,10 +75,10 @@ async def resources():
     return JSONResponse(content={"State": sealer.get_status() })
 
 
-@app.post("/action")
-async def do_action(
+@app.post("/action") 
+def do_action(
     action_handle: str,
-    action_vars: dict, 
+    action_vars 
 ):  
     global state, sciclops
     response = {"action_response": "", "action_msg": "", "action_log": ""}
@@ -91,8 +92,8 @@ async def do_action(
    # while state != "READY":
             pass #self.get_logger().warn("Waiting for SCICLOPS to switch READY state...")
             sleep(0.5)
-            
-    sate  = "BUSY"
+
+    state  = "BUSY"
 
     if action_handle == 'status':
                 try:
@@ -104,7 +105,7 @@ async def do_action(
                     response["action_response"] = 0
                     response["action_msg"]= "Get status successfully completed"  
 
-                state = "COMPLETED"
+                state = "READY"
                 return response 
 
 
@@ -119,7 +120,7 @@ async def do_action(
                     response["action_response"] = 0
                     response["action_msg"]= "Homing successfully completed"  
                 
-                state = "COMPLETED"
+                state = "READY"
                 return response
 
 
@@ -143,7 +144,7 @@ async def do_action(
                     response["action_msg"]= "Get plate successfully completed"
 
                 pass #self.get_logger().info('Finished Action: ' + action_handle)
-                state = "COMPLETED"
+                state = "READY"
 
                 return response
 

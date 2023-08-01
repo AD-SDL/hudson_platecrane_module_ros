@@ -13,6 +13,7 @@ from wei_services.srv import WeiActions
 from time import sleep
 import threading
 import asyncio
+import json
 
 from platecrane_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
