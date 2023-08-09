@@ -88,7 +88,8 @@ def do_action(
             response["action_response"] = -1
             response["action_msg"] = message
             return response
-
+    if state == "BUSY":
+      return response
    # while state != "IDLE":
             pass #self.get_logger().warn("Waiting for SCICLOPS to switch IDLE state...")
             sleep(0.5)
