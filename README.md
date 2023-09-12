@@ -1,10 +1,6 @@
 # platecrane_ros_packages
 
-This repo contains the following ROS2 packages:
-
-- `platecrane_ros_client`
-
-### Ros Packages
+## Installation
 
 ```
 mkdir ~/sciclops_ws
@@ -17,7 +13,6 @@ git clone https://github.com/AD-SDL/wei_ros
 cd ..
 colcon build
 ```
-
 
 ## Description
 

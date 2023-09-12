@@ -7,20 +7,20 @@ from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
 from std_msgs.msg import String
 
-from wei_services.srv import WeiDescription 
-from wei_services.srv import WeiActions   
+from wei_services.srv import WeiDescription
+from wei_services.srv import WeiActions
 
-import ast 
+import ast
 from time import sleep
 import threading
 import asyncio
 import json
 
-from platecrane_driver.platecrane_driver import PlateCrane 
+from platecrane_driver.platecrane_driver import PlateCrane
 
 class PlatecraneClient(Node):
     '''
-    The PlatecraneClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
+    The PlatecraneClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback,
     based on the executed command and publishes the state of the platecrane and a description of the platecrane to the respective topics.
     '''
     def __init__(self, TEMP_NODE_NAME = "PlatecraneNode"):
@@ -33,16 +33,16 @@ class PlatecraneClient(Node):
         self.state = "UNKNOWN"
         self.action_flag = "READY"
 
-        # Setting temporary default parameter values        
+        # Setting temporary default parameter values
         self.declare_parameter("port","/dev/ttyUSB2")
 
         # Receiving the real vendor_id and product_id from the launch parameters
         self.port = self.get_parameter("port").get_parameter_value().string_value
         self.get_logger().info("Received Port name: " + str(self.port))
-        
+
         self.platecrane = None
         self.connect_robot()
-        
+
         self.robot_status = None
         self.robot_movement_state = None
         self.robot_error_status = None
@@ -71,13 +71,13 @@ class PlatecraneClient(Node):
 
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(state_pub_timer_period, self.stateCallback, callback_group = state_cb_group)
-        
+
         self.StateRefresherTimer = self.create_timer(state_refresher_timer_period, callback = self.robot_state_refresher_callback, callback_group = state_refresher_cb_group)
 
         self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
         self.descriptionSrv = self.create_service(WeiDescription, node_name + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
-        
+
         # self.lock = threading.Lock()
 
     def connect_robot(self):
@@ -99,13 +99,13 @@ class PlatecraneClient(Node):
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
                 self.platecrane.get_robot_movement_state()
                 self.platecrane.get_status()
-                self.state_refresher_timer = 0 
-            
+                self.state_refresher_timer = 0
+
             if self.past_movement_state == self.robot_movement_state:
                 self.state_refresher_timer += 1
             elif self.past_movement_state != self.robot_movement_state:
                 self.past_movement_state = self.robot_movement_state
-                self.state_refresher_timer = 0 
+                self.state_refresher_timer = 0
 
             # if self.state_refresher_timer > 30: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
             #     # self.get_logger().info("Refresh state, robot state is frozen...")
@@ -116,7 +116,7 @@ class PlatecraneClient(Node):
 
     def stateCallback(self):
         '''
-        Publishes the platecrane state to the 'state' topic. 
+        Publishes the platecrane state to the 'state' topic.
         '''
         msg = String()
 
@@ -147,7 +147,7 @@ class PlatecraneClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.action_flag = "READY"
-                
+
             elif self.state == "COMPLETED" and self.action_flag == "BUSY":
                 msg.data = 'Statessss: %s' % self.state
                 self.statePub.publish(msg)
@@ -197,7 +197,7 @@ class PlatecraneClient(Node):
         '''
         The actionCallback function is a service that can be called to execute the available actions the robot
         can preform.
-        '''        
+        '''
         if self.state == "PLATECRANE CONNECTION ERROR":
             message = "Connection error, cannot accept a job!"
             self.get_logger().error(message)
@@ -208,10 +208,10 @@ class PlatecraneClient(Node):
         while self.state != "READY":
             self.get_logger().warn("Waiting for PLATECRANE to switch READY state...")
             sleep(0.5)
-            
+
         self.action_flag = "BUSY"
         sleep(1)
-        
+
         self.get_logger().info(str(request.vars))
         vars = ast.literal_eval(request.vars) #json.loads(str(request.vars))
         self.get_logger().info(str(vars))
@@ -235,7 +235,7 @@ class PlatecraneClient(Node):
             if not source_type or not target_type:
                 self.get_logger().error("Please provide source and target transfer types!")
                 self.state = "ERROR"
-                
+
             height_offset = vars.get('height_offset', 0)
             self.get_logger().info("Height Offset: " + str(height_offset))
 
@@ -246,14 +246,14 @@ class PlatecraneClient(Node):
                 response.action_msg= "Transfer failed. Error:" + str(err)
                 self.get_logger().error(str(err))
                 self.state = "ERROR"
-            else:    
+            else:
                 response.action_response = 0
                 response.action_msg= "Transfer successfully completed"
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
-            
+
         elif request.action_handle == "remove_lid":
 
             try:
@@ -263,14 +263,14 @@ class PlatecraneClient(Node):
                 response.action_msg= "Remove lid failed. Error:" + str(err)
                 self.get_logger().error(str(err))
                 self.state = "ERROR"
-            else:    
+            else:
                 response.action_response = 0
                 response.action_msg= "Remove lid successfully completed"
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
-            
+
         elif request.action_handle == "replace_lid":
             try:
                 self.platecrane.replace_lid(source = source, target = target, plate_type = plate_type)
@@ -279,14 +279,14 @@ class PlatecraneClient(Node):
                 response.action_msg= "Replace lid failed. Error:" + str(err)
                 self.get_logger().error(str(err))
                 self.state = "ERROR"
-            else:    
+            else:
                 response.action_response = 0
                 response.action_msg= "Replace lid  successfully completed"
                 self.state = "COMPLETED"
             finally:
                 self.get_logger().info('Finished Action: ' + request.action_handle.upper())
                 return response
-        else: 
+        else:
             msg = "UNKOWN ACTION REQUEST! Available actions:transfer, remove_lid, replace_lid"
             response.action_response = -1
             response.action_msg= msg
@@ -299,20 +299,20 @@ def main(args = None):
     rclpy.init(args=args)  # initialize Ros2 communication
 
     try:
-        platecrane_client = PlatecraneClient()
+        platecrane_ros_client = PlatecraneClient()
         executor = MultiThreadedExecutor()
-        executor.add_node(platecrane_client)
+        executor.add_node(platecrane_ros_client)
 
         try:
-            platecrane_client.get_logger().info('Beginning client, shut down with CTRL-C')
+            platecrane_ros_client.get_logger().info('Beginning client, shut down with CTRL-C')
             executor.spin()
         except KeyboardInterrupt:
-            platecrane_client.get_logger().info('Keyboard interrupt, shutting down.\n')
+            platecrane_ros_client.get_logger().info('Keyboard interrupt, shutting down.\n')
         finally:
-            # platecrane_client.platecrane.__serial_port.__disconnect_robot()
-            platecrane_client.get_logger().warn("Robot connection is closed")
+            # platecrane_ros_client.platecrane.__serial_port.__disconnect_robot()
+            platecrane_ros_client.get_logger().warn("Robot connection is closed")
             executor.shutdown()
-            platecrane_client.destroy_node()
+            platecrane_ros_client.destroy_node()
     finally:
         rclpy.shutdown()
 
