@@ -1,32 +1,26 @@
-# sciclops_driver
+# platecrane_ros_packages
 
+This repo contains the following ROS2 packages:
 
-
-
-## Install
-
-The sciclops driver can be installed as a stand-alone python package or a ROS-Node 
-
-### Python Driver
-
-  git clone https://github.com/AD-SDL/sciclops_module
-  cd sciclops_module/sciclops_driver
-  python setup.py install 
+- `platecrane_ros_client`
 
 ### Ros Packages
 
-  mkdir ~/sciclops_ws
-  cd ~/sciclops_ws
+```
+mkdir ~/sciclops_ws
+cd ~/sciclops_ws
 
-  mkdir src
-  cd src
-  git clone https://github.com/AD-SDL/sciclops_module
-  git clone https://github.com/AD-SDL/wei_ros
-  cd ..
-  colcon build
+mkdir src
+cd src
+git clone https://github.com/AD-SDL/platecrane_ros_packages
+git clone https://github.com/AD-SDL/wei_ros
+cd ..
+colcon build
+```
 
 
 ## Description
+
 A repository for the Hudson Plate Stacker (Sciclops).
 
 This package guides a user to remotely control the sciclops.
@@ -51,27 +45,27 @@ Sciclops has 4 controllable axes and a gripper.
 1. ### Find and setup port
     * Connect Sciclops to device with a serial to usb cable
     * Run following code in python script
-    
+
           file_path = os.path.join(os.path.split(os.path.dirname(__file__))[0]  + '/SCICLOPS_logs/robot_client_logs.log')
-        
+
 2. ### Create ROS2 infrastructure
      * Install ROS2 and create ROS2 workspace
         https://docs.ros.org/en/humble/Installation.html
-              
-3. ### Git clone hudson_driver repository 
+
+3. ### Git clone hudson_driver repository
      * cd into src folder
 In terminal:
-    
+
            git clone https://github.com/AD-SDL/hudson_driver.git
 
 4. ### Run Commands
      * In terminal
-        
+
            colcon build
-         
-           source install/setup.bash 
-     
-           ros2 run sciclops_module_client sciclopsNode
+
+           source install/setup.bash
+
+           ros2 run sciclops_ros_client sciclopsNode
 
      * Open new terminal
 
@@ -90,7 +84,7 @@ In terminal:
    * cd into src folder
    * git pull
    * colcon build
-   * source install/setup.bash 
+   * source install/setup.bash
 
 ## Authors and Maintainers
 * Sanjiv Parthasarathy
