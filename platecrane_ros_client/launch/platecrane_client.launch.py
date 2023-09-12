@@ -15,10 +15,10 @@ def generate_launch_description():
         default_value = "/dev/ttyUSB2",
         description = 'Flag to accept port number')
 
-    platecrane_client = Node(
-            package='platecrane_client',
+    platecrane_ros_client = Node(
+            package='platecrane_ros_client',
             namespace = 'std_ns',
-            executable='platecrane_client',
+            executable='platecrane_ros_client',
             name='PlateCraneNode',
             parameters=[
                 {'port':port},
@@ -26,11 +26,11 @@ def generate_launch_description():
             emulate_tty=True
     )
 
-    
+
     launch_d = LaunchDescription()
 
     launch_d.add_action(declare_use_port_cmd)
-    launch_d.add_action(platecrane_client)
-    
+    launch_d.add_action(platecrane_ros_client)
+
     return launch_d
-    
+

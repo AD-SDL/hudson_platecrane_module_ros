@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
-package_name = 'platecrane_client'
+package_name = 'platecrane_ros_client'
 
 setup(
     name=package_name,
@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'platecrane_client = platecrane_client.platecrane_client:main',
+            'platecrane_ros_client = platecrane_ros_client.platecrane_ros_client:main',
         ],
    },
 )

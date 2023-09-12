@@ -7,8 +7,8 @@ from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 
 from std_msgs.msg import String
 
-from wei_services.srv import WeiDescription 
-from wei_services.srv import WeiActions   
+from wei_services.srv import WeiDescription
+from wei_services.srv import WeiActions
 
 from time import sleep
 import threading
@@ -18,7 +18,7 @@ from platecrane_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
 class ScilopsClient(Node):
     '''
-    The ScilopsClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback, 
+    The ScilopsClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback,
     based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
     '''
     def __init__(self, TEMP_NODE_NAME = "ScilopsClientNode"):
@@ -31,7 +31,7 @@ class ScilopsClient(Node):
         self.state = "UNKNOWN"
         self.action_flag = "READY"
 
-        # Setting temporary default parameter values        
+        # Setting temporary default parameter values
         self.declare_parameter("vendor_id",0x7513)
         self.declare_parameter("product_id",0x0002)
 
@@ -42,7 +42,7 @@ class ScilopsClient(Node):
 
         self.connect_robot()
 
-        self.sciclops.get_status() 
+        self.sciclops.get_status()
         self.robot_status = self.sciclops.status
         asyncio.run(self.sciclops.check_complete())
         self.robot_movement_state = self.sciclops.movement_state
@@ -71,13 +71,13 @@ class ScilopsClient(Node):
 
         self.statePub = self.create_publisher(String, node_name + '/state', 10)
         self.stateTimer = self.create_timer(state_pub_timer_period, self.stateCallback, callback_group = state_cb_group)
-        
+
         self.StateRefresherTimer = self.create_timer(state_refresher_timer_period, callback = self.robot_state_refresher_callback, callback_group = state_refresher_cb_group)
 
         self.actionSrv = self.create_service(WeiActions, node_name + "/action_handler", self.actionCallback, callback_group = action_cb_group)
 
         self.descriptionSrv = self.create_service(WeiDescription, node_name + "/description_handler", self.descriptionCallback, callback_group = description_cb_group)
-        
+
         # self.lock = threading.Lock()
 
     def connect_robot(self):
@@ -98,13 +98,13 @@ class ScilopsClient(Node):
 
             if self.action_flag.upper() == "READY": #Only refresh the state manualy if robot is not running a job.
                 asyncio.run(self.sciclops.check_complete())
-                self.state_refresher_timer = 0 
-            
+                self.state_refresher_timer = 0
+
             if self.past_movement_state == self.robot_movement_state:
                 self.state_refresher_timer += 1
             elif self.past_movement_state != self.robot_movement_state:
                 self.past_movement_state = self.robot_movement_state
-                self.state_refresher_timer = 0 
+                self.state_refresher_timer = 0
 
             if self.state_refresher_timer > 30: # Refresh the state if robot has been stuck at a status for more than 25 refresh times.
                 # self.get_logger().info("Refresh state, robot state is frozen...")
@@ -115,7 +115,7 @@ class ScilopsClient(Node):
 
     def stateCallback(self):
         '''
-        Publishes the sciclops state to the 'state' topic. 
+        Publishes the sciclops state to the 'state' topic.
         '''
         msg = String()
 
@@ -155,7 +155,7 @@ class ScilopsClient(Node):
                 self.statePub.publish(msg)
                 self.get_logger().error(msg.data)
                 self.get_logger().error("ROBOT IS NOT HOMED")
-                
+
                 if self.robot_home_iter == 0 :
                     self.robot_home_iter = 1
                     self.get_logger().warn("Resetting the robot")
@@ -164,7 +164,7 @@ class ScilopsClient(Node):
                     self.get_logger().warn("Homing the robot")
                     sleep(25)
                     self.get_logger().warn("Homing completed")
-                    self.robot_home_iter = 0    
+                    self.robot_home_iter = 0
 
             elif self.robot_status == "ERROR":
                 self.state = "ERROR"
@@ -216,7 +216,7 @@ class ScilopsClient(Node):
         while self.state != "READY":
             self.get_logger().warn("Waiting for SCICLOPS to switch READY state...")
             sleep(0.5)
-            
+
         self.action_flag = "BUSY"
 
         if request.action_handle == 'status':
@@ -225,25 +225,25 @@ class ScilopsClient(Node):
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Get status failed. Error:" + err
-            else:    
+            else:
                 response.action_response = 0
-                response.action_msg= "Get status successfully completed"  
+                response.action_msg= "Get status successfully completed"
 
             self.state = "COMPLETED"
-            return response 
+            return response
 
 
-        elif request.action_handle == 'home':            
+        elif request.action_handle == 'home':
 
             try:
-                self.sciclops.home()  
+                self.sciclops.home()
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Homing failed. Error:" + err
-            else:    
+            else:
                 response.action_response = 0
-                response.action_msg= "Homing successfully completed"  
-            
+                response.action_msg= "Homing successfully completed"
+
             self.state = "COMPLETED"
             return response
 
@@ -263,7 +263,7 @@ class ScilopsClient(Node):
             except Exception as err:
                 response.action_response = -1
                 response.action_msg= "Get plate failed. Error:" + err
-            else:    
+            else:
                 response.action_response = 0
                 response.action_msg= "Get plate successfully completed"
 
@@ -272,7 +272,7 @@ class ScilopsClient(Node):
 
             return response
 
-        else: 
+        else:
             msg = "UNKOWN ACTION REQUEST! Available actions: status, home, get_plate"
             response.action_response = -1
             response.action_msg= msg
@@ -287,20 +287,20 @@ def main(args = None):
     rclpy.init(args=args)  # initialize Ros2 communication
 
     try:
-        sciclops_client = ScilopsClient()
+        sciclops_ros_client = ScilopsClient()
         executor = MultiThreadedExecutor()
-        executor.add_node(sciclops_client)
+        executor.add_node(sciclops_ros_client)
 
         try:
-            sciclops_client.get_logger().info('Beginning client, shut down with CTRL-C')
+            sciclops_ros_client.get_logger().info('Beginning client, shut down with CTRL-C')
             executor.spin()
         except KeyboardInterrupt:
-            sciclops_client.get_logger().info('Keyboard interrupt, shutting down.\n')
+            sciclops_ros_client.get_logger().info('Keyboard interrupt, shutting down.\n')
         finally:
-            sciclops_client.sciclops.disconnect_robot()
-            sciclops_client.get_logger().warn("Robot connection is closed")
+            sciclops_ros_client.sciclops.disconnect_robot()
+            sciclops_ros_client.get_logger().warn("Robot connection is closed")
             executor.shutdown()
-            sciclops_client.destroy_node()
+            sciclops_ros_client.destroy_node()
     finally:
         rclpy.shutdown()
 
