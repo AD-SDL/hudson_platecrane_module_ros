@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
-package_name = 'sciclops_module_client'
+package_name = 'sciclops_ros_client'
 
 setup(
     name=package_name,
@@ -23,7 +23,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sciclops_client = sciclops_module_client.sciclops_client:main',
+            'sciclops_ros_client = sciclops_ros_client.sciclops_ros_client:main',
         ],
    },
 )

@@ -22,9 +22,9 @@ def generate_launch_description():
         description = 'Flag to accept product_id number')
 
     scisclops_client = Node(
-            package='sciclops_module_client',
+            package='sciclops_ros_client',
             namespace = 'std_ns',
-            executable='sciclops_client',
+            executable='sciclops_ros_client',
             name='SciclopsNode',
             parameters=[
                 {'vendor_id':vendor_id},
@@ -33,12 +33,12 @@ def generate_launch_description():
             emulate_tty=True
     )
 
-    
+
     launch_d = LaunchDescription()
 
     launch_d.add_action(declare_use_vendor_id_cmd)
     launch_d.add_action(declare_use_product_id_cmd)
     launch_d.add_action(scisclops_client)
-    
+
     return launch_d
-    
+
