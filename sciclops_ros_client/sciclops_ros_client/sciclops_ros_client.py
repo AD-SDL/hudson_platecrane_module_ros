@@ -16,14 +16,14 @@ import asyncio
 
 from platecrane_driver.sciclops_driver import SCICLOPS # import sciclops driver
 
-class ScilopsClient(Node):
+class SciclopsClient(Node):
     '''
-    The ScilopsClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback,
+    The SciclopsClient inputs data from the 'action' topic, providing a set of commands for the driver to execute. It then receives feedback,
     based on the executed command and publishes the state of the sciclops and a description of the sciclops to the respective topics.
     '''
-    def __init__(self, TEMP_NODE_NAME = "ScilopsClientNode"):
+    def __init__(self, TEMP_NODE_NAME = "SciclopsClientNode"):
         '''
-        The init function is neccesary for the ScilopsClient class to initialize all variables, parameters, and other functions.
+        The init function is neccesary for the SciclopsClient class to initialize all variables, parameters, and other functions.
         Inside the function the parameters exist, and calls to other functions and services are made so they can be executed in main.
         '''
         super().__init__(TEMP_NODE_NAME)
@@ -287,7 +287,7 @@ def main(args = None):
     rclpy.init(args=args)  # initialize Ros2 communication
 
     try:
-        sciclops_ros_client = ScilopsClient()
+        sciclops_ros_client = SciclopsClient()
         executor = MultiThreadedExecutor()
         executor.add_node(sciclops_ros_client)
 
